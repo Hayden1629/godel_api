@@ -16,7 +16,7 @@ def main():
     """Debug mode - browser stays open"""
     
     # Configuration - modify these for testing
-    TICKER = "AVXL"
+    TICKER = "PLTR"
     ASSET_CLASS = "EQ"
     COMMAND_TYPE = "DES"
     

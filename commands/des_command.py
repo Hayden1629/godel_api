@@ -49,7 +49,8 @@ class DESCommand(BaseCommand):
                 "//div[@class='cursor-pointer p-2' and text()='Show all']"
             )
             if show_all_button:
-                show_all_button.click()
+                # Use JavaScript to click the button instead of regular click
+                self.driver.execute_script("arguments[0].click();", show_all_button)
                 time.sleep(0.5)
                 print("Analyst ratings expanded")
                 return True
@@ -235,6 +236,7 @@ class DESCommand(BaseCommand):
     def _extract_analyst_ratings(self) -> List[Dict]:
         """Extract analyst ratings table"""
         try:
+            import pandas as pd
             ratings = []
             ratings_table = self.window.find_element(
                 By.XPATH,
@@ -248,20 +250,46 @@ class DESCommand(BaseCommand):
                 try:
                     cells = row.find_elements(By.TAG_NAME, "td")
                     if len(cells) >= 5:
-                        target_text = cells[3].text.strip()
-                        target_text = target_text.replace('\n', '').replace('  ', ' ')
+                        # Get firm name and skip if empty
+                        firm = cells[0].text.strip()
+                        if not firm:
+                            continue
+                            
+                        # Handle target price specially since it has a complex structure
+                        target_cell = cells[3]
+                        target_spans = target_cell.find_elements(By.TAG_NAME, "span")
+                        if target_spans:
+                            # Extract from and to prices
+                            from_price = target_spans[0].text.strip() if len(target_spans) > 0 else ""
+                            to_price = target_spans[-1].text.strip() if len(target_spans) > 2 else from_price
+                            target_text = f"{from_price}→{to_price}" if from_price and to_price else ""
+                        else:
+                            target_text = ""
                         
                         rating = {
-                            'Firm': cells[0].text.strip(),
+                            'Firm': firm,
                             'Analyst': cells[1].text.strip(),
                             'Rating': cells[2].text.strip(),
                             'Target': target_text,
                             'Date': cells[4].text.strip()
                         }
-                        ratings.append(rating)
+                        
+                        # Only add if we have actual data
+                        if rating['Firm'] and rating['Analyst'] and rating['Rating']:
+                            ratings.append(rating)
+                            
                 except Exception as e:
                     print(f"Error extracting rating row: {e}")
                     continue
+            
+            # Convert to DataFrame for inspection
+            df = pd.DataFrame(ratings)
+            print("\nAnalyst Ratings DataFrame:")
+            print("Shape:", df.shape)
+            print("\nContents:")
+            print(df)
+            print("\nEmpty Values:")
+            print(df.isna().sum())
             
             return ratings
         except Exception as e:
