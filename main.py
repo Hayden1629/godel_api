@@ -1,80 +1,59 @@
 """
-Godel Terminal Main Script
-Example usage of the command framework
+Godel Terminal Debug Script
+Non-headless mode for debugging with browser visible
 """
 
 import json
-import os
-from datetime import datetime
 from pathlib import Path
+from datetime import datetime
 from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
 from godel_core import GodelTerminalController
-from commands import DESCommand, GCommand, GIPCommand, QMCommand
+from commands import DESCommand
 
 
 def main():
-    """Main execution function"""
+    """Debug mode - browser stays open"""
     
-    # Configuration
-    TICKER = "ABVX"
+    # Configuration - modify these for testing
+    TICKER = "AVXL"
     ASSET_CLASS = "EQ"
+    COMMAND_TYPE = "DES"
     
-    print("=" * 60)
-    print("Godel Terminal Command Framework")
-    print("=" * 60)
+    print(f"\n🔍 DEBUG MODE - Executing: {TICKER} {ASSET_CLASS} {COMMAND_TYPE}\n")
     
-    # Initialize controller
+    # Initialize in non-headless mode
     controller = GodelTerminalController(GODEL_URL, headless=False)
-    
-    # Register available commands
-    controller.register_command('DES', DESCommand)
-    controller.register_command('G', GCommand)
-    controller.register_command('GIP', GIPCommand)
-    controller.register_command('QM', QMCommand)
+    controller.register_command(COMMAND_TYPE, DESCommand)
     
     try:
-        # Connect and login
+        # Execute
         controller.connect()
         controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+        controller.open_terminal()
         
-        # Open terminal
-        if not controller.open_terminal():
-            print("Failed to open terminal")
-            return
+        result, cmd = controller.execute_command(COMMAND_TYPE, TICKER, ASSET_CLASS)
         
-        # Execute DES command
-        result, des_command = controller.execute_command('DES', TICKER, ASSET_CLASS)
-        
-        # Display results
-        print("\n" + "=" * 60)
-        print("RESULTS")
-        print("=" * 60)
-        
+        # Save output
         if result['success']:
-            # Create output directory if it doesn't exist
             output_dir = Path(__file__).parent / "output"
             output_dir.mkdir(exist_ok=True)
+            output_file = output_dir / f"debug_{TICKER}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             
-            # Save full data to JSON
-            output_file = output_dir / f"des_data_{TICKER}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
             with open(output_file, 'w') as f:
                 json.dump(result, f, indent=2)
-            print(f"\n✓ Full data saved to: {output_file}")
             
-            # Close the window
-            des_command.close()
+            print(f"\n✓ Saved: {output_file}")
         else:
-            print(f"✗ Command failed: {result.get('error')}")
+            print(f"\n✗ Error: {result.get('error')}")
         
-        # Keep browser open for inspection
-        print("\n" + "=" * 60)
-        input("Press Enter to close browser...")
+        # Keep browser open
+        input("\n[Browser stays open] Press Enter to close...")
         
     except Exception as e:
-        print(f"\n✗ Error: {e}")
+        print(f"\n✗ Exception: {e}")
         import traceback
         traceback.print_exc()
-        
+        input("\nPress Enter to close...")
     finally:
         controller.disconnect()
 

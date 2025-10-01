@@ -1,0 +1,258 @@
+{
+  "success": true,
+  "command": "AVXL EQ DES",
+  "data": {
+    "timestamp": "2025-10-01T03:20:26.712409Z",
+    "window_id": "3733-window",
+    "ticker": "AVXL US",
+    "company_info": {
+      "company_name": "Anavex Life Sciences Corporation",
+      "asset_class": "EQ",
+      "logo_url": "https://api.twelvedata.com/logo/anavex.com",
+      "website": "https://anavex.com/",
+      "address": "630 5TH AVENUE, 20TH FLOOR, NEW YORK, NY, 10111",
+      "ceo": "CEO: DR. CHRISTOPHER U. MISSLING M.B.A., M.S., PH.D."
+    },
+    "description": "Anavex Life Sciences Corp., a clinical stage biopharmaceutical company, engages in the development of drug candidates for the treatment of central nervous system (CNS) diseases. Its lead drug candidate is ANAVEX 2-73, which is in Phase III clinical trial for the treatment of Alzheimers disease; Phase III clinical trial to treat pediatric patients with Rett syndrome; Phase II clinical trial for the treatment of Parkinsons disease; and preclinical clinical trials to treat epilepsy, infantile spasms, Fragile X syndrome, Angelman syndrome, multiple sclerosis, and tuberous sclerosis complex. The companys drug candidate also comprises ANAVEX 3-71, which is in Phase I clinical trial for the treatment of frontotemporal dementia and other dementia indications; and preclinical clinical trials for the treatment of neurodegenerative diseases, such as Alzheimers and Parkinsons diseases. Its preclinical drug candidates include ANAVEX 1-41, a sigma-1 receptor agonist for the treatment of depression, stroke, Parkinsons, and Alzheimers diseases; ANAVEX 1066, a mixed sigma-1/sigma-2 ligand for the potential treatment of neuropathic and visceral pain; and ANAVEX 1037 to treat prostate and pancreatic cancer. The company was incorporated in 2004 and is headquartered in New York, New York.",
+    "eps_estimates": {
+      "Q1, Dec 25": "-0.10",
+      "FY26, Sep 26": "2.37"
+    },
+    "analyst_ratings": [
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "09/10/25 17:44"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "09/10/25 12:21"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "08/27/25 17:06"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "08/22/25 15:40"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "08/13/25 21:06"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "08/04/25 16:42"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "04/07/25 16:12"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "04/07/25 16:24"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "03/31/25 16:05"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "02/18/25 17:42"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "02/12/25 19:11"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "01/28/25 18:03"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "01/28/25 18:54"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$42\u2192$42",
+        "Date": "01/21/25 18:44"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "01/15/25 22:16"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "01/13/25 19:08"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$42",
+        "Date": "12/26/24 17:21"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "12/23/24 19:40"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "11/27/24 17:58"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "11/26/24 22:59"
+      },
+      {
+        "Firm": "D. Boral Capital",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "11/25/24 20:04"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "11/04/24 17:25"
+      },
+      {
+        "Firm": "EF Hutton",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "10/31/24 18:01"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "10/18/24 16:02"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "08/01/24 15:08"
+      },
+      {
+        "Firm": "EF Hutton",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "$46\u2192$46",
+        "Date": "07/29/24 16:22"
+      },
+      {
+        "Firm": "EF Hutton",
+        "Analyst": "Jason Kolbert",
+        "Rating": "Buy",
+        "Target": "",
+        "Date": "07/22/24 17:20"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "06/11/24 15:07"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$40\u2192$40",
+        "Date": "05/10/24 16:52"
+      },
+      {
+        "Firm": "HC Wainwright & Co.",
+        "Analyst": "Raghuram Selvaraju",
+        "Rating": "Buy",
+        "Target": "$54\u2192$40",
+        "Date": "01/03/24 19:32"
+      }
+    ],
+    "snapshot": {
+      "Exchange": "XNGS",
+      "Currency": "USD",
+      "Float": "83.0M",
+      "Employees": "42",
+      "Insiders": "3.36%",
+      "Institutions": "38.38%",
+      "P/Sales": "-",
+      "P/Book": "8.12",
+      "EV/EBITDA": "-14.86",
+      "EV/R": "-",
+      "EV": "641.8M",
+      "Trl P/E": "-",
+      "Fwd P/E": "-",
+      "Trl Yld": "-",
+      "Fwd Yld": "-",
+      "5Y Avg Yld": "-",
+      "Payout R": "-",
+      "Ex Div Date": "-",
+      "Div Date": "-",
+      "Beta": "0.83",
+      "Short": "24.8M",
+      "Short R": "21.10"
+    }
+  }
+}

@@ -14,7 +14,9 @@ godel_api/
 │   ├── g_command.py      # Chart command (placeholder)
 │   ├── gip_command.py    # Intraday chart (placeholder)
 │   └── qm_command.py     # Quote monitor (placeholder)
-├── main.py               # Example usage
+├── cli.py                # CLI interface (headless, production use)
+├── main.py               # Debug script (browser visible)
+├── output/               # JSON output files
 └── config.py             # URL and credentials
 ```
 
@@ -58,27 +60,51 @@ class MyCommand(BaseCommand):
 
 ## Usage
 
+### CLI (Primary Use Case)
+Command-line interface with minimal output:
+```bash
+python cli.py
+# Enter: AAPL EQ DES
+```
+
+Features:
+- Browser runs in background (minimized)
+- Silent execution - suppresses all status messages
+- Outputs only the final JSON data
+- Saves to file automatically
+- Auto-closes after execution
+
+### Debug Mode
+For testing with visible browser:
+```bash
+python main.py
+# Edit TICKER, ASSET_CLASS, COMMAND_TYPE in file
+```
+
+Features:
+- Browser stays visible
+- Keeps browser open after execution
+- Useful for troubleshooting selectors
+
+### Programmatic Usage
 ```python
 from godel_core import GodelTerminalController
 from commands import DESCommand
-from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
 
-# Initialize
-controller = GodelTerminalController(GODEL_URL)
+controller = GodelTerminalController(url, headless=False)
 controller.register_command('DES', DESCommand)
-
-# Execute
 controller.connect()
-controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+controller.login(user, pass)
 controller.open_terminal()
 
 result, cmd = controller.execute_command('DES', 'AAPL', 'EQ')
 if result['success']:
     print(result['data'])
     cmd.close()
-
 controller.disconnect()
 ```
+
+**Note:** Headless mode is not supported - the browser must be visible for terminal interaction to work properly.
 
 ## DES Command Details
 
