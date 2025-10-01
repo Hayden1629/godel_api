@@ -9,7 +9,7 @@ This API allows you to automate interactions with the Godel Terminal. Essentiall
 ## Usage
 
 Use the cli.py file for commandline usage with Agentic AI. Use the main.py for running as a human person/ debugging.
-You probably should log in if you want all functions to work. 
+You probably should log in if you want all functions to work. Additionally, you need a blank layout named "dev" 
 
 Currently I have only written the methods for DES with more to come.
 

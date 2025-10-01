@@ -28,6 +28,8 @@ Main controller for browser automation and command execution.
 **Key Methods:**
 - `connect()` - Initialize Chrome browser
 - `login(username, password)` - Authenticate
+- `load_layout(layout_name)` - Navigate to a specific layout (default: "dev")
+- `open_terminal()` - Open terminal with backtick key
 - `register_command(type, class)` - Register command implementations
 - `execute_command(type, ticker, asset_class)` - Execute and return `(result_dict, command_instance)`
 - `close_all_windows()` - Clean up
@@ -62,6 +64,13 @@ class MyCommand(BaseCommand):
 
 ### CLI (Primary Use Case)
 Command-line interface with minimal output:
+
+**With arguments:**
+```bash
+python cli.py AAPL EQ DES
+```
+
+**Interactive mode:**
 ```bash
 python cli.py
 # Enter: AAPL EQ DES
@@ -69,10 +78,22 @@ python cli.py
 
 Features:
 - Browser runs in background (minimized)
-- Silent execution - suppresses all status messages
+- Silent execution - suppresses all status messages (when DEBUG=False)
 - Outputs only the final JSON data
 - Saves to file automatically
 - Auto-closes after execution
+
+**Debug Mode:**
+To enable debug output, edit `cli.py` and set:
+```python
+DEBUG = True  # Shows step-by-step execution details
+```
+Debug messages print to stderr and show:
+- Command parsing
+- Connection status
+- Terminal operations
+- Execution progress
+- Error details
 
 ### Debug Mode
 For testing with visible browser:
@@ -95,6 +116,7 @@ controller = GodelTerminalController(url, headless=False)
 controller.register_command('DES', DESCommand)
 controller.connect()
 controller.login(user, pass)
+controller.load_layout("dev")  # Load blank layout
 controller.open_terminal()
 
 result, cmd = controller.execute_command('DES', 'AAPL', 'EQ')

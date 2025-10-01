@@ -4,6 +4,7 @@ Non-headless mode for debugging with browser visible
 """
 
 import json
+import time
 from pathlib import Path
 from datetime import datetime
 from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
@@ -29,6 +30,7 @@ def main():
         # Execute
         controller.connect()
         controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+        controller.load_layout("dev")
         controller.open_terminal()
         
         result, cmd = controller.execute_command(COMMAND_TYPE, TICKER, ASSET_CLASS)
@@ -43,6 +45,8 @@ def main():
                 json.dump(result, f, indent=2)
             
             print(f"\n✓ Saved: {output_file}")
+            cmd.close()
+            time.sleep(3)  # Wait before disconnect
         else:
             print(f"\n✗ Error: {result.get('error')}")
         

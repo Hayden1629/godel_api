@@ -273,6 +273,28 @@ class GodelTerminalController:
             print(f'✗ Login failed: {str(e)}')
             raise
     
+    def load_layout(self, layout_name: str = "dev"):
+        """Navigate to a specific layout"""
+        try:
+            print(f'Loading layout: {layout_name}...')
+            
+            # Find and click the layout by name
+            layout_span = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, f"//span[@class='whitespace-nowrap' and text()='{layout_name}']"))
+            )
+            layout_span.click()
+            
+            time.sleep(1)
+            print(f"✓ Layout '{layout_name}' loaded")
+            return True
+            
+        except TimeoutException:
+            print(f'✗ Layout "{layout_name}" not found')
+            return False
+        except Exception as e:
+            print(f'✗ Error loading layout: {str(e)}')
+            return False
+    
     def open_terminal(self):
         """Open terminal using backtick key"""
         try:
