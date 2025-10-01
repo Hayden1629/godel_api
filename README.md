@@ -13,6 +13,63 @@ You probably should log in if you want all functions to work. Additionally, you 
 
 Currently I have only written the methods for DES with more to come.
 
+## DES
+
+Returns JSON of all the information on DES component, excluding chart.
+Format:
+{
+  "timestamp": "",
+  "window_id": "",
+  "ticker": "",
+  "company_info": {
+    "company_name": "",
+    "asset_class": "",
+    "logo_url": "",
+    "website": "",
+    "address": "",
+    "ceo": ""
+  },
+  "description": "",
+  "eps_estimates": {
+    "Q4": "",
+    "FY1": "",
+    "FY2": ""
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "",
+      "Analyst": "",
+      "Rating": "",
+      "Target": "",
+      "Date": ""
+    }
+  ],
+  "snapshot": {
+    "Exchange": "",
+    "Currency": "",
+    "Float": "",
+    "Employees": "",
+    "Insiders": "",
+    "Institutions": "",
+    "P/Sales": "",
+    "P/Book": "",
+    "EV/EBITDA": "",
+    "EV/R": "",
+    "EV": "",
+    "Trl P/E": "",
+    "Fwd P/E": "",
+    "Trl Yld": "",
+    "Fwd Yld": "",
+    "5Y Avg Yld": "",
+    "Payout R": "",
+    "Ex Div Date": "",
+    "Div Date": "",
+    "Beta": "",
+    "Short": "",
+    "Short R": ""
+  }
+}
+
 ## License
 
 MIT LICENSE
