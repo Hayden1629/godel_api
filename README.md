@@ -40,7 +40,8 @@ Format:
       "Firm": "",
       "Analyst": "",
       "Rating": "",
-      "Target": "",
+      "Old_Target": "",
+      "New_Target": "",
       "Date": ""
     }
   ],

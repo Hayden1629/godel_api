@@ -258,19 +258,20 @@ class DESCommand(BaseCommand):
                         # Handle target price specially since it has a complex structure
                         target_cell = cells[3]
                         target_spans = target_cell.find_elements(By.TAG_NAME, "span")
+                        old_target = ""
+                        new_target = ""
+                        
                         if target_spans:
-                            # Extract from and to prices
-                            from_price = target_spans[0].text.strip() if len(target_spans) > 0 else ""
-                            to_price = target_spans[-1].text.strip() if len(target_spans) > 2 else from_price
-                            target_text = f"{from_price}→{to_price}" if from_price and to_price else ""
-                        else:
-                            target_text = ""
+                            # Extract old and new prices
+                            old_target = target_spans[0].text.strip() if len(target_spans) > 0 else ""
+                            new_target = target_spans[-1].text.strip() if len(target_spans) > 2 else old_target
                         
                         rating = {
                             'Firm': firm,
                             'Analyst': cells[1].text.strip(),
                             'Rating': cells[2].text.strip(),
-                            'Target': target_text,
+                            'Old_Target': old_target,
+                            'New_Target': new_target,
                             'Date': cells[4].text.strip()
                         }
                         
