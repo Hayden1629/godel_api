@@ -78,22 +78,26 @@ python cli.py
 
 Features:
 - Browser runs in background (minimized)
-- Silent execution - suppresses all status messages (when DEBUG=False)
-- Outputs only the final JSON data
+- Silent execution - no status messages when DEBUG=False
+- Outputs only JSON data to stdout
 - Saves to file automatically
 - Auto-closes after execution
 
 **Debug Mode:**
-To enable debug output, edit `cli.py` and set:
+Edit `cli.py` to control output verbosity:
 ```python
-DEBUG = True  # Shows step-by-step execution details
+DEBUG = False  # Silent - only JSON output
+DEBUG = True   # Verbose - shows all execution steps
 ```
-Debug messages print to stderr and show:
-- Command parsing
-- Connection status
-- Terminal operations
-- Execution progress
-- Error details
+
+When `DEBUG = True`, shows:
+- [DEBUG] messages to stderr with execution steps
+- Status messages from controller (login, connect, etc.)
+- Final JSON output
+
+When `DEBUG = False`:
+- Complete silence during execution
+- Only final JSON output to stdout
 
 ### Debug Mode
 For testing with visible browser:

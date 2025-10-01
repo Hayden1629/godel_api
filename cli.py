@@ -7,6 +7,8 @@ import json
 import sys
 import os
 import time
+from io import StringIO
+from contextlib import redirect_stdout
 from pathlib import Path
 from datetime import datetime
 from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
@@ -15,6 +17,7 @@ from commands import DESCommand, GCommand, GIPCommand, QMCommand
 
 # DEBUG MODE - Set to True to see execution details, False for silent operation
 DEBUG = True  # <-- Change to False for production use
+#TODO: FIND OUT WHY IT ONLY WORKS WITH DEBUG = TRUE
 
 
 def debug_print(msg):
@@ -80,10 +83,6 @@ def main():
         debug_print(f"Unknown command type: {command_type}")
         sys.exit(1)
     
-    # Suppress output from controller (unless debug mode)
-    if not DEBUG:
-        sys.stdout = open(os.devnull, 'w')
-    
     debug_print("Initializing controller...")
     
     # Initialize controller (non-headless required)
@@ -93,27 +92,34 @@ def main():
     debug_print(f"Command '{command_type}' registered")
     
     try:
-        # Execute
-        debug_print("Connecting to browser...")
-        controller.connect()
-        
-        debug_print("Logging in...")
-        controller.login(GODEL_USERNAME, GODEL_PASSWORD)
-        
-        debug_print("Loading dev layout...")
-        controller.load_layout("dev")
-        
-        debug_print("Opening terminal...")
-        controller.open_terminal()
-        
-        debug_print(f"Executing command: {ticker} {asset_class} {command_type}")
-        result, cmd = controller.execute_command(command_type, ticker, asset_class)
-        
-        debug_print(f"Command execution result - Success: {result.get('success')}")
-        
-        # Restore stdout
+        # Suppress stdout during execution if not in debug mode
         if not DEBUG:
-            sys.stdout = sys.__stdout__
+            old_stdout = sys.stdout
+            sys.stdout = open(os.devnull, 'w')
+        
+        try:
+            # Execute
+            debug_print("Connecting to browser...")
+            controller.connect()
+            
+            debug_print("Logging in...")
+            controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+            
+            debug_print("Loading dev layout...")
+            controller.load_layout("dev")
+            
+            debug_print("Opening terminal...")
+            controller.open_terminal()
+            
+            debug_print(f"Executing command: {ticker} {asset_class} {command_type}")
+            result, cmd = controller.execute_command(command_type, ticker, asset_class)
+            
+            debug_print(f"Command execution result - Success: {result.get('success')}")
+        finally:
+            # Restore stdout
+            if not DEBUG:
+                sys.stdout.close()
+                sys.stdout = old_stdout
         
         if result['success']:
             debug_print("Saving output...")
@@ -136,8 +142,6 @@ def main():
         
     except Exception as e:
         debug_print(f"Exception occurred: {type(e).__name__}: {e}")
-        if not DEBUG:
-            sys.stdout = sys.__stdout__
         import traceback
         if DEBUG:
             traceback.print_exc(file=sys.stderr)

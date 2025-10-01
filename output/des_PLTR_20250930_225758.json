@@ -1,0 +1,259 @@
+{
+  "success": true,
+  "command": "PLTR EQ DES",
+  "data": {
+    "timestamp": "2025-10-01T03:57:56.619024Z",
+    "window_id": "3745-window",
+    "ticker": "PLTR US",
+    "company_info": {
+      "company_name": "Palantir Technologies Inc",
+      "asset_class": "EQ",
+      "logo_url": "https://api.twelvedata.com/logo/palantir.com",
+      "website": "https://palantir.com/",
+      "address": "1200 17TH STREET, FLOOR 15, DENVER, CO, 80202",
+      "ceo": "CEO: DR. ALEXANDER C. KARP J.D."
+    },
+    "description": "Palantir Technologies Inc. builds and deploys software platforms for the intelligence community in the United States to assist in counterterrorism investigations and operations. The company provides palantir gotham, a software platform which enables users to identify patterns hidden deep within datasets, ranging from signals intelligence sources to reports from confidential informants, as well as facilitates the handoff between analysts and operational users, helping operators plan and execute real-world responses to threats that have been identified within the platform. It also offers palantir foundry, a platform that transforms the ways organizations operate by creating a central operating system for their data; and allows individual users to integrate and analyze the data they need in one place. In addition, it provides apollo, a software that enables customers to deploy their own software virtually in any environment. Palantir Technologies Inc. was incorporated in 2003 and is based in Denver, Colorado.",
+    "eps_estimates": {
+      "Q4, Dec 25": "0.19",
+      "FY25, Dec 25": "0.64",
+      "FY26, Dec 26": "0.85"
+    },
+    "analyst_ratings": [
+      {
+        "Firm": "B of A Securities",
+        "Analyst": "Mariana Perez Mora",
+        "Rating": "Buy",
+        "Target": "$180\u2192$215",
+        "Date": "09/23/25 13:21"
+      },
+      {
+        "Firm": "HSBC",
+        "Analyst": "Stephen Bersey",
+        "Rating": "Hold",
+        "Target": "$111\u2192$181",
+        "Date": "08/06/25 15:35"
+      },
+      {
+        "Firm": "Goldman Sachs",
+        "Analyst": "Gabriela Borges",
+        "Rating": "Neutral",
+        "Target": "$90\u2192$141",
+        "Date": "08/06/25 19:42"
+      },
+      {
+        "Firm": "Cantor Fitzgerald",
+        "Analyst": "Thomas Blakey",
+        "Rating": "Neutral",
+        "Target": "$110\u2192$155",
+        "Date": "08/05/25 17:28"
+      },
+      {
+        "Firm": "Loop Capital",
+        "Analyst": "Mark Schappel",
+        "Rating": "Buy",
+        "Target": "$178\u2192$180",
+        "Date": "08/05/25 19:37"
+      },
+      {
+        "Firm": "DA Davidson",
+        "Analyst": "Gil Luria",
+        "Rating": "Neutral",
+        "Target": "$115\u2192$170",
+        "Date": "08/05/25 20:58"
+      },
+      {
+        "Firm": "UBS",
+        "Analyst": "Karl Keirstead",
+        "Rating": "Neutral",
+        "Target": "$110\u2192$165",
+        "Date": "08/05/25 18:19"
+      },
+      {
+        "Firm": "Piper Sandler",
+        "Analyst": "Brent Bracelin",
+        "Rating": "Overweight",
+        "Target": "$170\u2192$182",
+        "Date": "08/05/25 14:08"
+      },
+      {
+        "Firm": "Morgan Stanley",
+        "Analyst": "Sanjit Singh",
+        "Rating": "Equal-Weight",
+        "Target": "$98\u2192$155",
+        "Date": "08/05/25 20:21"
+      },
+      {
+        "Firm": "B of A Securities",
+        "Analyst": "Mariana Perez Mora",
+        "Rating": "Buy",
+        "Target": "$150\u2192$180",
+        "Date": "08/05/25 19:09"
+      },
+      {
+        "Firm": "RBC Capital",
+        "Analyst": "Rishi Jaluria",
+        "Rating": "Underperform",
+        "Target": "$40\u2192$45",
+        "Date": "08/05/25 18:46"
+      },
+      {
+        "Firm": "Citigroup",
+        "Analyst": "Tyler Radke",
+        "Rating": "Neutral",
+        "Target": "$158\u2192$177",
+        "Date": "08/05/25 22:55"
+      },
+      {
+        "Firm": "Deutsche Bank",
+        "Analyst": "Brad Zelnick",
+        "Rating": "Hold",
+        "Target": "$80\u2192$160",
+        "Date": "08/05/25 16:07"
+      },
+      {
+        "Firm": "Wedbush",
+        "Analyst": "Daniel Ives",
+        "Rating": "Outperform",
+        "Target": "$160\u2192$200",
+        "Date": "08/05/25 20:25"
+      },
+      {
+        "Firm": "Piper Sandler",
+        "Analyst": "Brent Bracelin",
+        "Rating": "Overweight",
+        "Target": "$170\u2192$170",
+        "Date": "08/05/25 02:02"
+      },
+      {
+        "Firm": "Loop Capital",
+        "Analyst": "Mark Schappel",
+        "Rating": "Buy",
+        "Target": "$155\u2192$178",
+        "Date": "07/30/25 21:08"
+      },
+      {
+        "Firm": "Piper Sandler",
+        "Analyst": "Brent Bracelin",
+        "Rating": "Overweight",
+        "Target": "",
+        "Date": "07/25/25 16:13"
+      },
+      {
+        "Firm": "Loop Capital",
+        "Analyst": "Mark Schappel",
+        "Rating": "Buy",
+        "Target": "$130\u2192$155",
+        "Date": "06/12/25 19:19"
+      },
+      {
+        "Firm": "Mizuho",
+        "Analyst": "Matthew Broome",
+        "Rating": "Underperform",
+        "Target": "$94\u2192$116",
+        "Date": "06/11/25 20:49"
+      },
+      {
+        "Firm": "Citigroup",
+        "Analyst": "Tyler Radke",
+        "Rating": "Neutral",
+        "Target": "$110\u2192$115",
+        "Date": "05/09/25 00:04"
+      },
+      {
+        "Firm": "Goldman Sachs",
+        "Analyst": "Gabriela Borges",
+        "Rating": "Neutral",
+        "Target": "$80\u2192$90",
+        "Date": "05/06/25 22:33"
+      },
+      {
+        "Firm": "Loop Capital",
+        "Analyst": "Mark Schappel",
+        "Rating": "Buy",
+        "Target": "$125\u2192$130",
+        "Date": "05/07/25 04:00"
+      },
+      {
+        "Firm": "DA Davidson",
+        "Analyst": "Gil Luria",
+        "Rating": "Neutral",
+        "Target": "$100\u2192$115",
+        "Date": "05/07/25 03:29"
+      },
+      {
+        "Firm": "Morgan Stanley",
+        "Analyst": "Sanjit Singh",
+        "Rating": "Equal-Weight",
+        "Target": "$90\u2192$98",
+        "Date": "05/06/25 20:38"
+      },
+      {
+        "Firm": "Mizuho",
+        "Analyst": "Matthew Broome",
+        "Rating": "Underperform",
+        "Target": "$80\u2192$94",
+        "Date": "05/06/25 18:08"
+      },
+      {
+        "Firm": "UBS",
+        "Analyst": "Karl Keirstead",
+        "Rating": "Neutral",
+        "Target": "$105\u2192$110",
+        "Date": "05/06/25 18:36"
+      },
+      {
+        "Firm": "Cantor Fitzgerald",
+        "Analyst": "Thomas Blakey",
+        "Rating": "Neutral",
+        "Target": "$98\u2192$110",
+        "Date": "05/06/25 18:06"
+      },
+      {
+        "Firm": "RBC Capital",
+        "Analyst": "Rishi Jaluria",
+        "Rating": "Underperform",
+        "Target": "$40\u2192$40",
+        "Date": "04/29/25 21:44"
+      },
+      {
+        "Firm": "Morgan Stanley",
+        "Analyst": "Sanjit Singh",
+        "Rating": "Equal-Weight",
+        "Target": "$95\u2192$90",
+        "Date": "04/16/25 21:13"
+      },
+      {
+        "Firm": "DA Davidson",
+        "Analyst": "Gil Luria",
+        "Rating": "Neutral",
+        "Target": "$105\u2192$100",
+        "Date": "04/14/25 23:44"
+      }
+    ],
+    "snapshot": {
+      "Exchange": "XNGS",
+      "Currency": "USD",
+      "Float": "2.2B",
+      "Employees": "4,164",
+      "Insiders": "3.62%",
+      "Institutions": "57.40%",
+      "P/Sales": "122.44",
+      "P/Book": "71.54",
+      "EV/EBITDA": "700.33",
+      "EV/R": "121.68",
+      "EV": "418.7B",
+      "Trl P/E": "596.20x",
+      "Fwd P/E": "380.55x",
+      "Trl Yld": "-",
+      "Fwd Yld": "-",
+      "5Y Avg Yld": "-",
+      "Payout R": "-",
+      "Ex Div Date": "-",
+      "Div Date": "-",
+      "Beta": "2.59",
+      "Short": "54.6M",
+      "Short R": "0.94"
+    }
+  }
+}
