@@ -158,7 +158,8 @@ class BaseCommand(ABC):
                 )
                 close_button.click()
                 time.sleep(0.5)
-                print(f"Window {self.window_id} closed")
+                #DEBUG PRINT
+                #print(f"Window {self.window_id} closed")
                 return True
             except NoSuchElementException:
                 # Fallback: try finding by SVG data-icon attribute
@@ -169,7 +170,8 @@ class BaseCommand(ABC):
                     )
                     close_svg.click()
                     time.sleep(0.5)
-                    print(f"Window {self.window_id} closed (via SVG)")
+                    #DEBUG PRINT
+                    #print(f"Window {self.window_id} closed (via SVG)")
                     return True
                 except Exception as e:
                     print(f"Error closing window: {e}")
@@ -219,7 +221,8 @@ class GodelTerminalController:
         """Close browser"""
         if self.driver:
             self.driver.quit()
-            print("Disconnected")
+            #DEBUG PRINT
+            #print("Disconnected")
     
     def login(self, username: str, password: str):
         """Log in to the website"""

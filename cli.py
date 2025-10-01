@@ -16,7 +16,7 @@ from godel_core import GodelTerminalController
 from commands import DESCommand, GCommand, GIPCommand, QMCommand
 
 # DEBUG MODE - Set to True to see execution details, False for silent operation
-DEBUG = True  # <-- Change to False for production use
+DEBUG = False  # <-- Change to False for production use
 #TODO: FIND OUT WHY IT ONLY WORKS WITH DEBUG = TRUE
 
 
