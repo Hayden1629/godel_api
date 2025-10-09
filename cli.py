@@ -13,7 +13,7 @@ from pathlib import Path
 from datetime import datetime
 from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
 from godel_core import GodelTerminalController
-from commands import DESCommand, GCommand, GIPCommand, QMCommand
+from commands import DESCommand, GCommand, GIPCommand, QMCommand, PRTCommand
 
 # DEBUG MODE - Set to True to see execution details, False for silent operation
 DEBUG = True  # <-- Change to False for production use
@@ -32,7 +32,9 @@ def save_output(data, command_type, ticker):
     output_dir.mkdir(exist_ok=True)
     
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    output_file = output_dir / f"{command_type.lower()}_{ticker}_{timestamp}.json"
+    # Handle ticker being a string or list
+    ticker_str = ticker if isinstance(ticker, str) else '_'.join(ticker[:3])  # Use first 3 tickers
+    output_file = output_dir / f"{command_type.lower()}_{ticker_str}_{timestamp}.json"
     
     with open(output_file, 'w') as f:
         json.dump(data, f, indent=2)
@@ -61,22 +63,32 @@ def main():
     
     # Parse command
     parts = command_input.split()
-    if len(parts) < 3:
-        debug_print(f"Invalid command format: {parts}")
-        sys.exit(1)
     
-    ticker = parts[0].upper()
-    asset_class = parts[1].upper()
-    command_type = parts[2].upper()
-    
-    debug_print(f"Parsed - Ticker: {ticker}, Asset: {asset_class}, Command: {command_type}")
+    # Check if it's a PRT command (special case: PRT AAPL NVDA MSFT ...)
+    if parts[0].upper() == 'PRT':
+        command_type = 'PRT'
+        tickers = [t.upper() for t in parts[1:]]
+        ticker = tickers  # For PRT, ticker is a list
+        asset_class = None
+        debug_print(f"Parsed PRT - Tickers: {tickers}")
+    else:
+        # Standard command format: TICKER ASSET COMMAND
+        if len(parts) < 3:
+            debug_print(f"Invalid command format: {parts}")
+            sys.exit(1)
+        
+        ticker = parts[0].upper()
+        asset_class = parts[1].upper()
+        command_type = parts[2].upper()
+        debug_print(f"Parsed - Ticker: {ticker}, Asset: {asset_class}, Command: {command_type}")
     
     # Command registry
     command_map = {
         'DES': DESCommand,
         'G': GCommand,
         'GIP': GIPCommand,
-        'QM': QMCommand
+        'QM': QMCommand,
+        'PRT': PRTCommand
     }
     
     if command_type not in command_map:
@@ -87,6 +99,8 @@ def main():
     
     # Initialize controller (non-headless required)
     controller = GodelTerminalController(GODEL_URL, headless=False)
+    
+    # Register the command
     controller.register_command(command_type, command_map[command_type])
     
     debug_print(f"Command '{command_type}' registered")
@@ -111,8 +125,13 @@ def main():
             debug_print("Opening terminal...")
             controller.open_terminal()
             
-            debug_print(f"Executing command: {ticker} {asset_class} {command_type}")
-            result, cmd = controller.execute_command(command_type, ticker, asset_class)
+            # Execute command (now handles both PRT and standard commands)
+            if command_type == 'PRT':
+                debug_print(f"Executing PRT with tickers: {tickers}")
+                result, cmd = controller.execute_command(command_type, ticker=tickers)
+            else:
+                debug_print(f"Executing command: {ticker} {asset_class} {command_type}")
+                result, cmd = controller.execute_command(command_type, ticker, asset_class)
             
             debug_print(f"Command execution result - Success: {result.get('success')}")
         finally:

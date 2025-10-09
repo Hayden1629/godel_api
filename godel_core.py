@@ -242,9 +242,10 @@ class GodelTerminalController:
             
             password_field = self.driver.find_element(By.CSS_SELECTOR, "input[autocomplete='current-password']")
             password_field.send_keys(password)
+            time.sleep(.5)
 
             # Click login button to submit
-            login_button = self.driver.find_element(By.XPATH, "//button[text()='Login']")
+            login_button = self.driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[3]/div/div[2]/div/form/div[2]/button')
             login_button.click()
             
             print('Waiting for login to complete...')
@@ -327,8 +328,15 @@ class GodelTerminalController:
             print(f"Error sending command: {e}")
             return False
     
-    def execute_command(self, command_type: str, ticker: str, asset_class: str = "EQ") -> tuple[Dict, Optional[Any]]:
-        """Execute a command by type and return (result_dict, command_instance)"""
+    def execute_command(self, command_type: str, ticker = None, asset_class: str = "EQ", **kwargs) -> tuple[Dict, Optional[Any]]:
+        """Execute a command by type and return (result_dict, command_instance)
+        
+        Args:
+            command_type: Type of command to execute (DES, PRT, etc.)
+            ticker: Single ticker string OR list of tickers (for PRT)
+            asset_class: Asset class (for single-ticker commands)
+            **kwargs: Additional arguments passed to command constructor
+        """
         if command_type not in self.command_registry:
             return {
                 'success': False,
@@ -338,11 +346,19 @@ class GodelTerminalController:
         
         # Create command instance
         command_class = self.command_registry[command_type]
-        command = command_class(self)
         
-        # Execute and track
-        result = command.execute(ticker, asset_class)
+        # Special handling for PRT command (takes list of tickers in constructor)
+        if command_type == 'PRT':
+            # ticker should be a list for PRT
+            tickers = ticker if isinstance(ticker, list) else [ticker] if ticker else []
+            command = command_class(self, tickers=tickers, **kwargs)
+            result = command.execute()
+        else:
+            # Standard commands (DES, GIP, etc.) - single ticker + asset_class
+            command = command_class(self, **kwargs)
+            result = command.execute(ticker, asset_class)
         
+        # Track successful commands
         if result['success']:
             self.active_commands.append(command)
             return result, command
