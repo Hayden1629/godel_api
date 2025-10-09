@@ -11,6 +11,7 @@ from datetime import datetime
 from typing import Dict, Optional, List
 import time
 import os
+import pandas as pd
 
 import sys
 from pathlib import Path
@@ -26,6 +27,7 @@ class PRTCommand(BaseCommand):
         super().__init__(controller)
         self.tickers = tickers or []
         self.csv_file_path = None
+        self.df = None
     
     def get_command_string(self, ticker: str = None, asset_class: str = None) -> str:
         """Return the command string to send to terminal"""
@@ -194,6 +196,14 @@ class PRTCommand(BaseCommand):
                         file_path = os.path.join(download_dir, new_file)
                         print(f"CSV file downloaded: {file_path}")
                         self.csv_file_path = file_path
+                        
+                        # Load CSV into DataFrame
+                        try:
+                            self.df = pd.read_csv(file_path)
+                            print(f"Loaded DataFrame with {len(self.df)} rows and {len(self.df.columns)} columns")
+                        except Exception as e:
+                            print(f"Warning: Could not load CSV into DataFrame: {e}")
+                        
                         return file_path
                 
                 time.sleep(0.5)
@@ -286,9 +296,17 @@ class PRTCommand(BaseCommand):
         try:
             data = self.extract_data()
             data['csv_file_path'] = csv_path
+            data['dataframe'] = self.df
+            data['row_count'] = len(self.df) if self.df is not None else 0
+            data['columns'] = self.df.columns.tolist() if self.df is not None else []
         except Exception as e:
             print(f"Warning: Data extraction failed: {e}")
-            data = {'csv_file_path': csv_path}
+            data = {
+                'csv_file_path': csv_path,
+                'dataframe': self.df,
+                'row_count': len(self.df) if self.df is not None else 0,
+                'columns': self.df.columns.tolist() if self.df is not None else []
+            }
         
         return {
             'success': True,
@@ -393,4 +411,36 @@ class PRTCommand(BaseCommand):
         except Exception as e:
             print(f"Error extracting failure count: {e}")
             return 0
+    
+    def get_dataframe(self) -> Optional[pd.DataFrame]:
+        """Get the extracted DataFrame"""
+        return self.df
+    
+    def save_to_csv(self, filepath: str) -> bool:
+        """Save the DataFrame to CSV"""
+        if self.df is not None:
+            try:
+                self.df.to_csv(filepath, index=False)
+                print(f"Saved DataFrame to: {filepath}")
+                return True
+            except Exception as e:
+                print(f"Error saving to CSV: {e}")
+                return False
+        else:
+            print("No DataFrame to save")
+            return False
+    
+    def save_to_json(self, filepath: str) -> bool:
+        """Save the DataFrame to JSON"""
+        if self.df is not None:
+            try:
+                self.df.to_json(filepath, orient='records', indent=2)
+                print(f"Saved DataFrame to: {filepath}")
+                return True
+            except Exception as e:
+                print(f"Error saving to JSON: {e}")
+                return False
+        else:
+            print("No DataFrame to save")
+            return False
         

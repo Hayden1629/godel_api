@@ -185,7 +185,7 @@ class BaseCommand(ABC):
 class GodelTerminalController:
     """Controller for Godel Terminal command execution"""
     
-    def __init__(self, url: str, headless: bool = False):
+    def __init__(self, url: str ="https://app.godelterminal.com", headless: bool = False):
         self.url = url
         self.driver = None
         self.dom_monitor = None
