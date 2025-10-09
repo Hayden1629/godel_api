@@ -1,0 +1,57 @@
+{
+  "success": true,
+  "command": "PRT",
+  "data": {
+    "timestamp": "2025-10-09T03:14:56.480955Z",
+    "window_id": "3914-window",
+    "tickers": [
+      "AAPL",
+      "SRPT"
+    ],
+    "csv_file_path": "C:\\Users\\hayde\\Downloads\\prt_results (5).csv",
+    "performance_summary": [
+      {
+        "bucket": "Top 1%",
+        "n": "1",
+        "long": "1",
+        "short": "0",
+        "win_rate": "0.0%",
+        "mean_pl": "-0.23%",
+        "median_pl": "-0.23%"
+      },
+      {
+        "bucket": "Top 5%",
+        "n": "1",
+        "long": "1",
+        "short": "0",
+        "win_rate": "0.0%",
+        "mean_pl": "-0.23%",
+        "median_pl": "-0.23%"
+      },
+      {
+        "bucket": "Top 10%",
+        "n": "1",
+        "long": "1",
+        "short": "0",
+        "win_rate": "0.0%",
+        "mean_pl": "-0.23%",
+        "median_pl": "-0.23%"
+      },
+      {
+        "bucket": "All",
+        "n": "2",
+        "long": "2",
+        "short": "0",
+        "win_rate": "0.0%",
+        "mean_pl": "-0.15%",
+        "median_pl": "-0.08%"
+      }
+    ],
+    "progress": {
+      "completed": "Symbols (space",
+      "total": "comma"
+    },
+    "failures": 0
+  },
+  "csv_file": "C:\\Users\\hayde\\Downloads\\prt_results (5).csv"
+}
