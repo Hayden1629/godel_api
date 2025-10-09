@@ -16,8 +16,8 @@ from godel_core import GodelTerminalController
 from commands import DESCommand, GCommand, GIPCommand, QMCommand, PRTCommand
 
 # DEBUG MODE - Set to True to see execution details, False for silent operation
-DEBUG = True  # <-- Change to False for production use
-#TODO: FIND OUT WHY IT ONLY WORKS WITH DEBUG = TRUE
+DEBUG = False  # <-- Change to False for production use
+#TODO: FIND OUT WHY IT ONLY WORKS WITH DEBUG = TRUE / works on mac with debug false
 
 
 def debug_print(msg):
