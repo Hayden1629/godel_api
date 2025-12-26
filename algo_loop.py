@@ -35,6 +35,18 @@ TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results
 NTFY_WEBHOOK_URL = "https://ntfy.sh/hayden_algo_api"  # Webhook URL for sending trade statistics
 TAKE_PROFIT_PERCENT = 1.5  # Close position if profit reaches this percentage
 
+# Supervisor loop constants
+SUPERVISOR_CHECK_INTERVAL_MINUTES = 15  # How often to check market status and refresh tokens when market is closed
+TOKEN_REFRESH_INTERVAL_MINUTES = 29  # How often to refresh tokens (Schwab tokens expire in 30 min)
+MARKET_OPEN_PREP_MINUTES = 30  # Start preparing this many minutes before market open
+
+# Dynamic limit order constants
+USE_LIMIT_ORDERS = True  # Use limit orders instead of market orders for better pricing
+LIMIT_ORDER_TIMEOUT_SECONDS = 10  # How long to wait for limit order to fill before adjusting
+LIMIT_ORDER_MAX_ATTEMPTS = 3  # Maximum number of price adjustments before using market order
+LIMIT_ORDER_PRICE_OFFSET_PERCENT = 0.02  # Initial offset from quote price (0.02% = 2 basis points)
+LIMIT_ORDER_ADJUSTMENT_PERCENT = 0.05  # How much to adjust price on each attempt (0.05% = 5 basis points)
+
 # Debug mode flag - set to True for verbose API response logging
 DEBUG_MODE = os.getenv("ALGO_DEBUG", "false").lower() in ("true", "1", "yes")
 
@@ -732,6 +744,227 @@ class AccountsTrading:
                 return {'error': str(e)}
         
         return {'error': f'Failed after {max_retries} attempts'}
+    
+    def create_dynamic_limit_order(self, ticker: str, instruction: str, quantity: int, 
+                                    timeout_seconds: float = None, max_attempts: int = None,
+                                    price_offset_percent: float = None, adjustment_percent: float = None) -> dict:
+        """
+        Create a limit order with dynamic price adjustment for better execution.
+        
+        Places an initial limit order near the current quote price, then monitors and adjusts
+        the price if not filled within the timeout period. Falls back to market order if
+        max attempts are reached.
+        
+        Args:
+            ticker: Stock ticker symbol
+            instruction: Order instruction ('BUY', 'SELL', 'SELL_SHORT', 'BUY_TO_COVER')
+            quantity: Number of shares
+            timeout_seconds: Seconds to wait before adjusting (default: LIMIT_ORDER_TIMEOUT_SECONDS)
+            max_attempts: Max adjustment attempts (default: LIMIT_ORDER_MAX_ATTEMPTS)
+            price_offset_percent: Initial offset from quote (default: LIMIT_ORDER_PRICE_OFFSET_PERCENT)
+            adjustment_percent: Price adjustment per attempt (default: LIMIT_ORDER_ADJUSTMENT_PERCENT)
+            
+        Returns:
+            dict: API response with order details including fill price
+        """
+        # Use defaults from constants if not specified
+        timeout_seconds = timeout_seconds or LIMIT_ORDER_TIMEOUT_SECONDS
+        max_attempts = max_attempts or LIMIT_ORDER_MAX_ATTEMPTS
+        price_offset_percent = price_offset_percent or LIMIT_ORDER_PRICE_OFFSET_PERCENT
+        adjustment_percent = adjustment_percent or LIMIT_ORDER_ADJUSTMENT_PERCENT
+        
+        # Get current bid/ask spread
+        bid_price, ask_price, last_price = self.get_bid_ask(ticker)
+        
+        if bid_price is None or ask_price is None:
+            logger.warning(f"Could not get bid/ask for {ticker}, falling back to market order")
+            return self._create_market_order_fallback(ticker, instruction, quantity)
+        
+        # Calculate initial limit price based on order direction
+        # For BUY orders: start just above bid (willing to pay more than current bid)
+        # For SELL orders: start just below ask (willing to accept less than current ask)
+        is_buy_order = instruction.upper() in ['BUY', 'BUY_TO_COVER']
+        
+        if is_buy_order:
+            # Start slightly above bid (but below ask) to be competitive
+            mid_price = (bid_price + ask_price) / 2
+            initial_limit = mid_price * (1 + price_offset_percent / 100)
+            # Don't exceed ask price on initial order
+            initial_limit = min(initial_limit, ask_price)
+        else:
+            # Start slightly below ask (but above bid) to be competitive
+            mid_price = (bid_price + ask_price) / 2
+            initial_limit = mid_price * (1 - price_offset_percent / 100)
+            # Don't go below bid price on initial order
+            initial_limit = max(initial_limit, bid_price)
+        
+        # Round to appropriate decimal places (2 for >= $1, 4 for < $1)
+        if initial_limit >= 1.0:
+            initial_limit = round(initial_limit, 2)
+        else:
+            initial_limit = round(initial_limit, 4)
+        
+        spread_pct = ((ask_price - bid_price) / mid_price) * 100
+        logger.info(f"Dynamic limit order for {ticker}: Bid ${bid_price:.4f} / Ask ${ask_price:.4f} (spread: {spread_pct:.3f}%)")
+        logger.info(f"Initial limit price: ${initial_limit:.4f} ({'BUY' if is_buy_order else 'SELL'})")
+        
+        current_limit = initial_limit
+        current_order_id = None
+        
+        for attempt in range(max_attempts):
+            # Create limit order payload
+            order_payload = {
+                "orderType": "LIMIT",
+                "price": current_limit,
+                "session": "NORMAL",
+                "duration": "DAY",
+                "orderStrategyType": "SINGLE",
+                "orderLegCollection": [{
+                    "instruction": instruction,
+                    "quantity": quantity,
+                    "instrument": {
+                        "symbol": ticker,
+                        "assetType": "EQUITY"
+                    }
+                }]
+            }
+            
+            logger.info(f"Placing limit order attempt {attempt + 1}/{max_attempts}: {ticker} {instruction} {quantity} @ ${current_limit:.4f}")
+            api_response = self.create_order(order_payload)
+            
+            if 'error' in api_response:
+                logger.error(f"Failed to create limit order: {api_response.get('error')}")
+                # If limit order fails, try market order as fallback
+                if attempt == max_attempts - 1:
+                    logger.warning(f"Falling back to market order for {ticker}")
+                    return self._create_market_order_fallback(ticker, instruction, quantity)
+                continue
+            
+            current_order_id = api_response.get('orderId')
+            if not current_order_id:
+                logger.warning(f"No order ID in response, attempting to continue...")
+                continue
+            
+            # Wait and check if order was filled
+            fill_start_time = time.time()
+            while time.time() - fill_start_time < timeout_seconds:
+                time.sleep(1)  # Check every second
+                
+                order_details = self.get_order_details(current_order_id, update_headers=False)
+                order_status = order_details.get('status', '').upper()
+                
+                if order_status == 'FILLED':
+                    # Order filled! Get fill price
+                    fill_price = self._extract_fill_price(order_details)
+                    logger.info(f"✅ Limit order filled for {ticker} at ${fill_price:.4f if fill_price else 'N/A'} (attempt {attempt + 1})")
+                    return {
+                        'orderId': current_order_id,
+                        'status': 'FILLED',
+                        'fillPrice': fill_price,
+                        'limitPrice': current_limit,
+                        'orderType': 'LIMIT',
+                        'attempts': attempt + 1
+                    }
+                elif order_status in ['CANCELED', 'REJECTED', 'EXPIRED']:
+                    logger.warning(f"Order {current_order_id} ended with status: {order_status}")
+                    break
+            
+            # Order not filled in time - cancel and adjust price
+            if order_status != 'FILLED':
+                logger.info(f"Order not filled in {timeout_seconds}s, canceling and adjusting price...")
+                self.close_order(current_order_id)
+                time.sleep(0.5)  # Brief delay after cancel
+                
+                # Adjust price more aggressively
+                if is_buy_order:
+                    # Increase buy price to be more attractive
+                    current_limit = current_limit * (1 + adjustment_percent / 100)
+                    # Get fresh quote and don't exceed current ask by too much
+                    _, new_ask, _ = self.get_bid_ask(ticker)
+                    if new_ask:
+                        max_price = new_ask * 1.002  # Don't pay more than 0.2% above ask
+                        current_limit = min(current_limit, max_price)
+                else:
+                    # Decrease sell price to be more attractive
+                    current_limit = current_limit * (1 - adjustment_percent / 100)
+                    # Get fresh quote and don't go below current bid by too much
+                    new_bid, _, _ = self.get_bid_ask(ticker)
+                    if new_bid:
+                        min_price = new_bid * 0.998  # Don't accept less than 0.2% below bid
+                        current_limit = max(current_limit, min_price)
+                
+                # Round again
+                if current_limit >= 1.0:
+                    current_limit = round(current_limit, 2)
+                else:
+                    current_limit = round(current_limit, 4)
+        
+        # Max attempts reached - fall back to market order
+        logger.warning(f"Max attempts ({max_attempts}) reached for {ticker}, falling back to market order")
+        return self._create_market_order_fallback(ticker, instruction, quantity)
+    
+    def _create_market_order_fallback(self, ticker: str, instruction: str, quantity: int) -> dict:
+        """
+        Create a market order as fallback when limit order fails.
+        
+        Args:
+            ticker: Stock ticker symbol
+            instruction: Order instruction ('BUY', 'SELL', etc.)
+            quantity: Number of shares
+            
+        Returns:
+            dict: API response with order details
+        """
+        order_payload = {
+            "orderType": "MARKET",
+            "session": "NORMAL",
+            "duration": "DAY",
+            "orderStrategyType": "SINGLE",
+            "orderLegCollection": [{
+                "instruction": instruction,
+                "quantity": quantity,
+                "instrument": {
+                    "symbol": ticker,
+                    "assetType": "EQUITY"
+                }
+            }]
+        }
+        
+        logger.info(f"Placing market order: {ticker} {instruction} {quantity} shares")
+        api_response = self.create_order(order_payload)
+        
+        if 'orderId' in api_response:
+            api_response['orderType'] = 'MARKET'
+            api_response['fallback'] = True
+        
+        return api_response
+    
+    def _extract_fill_price(self, order_details: dict) -> float | None:
+        """
+        Extract fill price from order details response.
+        
+        Args:
+            order_details: Order details dictionary from API
+            
+        Returns:
+            float: Fill price or None if not available
+        """
+        # Check orderActivityCollection first
+        activities = order_details.get('orderActivityCollection', [])
+        for activity in activities:
+            if activity.get('activityType') == 'EXECUTION':
+                exec_legs = activity.get('executionLegs', [])
+                for leg in exec_legs:
+                    price = leg.get('price')
+                    if price is not None:
+                        return float(price)
+        
+        # Fallback to price field
+        price = order_details.get('price')
+        if price is not None:
+            return float(price)
+        
+        return None
     
     def get_order_details(self, order_id: str, update_headers: bool = True, max_retries: int = 3, retry_delay: float = 1.0) -> dict:
         """
@@ -1495,6 +1728,34 @@ class AccountsTrading:
             logger.warning(f"Could not find price in quote data for {symbol}: {quote_data}")
             return None
     
+    def get_bid_ask(self, symbol: str) -> tuple[float | None, float | None, float | None]:
+        """
+        Get bid, ask, and last prices for a symbol.
+        
+        Args:
+            symbol: Stock ticker symbol
+            
+        Returns:
+            tuple: (bid_price, ask_price, last_price) - any can be None if unavailable
+        """
+        quote_data = self.get_quote_full(symbol)
+        if quote_data is None:
+            return None, None, None
+        
+        bid_price = quote_data.get('bidPrice')
+        ask_price = quote_data.get('askPrice')
+        last_price = (
+            quote_data.get('lastPrice') or
+            quote_data.get('last') or
+            quote_data.get('mark')
+        )
+        
+        return (
+            float(bid_price) if bid_price else None,
+            float(ask_price) if ask_price else None,
+            float(last_price) if last_price else None
+        )
+    
     def has_commission(self, symbol: str) -> bool:
         """
         Check if a stock has commissions associated with trading.
@@ -2066,37 +2327,59 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
         # Create Trade object
         trade = Trade(ticker=ticker, action=action, quantity=quantity)
         
-        # Create order payload
-        order_payload = {
-            "orderType": "MARKET",  # Market order for immediate execution
-            "session": "NORMAL",
-            "duration": "DAY",
-            "orderStrategyType": "SINGLE",
-            "orderLegCollection": [{
-                "instruction": instruction,
-                "quantity": quantity,
-                "instrument": {
-                    "symbol": ticker,
-                    "assetType": "EQUITY"
-                }
-            }]
-        }
-        
-        # Place order via API
-        logger.info(f"Placing order: {ticker} {action} {quantity} shares")
-        api_response = accounts_trading.create_order(order_payload)
-        
-        # Update trade with API response
-        trade.update_from_api_response(api_response)
-        
-        # Get actual execution/fill price from order details
-        if trade.order_id:
-            fill_price = accounts_trading.get_fill_price_from_order(trade.order_id)
-            if fill_price is not None:
-                trade.entry_price = fill_price
-                logger.info(f"Set entry price from order execution: ${trade.entry_price:.4f}")
-            else:
-                logger.warning(f"Could not get fill price for order {trade.order_id}, entry_price may be inaccurate")
+        # Place order - use dynamic limit orders for better pricing if enabled
+        if USE_LIMIT_ORDERS:
+            logger.info(f"Placing dynamic limit order: {ticker} {action} {quantity} shares")
+            api_response = accounts_trading.create_dynamic_limit_order(ticker, instruction, quantity)
+            
+            # Update trade with API response
+            trade.update_from_api_response(api_response)
+            
+            # Get fill price from dynamic limit order response
+            if 'fillPrice' in api_response and api_response['fillPrice'] is not None:
+                trade.entry_price = api_response['fillPrice']
+                order_type = api_response.get('orderType', 'LIMIT')
+                attempts = api_response.get('attempts', 1)
+                logger.info(f"Entry price from {order_type} order: ${trade.entry_price:.4f} (attempts: {attempts})")
+            elif trade.order_id:
+                # Fallback to getting fill price from order details
+                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id)
+                if fill_price is not None:
+                    trade.entry_price = fill_price
+                    logger.info(f"Set entry price from order execution: ${trade.entry_price:.4f}")
+                else:
+                    logger.warning(f"Could not get fill price for order {trade.order_id}")
+        else:
+            # Use traditional market order
+            order_payload = {
+                "orderType": "MARKET",
+                "session": "NORMAL",
+                "duration": "DAY",
+                "orderStrategyType": "SINGLE",
+                "orderLegCollection": [{
+                    "instruction": instruction,
+                    "quantity": quantity,
+                    "instrument": {
+                        "symbol": ticker,
+                        "assetType": "EQUITY"
+                    }
+                }]
+            }
+            
+            logger.info(f"Placing market order: {ticker} {action} {quantity} shares")
+            api_response = accounts_trading.create_order(order_payload)
+            
+            # Update trade with API response
+            trade.update_from_api_response(api_response)
+            
+            # Get actual execution/fill price from order details
+            if trade.order_id:
+                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id)
+                if fill_price is not None:
+                    trade.entry_price = fill_price
+                    logger.info(f"Set entry price from order execution: ${trade.entry_price:.4f}")
+                else:
+                    logger.warning(f"Could not get fill price for order {trade.order_id}, entry_price may be inaccurate")
         
         # Fallback: If we still don't have entry price, use quote (less accurate)
         if trade.entry_price is None:
@@ -2133,27 +2416,122 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
     logger.info(f"Executed {len(executed_trades)} trades via Schwab API")
     return executed_trades
 
-def market_timing_loop(accounts_trading: AccountsTrading):
+def get_minutes_until_market_open(accounts_trading: AccountsTrading) -> int | None:
     """
-    Separate loop that handles market timing - waits for market to be open for MARKET_OPEN_DELAY_MINUTES.
-    This loop runs independently from the algo loop.
+    Calculate minutes until market opens.
     
     Returns:
-        bool: True when market is open for MARKET_OPEN_DELAY_MINUTES and ready for algo, False otherwise
+        int: Minutes until market open, or None if market is already open or can't determine
     """
-    while True:
-        is_market_open, message = accounts_trading.is_market_open_for_15_minutes()
+    try:
+        market_start, market_end, equity_data = accounts_trading.get_market_hours_today()
+        if equity_data is None or not equity_data.get('isOpen', False):
+            return None  # Market is closed today
         
-        if is_market_open:
-            logger.info(f"Market timing check: {message}")
-            logger.info(f"Market has been open for {MARKET_OPEN_DELAY_MINUTES}+ minutes - ready to start algo loop")
-            return True
+        eastern = pytz.timezone('US/Eastern')
+        now = datetime.now(eastern)
+        
+        if now < market_start:
+            return int((market_start - now).total_seconds() / 60)
         else:
-            logger.info(f"Market timing check: {message}")
-            # Check for closing trades less frequently when market is closed
+            return None  # Market already open
+    except Exception as e:
+        logger.error(f"Error calculating time until market open: {e}")
+        return None
+
+
+def supervisor_loop(accounts_trading: AccountsTrading) -> str:
+    """
+    Supervisor loop that runs when market is closed or not ready for trading.
+    Handles token refresh and checks market timing every SUPERVISOR_CHECK_INTERVAL_MINUTES.
+    
+    Returns:
+        str: 'trade' when market is ready for trading, 'closed' when market is closed for the day
+    """
+    last_token_refresh = time.time()
+    token_refresh_interval = TOKEN_REFRESH_INTERVAL_MINUTES * 60  # Convert to seconds
+    check_interval = SUPERVISOR_CHECK_INTERVAL_MINUTES * 60  # Convert to seconds
+    
+    logger.info("=== Supervisor loop started ===")
+    logger.info(f"Check interval: {SUPERVISOR_CHECK_INTERVAL_MINUTES} minutes")
+    logger.info(f"Token refresh interval: {TOKEN_REFRESH_INTERVAL_MINUTES} minutes")
+    
+    while True:
+        try:
+            current_time = time.time()
+            
+            # Refresh tokens if needed (every TOKEN_REFRESH_INTERVAL_MINUTES)
+            if current_time - last_token_refresh >= token_refresh_interval:
+                logger.info("🔄 Refreshing API tokens...")
+                accounts_trading._update_headers(force=True)
+                last_token_refresh = current_time
+                logger.info("✅ Tokens refreshed successfully")
+            
+            # Check market status
+            is_market_open, message = accounts_trading.is_market_open_for_15_minutes()
+            
+            if is_market_open:
+                logger.info(f"📈 Market ready: {message}")
+                logger.info(f"Market has been open for {MARKET_OPEN_DELAY_MINUTES}+ minutes - transitioning to trading loop")
+                return 'trade'
+            
+            # Check if market is open today
+            try:
+                market_start, market_end, equity_data = accounts_trading.get_market_hours_today()
+                
+                if equity_data is None or not equity_data.get('isOpen', False):
+                    logger.info("📅 Market is closed today")
+                    return 'closed'
+                
+                # Calculate time until market open
+                eastern = pytz.timezone('US/Eastern')
+                now = datetime.now(eastern)
+                
+                if now > market_end:
+                    logger.info("📅 Market has closed for today")
+                    return 'closed'
+                
+                if now < market_start:
+                    minutes_until_open = int((market_start - now).total_seconds() / 60)
+                    
+                    # If close to market open, prepare by refreshing tokens
+                    if minutes_until_open <= MARKET_OPEN_PREP_MINUTES:
+                        logger.info(f"⏰ Market opens in {minutes_until_open} minutes - preparing...")
+                        # Refresh tokens before market open
+                        accounts_trading._update_headers(force=True)
+                        last_token_refresh = current_time
+                        
+                        # Check more frequently when close to open
+                        time.sleep(60)  # Check every minute when close to open
+                        continue
+                    else:
+                        logger.info(f"💤 Market opens in {minutes_until_open} minutes at {market_start.strftime('%H:%M')} ET")
+                else:
+                    # Market is open but we haven't reached MARKET_OPEN_DELAY_MINUTES
+                    logger.info(f"⏳ Waiting for market to settle: {message}")
+            
+            except Exception as e:
+                logger.error(f"Error checking market hours: {e}")
+            
+            # Check if we have active trades that need attention
             if accounts_trading.active_trades:
-                logger.info(f"Have {len(accounts_trading.active_trades)} active trades waiting to close when market opens")
-            time.sleep(60 * 5)  # Check every 5 minutes when waiting for market to open
+                logger.warning(f"⚠️ Have {len(accounts_trading.active_trades)} active trades - monitoring...")
+                accounts_trading.check_stop_loss_orders()
+                accounts_trading.check_profit_targets()
+            
+            # Sleep until next check
+            logger.info(f"💤 Next check in {SUPERVISOR_CHECK_INTERVAL_MINUTES} minutes...")
+            time.sleep(check_interval)
+            
+        except KeyboardInterrupt:
+            logger.info("\nSupervisor loop interrupted...")
+            raise
+        except Exception as e:
+            logger.error(f"Error in supervisor loop: {e}")
+            import traceback
+            traceback.print_exc()
+            # Continue running after error
+            time.sleep(60)
 
 
 def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalController):
@@ -2292,14 +2670,36 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
 
 
 def main():
-    """Main loop for MOST -> PRT -> Schwab API workflow"""
+    """
+    Main entry point for the trading algorithm.
+    
+    Architecture:
+    - Supervisor Loop: Runs when market is closed. Checks market timing every 15 minutes,
+      refreshes tokens, and prepares for market open.
+    - Trading Loop: Runs when market is open. Executes strategy, places trades, and monitors
+      positions until market close.
+    
+    The program runs continuously, transitioning between supervisor and trading loops
+    based on market hours.
+    """
+    logger.info("=" * 60)
+    logger.info("=== ALGO TRADING SYSTEM STARTING ===")
+    logger.info("=" * 60)
+    logger.info(f"Trade hold time: {TRADE_HOLD_MINUTES} minutes")
+    logger.info(f"Market close buffer: {MARKET_CLOSE_BUFFER_MINUTES} minutes")
+    logger.info(f"Use limit orders: {USE_LIMIT_ORDERS}")
+    if USE_LIMIT_ORDERS:
+        logger.info(f"  Limit order timeout: {LIMIT_ORDER_TIMEOUT_SECONDS} seconds")
+        logger.info(f"  Max price adjustments: {LIMIT_ORDER_MAX_ATTEMPTS}")
+    logger.info("=" * 60)
+    
     # Initialize Schwab API connection with token manager
     accounts_trading = None
     try:
         accounts_trading = AccountsTrading()
-        logger.info("Schwab API connection initialized with token manager")
+        logger.info("✅ Schwab API connection initialized with token manager")
     except Exception as e:
-        logger.error(f"Failed to initialize Schwab API connection: {e}")
+        logger.error(f"❌ Failed to initialize Schwab API connection: {e}")
         logger.error("Make sure you have run get_OG_tokens.py first to initialize tokens")
         return
     
@@ -2321,56 +2721,85 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
     signal.signal(signal.SIGTERM, signal_handler)
     
-    # Main outer loop - handles market timing separately from algo execution
+    # Controller for Godel terminal (initialized when needed)
     controller = None
+    
+    # Main program loop - runs indefinitely
     while True:
         try:
-            # Market timing loop - waits for market to be open for MARKET_OPEN_DELAY_MINUTES
-            market_timing_loop(accounts_trading)
+            # ============================================================
+            # SUPERVISOR LOOP - Runs when market is closed or not ready
+            # ============================================================
+            supervisor_result = supervisor_loop(accounts_trading)
             
-            # Initialize controller when market is ready
+            if supervisor_result == 'closed':
+                # Market closed for the day - wait until next morning
+                logger.info("📅 Market closed for today - entering overnight mode")
+                logger.info("Will check again in 15 minutes...")
+                time.sleep(SUPERVISOR_CHECK_INTERVAL_MINUTES * 60)
+                continue
+            
+            # ============================================================
+            # TRADING LOOP - Runs when market is open and ready
+            # ============================================================
+            
+            # Initialize Godel controller when transitioning to trading
             if controller is None:
-                logger.info("Initializing Godel controller...")
-                controller = GodelTerminalController()
-                controller.connect()
-                controller.login(GODEL_USERNAME, GODEL_PASSWORD)
-                controller.load_layout("dev")
-                logger.info("Godel controller initialized successfully")
+                logger.info("🔌 Initializing Godel controller...")
+                try:
+                    controller = GodelTerminalController()
+                    controller.connect()
+                    controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+                    controller.load_layout("dev")
+                    logger.info("✅ Godel controller initialized successfully")
+                except Exception as e:
+                    logger.error(f"❌ Failed to initialize Godel controller: {e}")
+                    logger.info("Waiting 60 seconds before retrying...")
+                    time.sleep(60)
+                    continue
             
-            # Run algo loop - only runs from MARKET_OPEN_DELAY_MINUTES min after open until MARKET_CLOSE_BUFFER_MINUTES min before close
+            # Run the trading loop
+            logger.info("=" * 60)
+            logger.info("=== ENTERING TRADING MODE ===")
+            logger.info("=" * 60)
+            
             algo_loop(accounts_trading, controller)
             
-            # Algo loop exited (market about to close or error)
-            logger.info("Algo loop exited - returning to market timing loop")
+            # Trading loop exited (market closed or error)
+            logger.info("📉 Trading loop exited - returning to supervisor")
             
         except KeyboardInterrupt:
-            logger.info("\nProgram interrupted by user - shutting down...")
+            logger.info("\n🛑 Program interrupted by user - shutting down...")
             break
         except Exception as e:
-            logger.error(f"Error in main loop: {e}")
+            logger.error(f"❌ Error in main loop: {e}")
             import traceback
             traceback.print_exc()
             # Wait a bit before retrying
             logger.info("Waiting 60 seconds before retrying...")
             time.sleep(60)
-        finally:
-            # Clean up controller if needed (but keep it for next market session)
-            # Only close if we're shutting down completely
-            pass
     
-    # Final cleanup
+    # ============================================================
+    # CLEANUP - Runs on program exit
+    # ============================================================
+    logger.info("=" * 60)
+    logger.info("=== SHUTTING DOWN ===")
+    logger.info("=" * 60)
+    
     if accounts_trading:
-        logger.warning("Final cleanup - closing all positions...")
+        logger.warning("Closing all positions...")
         accounts_trading.close_all_positions()
     
     if controller:
         try:
-            logger.info("Cleaning up controller...")
+            logger.info("Cleaning up Godel controller...")
             controller.close_all_windows()
             controller.disconnect()
-            logger.info("Controller closed successfully")
+            logger.info("✅ Controller closed successfully")
         except Exception as e:
             logger.error(f"Error closing controller: {e}")
+    
+    logger.info("👋 Goodbye!")
 
 if __name__ == "__main__":
     main()
