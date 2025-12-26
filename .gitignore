@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Local configuration
+config.py
+
+# Token storage (contains sensitive API tokens)
+schwab_tokens.json
+
+html_frameworks/
+

@@ -1,0 +1,436 @@
+TRADE ANALYSIS REPORT
+================================================================================
+
+INCONSISTENCIES:
+--------------------------------------------------------------------------------
+
+Ticker: AMC (LONG)
+  Quantity mismatch: Journal=606, Brokerage=609, Diff=3
+  P&L mismatch: Journal=$-3.03, Brokerage=$-0.56, Diff=$2.47
+
+Ticker: RDW (LONG)
+  Entry price mismatch: Journal=7.935, Brokerage=7.864, Diff=$0.0710
+  Quantity mismatch: Journal=125, Brokerage=127, Diff=2
+  P&L mismatch: Journal=$-10.94, Brokerage=$-18.14, Diff=$7.20
+
+Ticker: OMER (SHORT)
+  P&L mismatch: Journal=$-36.09, Brokerage=$-2023.43, Diff=$1987.34
+
+Ticker: HYMC (SHORT)
+  Exit price mismatch: Journal=24.93, Brokerage=24.8697, Diff=$0.0603
+  P&L mismatch: Journal=$-4.80, Brokerage=$-1987.19, Diff=$1982.39
+
+Ticker: SOC (SHORT)
+  Entry price mismatch: Journal=9.825, Brokerage=9.865, Diff=$0.0400
+  Exit price mismatch: Journal=9.79, Brokerage=9.765, Diff=$0.0250
+  Quantity mismatch: Journal=102, Brokerage=101, Diff=1
+  P&L mismatch: Journal=$3.57, Brokerage=$-1992.40, Diff=$1995.97
+
+Ticker: RKLB (SHORT)
+  Entry price mismatch: Journal=76.51, Brokerage=76.545, Diff=$0.0350
+  P&L mismatch: Journal=$2.15, Brokerage=$-1987.67, Diff=$1989.82
+
+Ticker: BBAI (SHORT)
+  Entry price mismatch: Journal=6.03, Brokerage=6.0644, Diff=$0.0344
+  Exit price mismatch: Journal=6.015, Brokerage=6.0845, Diff=$0.0695
+  P&L mismatch: Journal=$2.48, Brokerage=$-2004.57, Diff=$2007.05
+
+Ticker: UP (LONG)
+  P&L mismatch: Journal=$-14.50, Brokerage=$-16.00, Diff=$1.50
+
+Ticker: JBLU (LONG)
+  P&L mismatch: Journal=$-1.05, Brokerage=$1.60, Diff=$2.65
+
+Ticker: SOUN (LONG)
+  Entry price mismatch: Journal=10.895, Brokerage=10.975, Diff=$0.0800
+  Exit price mismatch: Journal=10.91, Brokerage=10.9232, Diff=$0.0132
+  P&L mismatch: Journal=$1.37, Brokerage=$-4.76, Diff=$6.13
+
+Ticker: AMC (LONG)
+  Quantity mismatch: Journal=606, Brokerage=609, Diff=3
+  P&L mismatch: Journal=$-0.42, Brokerage=$-9.21, Diff=$8.79
+
+Ticker: SOC (SHORT)
+  Exit price mismatch: Journal=9.74, Brokerage=9.6412, Diff=$0.0988
+  P&L mismatch: Journal=$11.11, Brokerage=$-1987.26, Diff=$1998.37
+
+Ticker: ASTS (SHORT)
+  Entry price mismatch: Journal=80.6869, Brokerage=80.6488, Diff=$0.0381
+  Exit price mismatch: Journal=81.0158, Brokerage=81.0526, Diff=$0.0368
+  P&L mismatch: Journal=$-3.95, Brokerage=$-1940.42, Diff=$1936.47
+
+Ticker: MU (SHORT)
+  Entry price mismatch: Journal=286.94, Brokerage=286.98, Diff=$0.0400
+  P&L mismatch: Journal=$2.52, Brokerage=$-1719.24, Diff=$1721.76
+
+Ticker: RXRX (SHORT)
+  P&L mismatch: Journal=$2.28, Brokerage=$-1997.30, Diff=$1999.58
+
+Ticker: QUBT (SHORT)
+  Entry price mismatch: Journal=11.235, Brokerage=11.3035, Diff=$0.0685
+  Exit price mismatch: Journal=11.2588, Brokerage=11.3099, Diff=$0.0511
+  P&L mismatch: Journal=$-2.09, Brokerage=$-1989.98, Diff=$1987.89
+
+Ticker: UP (LONG)
+  P&L mismatch: Journal=$-23.09, Brokerage=$-30.31, Diff=$7.22
+
+Ticker: DJT (LONG)
+  Entry price mismatch: Journal=14.34, Brokerage=14.32, Diff=$0.0200
+  P&L mismatch: Journal=$-7.25, Brokerage=$-5.97, Diff=$1.27
+
+Ticker: IREN (LONG)
+  Entry price mismatch: Journal=41.41, Brokerage=41.3986, Diff=$0.0114
+  Exit price mismatch: Journal=41.34, Brokerage=41.33, Diff=$0.0100
+
+Ticker: AMC (LONG)
+  Quantity mismatch: Journal=609, Brokerage=606, Diff=3
+  P&L mismatch: Journal=$6.09, Brokerage=$2.83, Diff=$3.26
+
+Ticker: OMER (SHORT)
+  Entry price mismatch: Journal=14.922, Brokerage=14.8916, Diff=$0.0304
+  Exit price mismatch: Journal=14.51, Brokerage=14.5294, Diff=$0.0194
+  P&L mismatch: Journal=$27.19, Brokerage=$-1941.79, Diff=$1968.98
+
+Ticker: ASTS (SHORT)
+  Entry price mismatch: Journal=80.965, Brokerage=81.02, Diff=$0.0550
+  Exit price mismatch: Journal=79.785, Brokerage=79.77, Diff=$0.0150
+  P&L mismatch: Journal=$14.16, Brokerage=$-1929.48, Diff=$1943.64
+
+Ticker: DNN (SHORT)
+  P&L mismatch: Journal=$3.62, Brokerage=$-1989.73, Diff=$1993.35
+
+Ticker: GRAB (SHORT)
+  P&L mismatch: Journal=$0.98, Brokerage=$-1999.76, Diff=$2000.74
+
+Ticker: BTBT (SHORT)
+  Entry price mismatch: Journal=2.11, Brokerage=2.125, Diff=$0.0150
+  Exit price mismatch: Journal=2.115, Brokerage=2.1399, Diff=$0.0249
+  Quantity mismatch: Journal=471, Brokerage=469, Diff=2
+  P&L mismatch: Journal=$-2.36, Brokerage=$-2000.24, Diff=$1997.88
+
+Ticker: UP (LONG)
+  P&L mismatch: Journal=$7.39, Brokerage=$5.17, Diff=$2.22
+
+Ticker: OMER (LONG)
+  Exit price mismatch: Journal=15.24, Brokerage=15.2134, Diff=$0.0266
+  P&L mismatch: Journal=$38.08, Brokerage=$36.26, Diff=$1.82
+
+Ticker: RKLB (LONG)
+  Entry price mismatch: Journal=76.7896, Brokerage=76.8142, Diff=$0.0246
+  Exit price mismatch: Journal=76.75, Brokerage=76.7273, Diff=$0.0227
+
+Ticker: RIG (LONG)
+  Entry price mismatch: Journal=4.04, Brokerage=4.0256, Diff=$0.0144
+  P&L mismatch: Journal=$-1.23, Brokerage=$6.73, Diff=$7.96
+
+Ticker: AMC (SHORT)
+  P&L mismatch: Journal=$-3.05, Brokerage=$-1999.16, Diff=$1996.11
+
+Ticker: JBLU (SHORT)
+  Exit price mismatch: Journal=4.7357, Brokerage=4.7469, Diff=$0.0112
+  P&L mismatch: Journal=$-0.62, Brokerage=$-1990.95, Diff=$1990.33
+
+Ticker: INTC (SHORT)
+  P&L mismatch: Journal=$1.72, Brokerage=$-1939.40, Diff=$1941.12
+
+Ticker: DJT (SHORT)
+  P&L mismatch: Journal=$8.60, Brokerage=$-1987.38, Diff=$1995.98
+
+Ticker: OMER (LONG)
+  Entry price mismatch: Journal=15.3899, Brokerage=15.435, Diff=$0.0451
+  Exit price mismatch: Journal=15.85, Brokerage=15.875, Diff=$0.0250
+  P&L mismatch: Journal=$29.45, Brokerage=$12.27, Diff=$17.18
+
+Ticker: RKLB (LONG)
+  Exit price mismatch: Journal=76.68, Brokerage=76.6459, Diff=$0.0341
+
+Ticker: SOC (SHORT)
+  Exit price mismatch: Journal=9.425, Brokerage=9.3756, Diff=$0.0494
+  P&L mismatch: Journal=$11.02, Brokerage=$-1993.50, Diff=$2004.52
+
+Ticker: BTG (SHORT)
+  P&L mismatch: Journal=$-3.21, Brokerage=$-1997.75, Diff=$1994.54
+
+Ticker: CDE (SHORT)
+  Entry price mismatch: Journal=18.325, Brokerage=18.365, Diff=$0.0400
+  Exit price mismatch: Journal=18.3844, Brokerage=18.3531, Diff=$0.0313
+  P&L mismatch: Journal=$-3.21, Brokerage=$-1982.78, Diff=$1979.57
+
+Ticker: PLUG (LONG)
+  Entry price mismatch: Journal=2.1038, Brokerage=2.1191, Diff=$0.0153
+  P&L mismatch: Journal=$-6.43, Brokerage=$-9.14, Diff=$2.71
+
+Ticker: BTG (LONG)
+  Quantity mismatch: Journal=212, Brokerage=213, Diff=1
+
+Ticker: RIG (LONG)
+  Entry price mismatch: Journal=4.0174, Brokerage=4.0299, Diff=$0.0125
+  P&L mismatch: Journal=$1.56, Brokerage=$-1.40, Diff=$2.96
+
+Ticker: OWL (SHORT)
+  Entry price mismatch: Journal=15.435, Brokerage=15.5152, Diff=$0.0802
+  Exit price mismatch: Journal=15.435, Brokerage=15.485, Diff=$0.0500
+  P&L mismatch: Journal=$0.00, Brokerage=$-1984.01, Diff=$1984.01
+
+Ticker: BITF (SHORT)
+  Entry price mismatch: Journal=2.675, Brokerage=2.6909, Diff=$0.0159
+  Exit price mismatch: Journal=2.665, Brokerage=2.7084, Diff=$0.0434
+  Quantity mismatch: Journal=374, Brokerage=371, Diff=3
+  P&L mismatch: Journal=$3.74, Brokerage=$-2003.14, Diff=$2006.88
+
+Ticker: CDE (SHORT)
+  Entry price mismatch: Journal=18.37, Brokerage=18.3244, Diff=$0.0456
+  P&L mismatch: Journal=$0.81, Brokerage=$-1981.23, Diff=$1982.04
+
+Ticker: ORCL (SHORT)
+  Exit price mismatch: Journal=197.8102, Brokerage=197.8899, Diff=$0.0797
+  P&L mismatch: Journal=$-0.80, Brokerage=$-1977.73, Diff=$1976.93
+
+Ticker: RITM (SHORT)
+  P&L mismatch: Journal=$0.14, Brokerage=$-1983.70, Diff=$1983.84
+
+Ticker: BTG (LONG)
+  Entry price mismatch: Journal=4.685, Brokerage=4.6955, Diff=$0.0105
+  Quantity mismatch: Journal=213, Brokerage=212, Diff=1
+  P&L mismatch: Journal=$0.00, Brokerage=$2.06, Diff=$2.06
+
+Ticker: BITF (LONG)
+  Entry price mismatch: Journal=2.665, Brokerage=2.6862, Diff=$0.0212
+  Quantity mismatch: Journal=374, Brokerage=371, Diff=3
+  P&L mismatch: Journal=$7.48, Brokerage=$-0.75, Diff=$8.23
+
+Ticker: BTBT (SHORT)
+  Quantity mismatch: Journal=469, Brokerage=471, Diff=2
+  P&L mismatch: Journal=$-2.34, Brokerage=$-1994.01, Diff=$1991.66
+
+Ticker: RDW (SHORT)
+  Exit price mismatch: Journal=7.87, Brokerage=7.9362, Diff=$0.0662
+  P&L mismatch: Journal=$-4.45, Brokerage=$-1986.67, Diff=$1982.23
+
+Ticker: PLUG (SHORT)
+  P&L mismatch: Journal=$-17.52, Brokerage=$-2008.72, Diff=$1991.20
+
+Ticker: VG (SHORT)
+  Entry price mismatch: Journal=7.135, Brokerage=7.1918, Diff=$0.0568
+  Exit price mismatch: Journal=7.168, Brokerage=7.2584, Diff=$0.0904
+  Quantity mismatch: Journal=140, Brokerage=138, Diff=2
+  P&L mismatch: Journal=$-4.62, Brokerage=$-1994.13, Diff=$1989.51
+
+Ticker: SOC (LONG)
+  Exit price mismatch: Journal=9.915, Brokerage=9.845, Diff=$0.0700
+  P&L mismatch: Journal=$-29.89, Brokerage=$11.89, Diff=$41.78
+
+Ticker: PLUG (LONG)
+  P&L mismatch: Journal=$-7.32, Brokerage=$-6.16, Diff=$1.16
+
+Ticker: OMER (LONG)
+  Entry price mismatch: Journal=15.91, Brokerage=15.9209, Diff=$0.0109
+  P&L mismatch: Journal=$-3.78, Brokerage=$11.36, Diff=$15.14
+
+Ticker: BTG (LONG)
+  Entry price mismatch: Journal=4.68, Brokerage=4.6999, Diff=$0.0199
+  Quantity mismatch: Journal=213, Brokerage=214, Diff=1
+  P&L mismatch: Journal=$2.13, Brokerage=$-12.77, Diff=$14.90
+
+Ticker: ORCL (LONG)
+  Entry price mismatch: Journal=197.89, Brokerage=197.81, Diff=$0.0800
+  Exit price mismatch: Journal=197.93, Brokerage=197.905, Diff=$0.0250
+
+Ticker: ASST (SHORT)
+  P&L mismatch: Journal=$-4.18, Brokerage=$-1993.76, Diff=$1989.58
+
+Ticker: OWL (SHORT)
+  Entry price mismatch: Journal=15.515, Brokerage=15.4344, Diff=$0.0806
+  Exit price mismatch: Journal=15.485, Brokerage=15.435, Diff=$0.0500
+  P&L mismatch: Journal=$1.92, Brokerage=$-1975.64, Diff=$1977.56
+
+Ticker: QBTS (SHORT)
+  Entry price mismatch: Journal=27.365, Brokerage=27.3467, Diff=$0.0183
+  Exit price mismatch: Journal=27.2875, Brokerage=27.3775, Diff=$0.0900
+  P&L mismatch: Journal=$2.79, Brokerage=$-1970.07, Diff=$1972.86
+
+Ticker: QUBT (SHORT)
+  Entry price mismatch: Journal=11.295, Brokerage=11.235, Diff=$0.0600
+  Exit price mismatch: Journal=11.305, Brokerage=11.2616, Diff=$0.0434
+  P&L mismatch: Journal=$-0.88, Brokerage=$-1979.70, Diff=$1978.82
+
+Ticker: CLSK (SHORT)
+  Entry price mismatch: Journal=11.405, Brokerage=11.4401, Diff=$0.0351
+  Exit price mismatch: Journal=11.375, Brokerage=11.465, Diff=$0.0900
+  P&L mismatch: Journal=$2.61, Brokerage=$-1992.75, Diff=$1995.36
+
+Ticker: BITF (LONG)
+  Entry price mismatch: Journal=2.69, Brokerage=2.6689, Diff=$0.0211
+  Quantity mismatch: Journal=371, Brokerage=374, Diff=3
+  P&L mismatch: Journal=$-0.78, Brokerage=$5.49, Diff=$6.27
+
+Ticker: CIFR (LONG)
+  Entry price mismatch: Journal=16.2, Brokerage=16.265, Diff=$0.0650
+  Exit price mismatch: Journal=16.2656, Brokerage=16.1701, Diff=$0.0955
+  P&L mismatch: Journal=$4.00, Brokerage=$-5.81, Diff=$9.81
+
+Ticker: IONQ (LONG)
+  Entry price mismatch: Journal=49.66, Brokerage=49.7499, Diff=$0.0899
+  P&L mismatch: Journal=$2.80, Brokerage=$1.00, Diff=$1.80
+
+Ticker: AMC (SHORT)
+  P&L mismatch: Journal=$5.98, Brokerage=$-2006.23, Diff=$2012.21
+
+Ticker: SOC (SHORT)
+  Entry price mismatch: Journal=9.865, Brokerage=9.8222, Diff=$0.0428
+  Exit price mismatch: Journal=9.4072, Brokerage=9.37, Diff=$0.0372
+  Quantity mismatch: Journal=101, Brokerage=102, Diff=1
+  P&L mismatch: Journal=$46.24, Brokerage=$-1948.23, Diff=$1994.47
+
+Ticker: VG (SHORT)
+  Entry price mismatch: Journal=7.195, Brokerage=7.1314, Diff=$0.0636
+  Exit price mismatch: Journal=7.25, Brokerage=7.1656, Diff=$0.0844
+  Quantity mismatch: Journal=138, Brokerage=140, Diff=2
+  P&L mismatch: Journal=$-7.59, Brokerage=$-2001.58, Diff=$1993.99
+
+Ticker: BMNR (SHORT)
+  Exit price mismatch: Journal=29.2696, Brokerage=29.285, Diff=$0.0154
+  P&L mismatch: Journal=$3.42, Brokerage=$-1994.40, Diff=$1997.82
+
+Ticker: BMNR (LONG)
+  Entry price mismatch: Journal=29.28, Brokerage=29.2636, Diff=$0.0164
+
+Ticker: RKLB (LONG)
+  Entry price mismatch: Journal=77.36, Brokerage=77.38, Diff=$0.0200
+
+Ticker: BTBT (LONG)
+  Entry price mismatch: Journal=2.14, Brokerage=2.1199, Diff=$0.0201
+  Quantity mismatch: Journal=469, Brokerage=471, Diff=2
+  P&L mismatch: Journal=$-2.35, Brokerage=$2.69, Diff=$5.04
+
+Ticker: AMC (SHORT)
+  P&L mismatch: Journal=$-2.99, Brokerage=$-2002.76, Diff=$1999.77
+
+Ticker: BBAI (SHORT)
+  Entry price mismatch: Journal=6.065, Brokerage=6.0359, Diff=$0.0291
+  Exit price mismatch: Journal=6.085, Brokerage=6.015, Diff=$0.0700
+  P&L mismatch: Journal=$-3.30, Brokerage=$-1988.40, Diff=$1985.10
+
+Ticker: RZLV (SHORT)
+  P&L mismatch: Journal=$-5.30, Brokerage=$-2003.74, Diff=$1998.44
+
+Ticker: RIG (SHORT)
+  P&L mismatch: Journal=$1.41, Brokerage=$-1990.87, Diff=$1992.28
+
+Ticker: SOC (LONG)
+  Entry price mismatch: Journal=9.7694, Brokerage=9.7399, Diff=$0.0295
+  Exit price mismatch: Journal=9.62, Brokerage=9.595, Diff=$0.0250
+  Quantity mismatch: Journal=102, Brokerage=101, Diff=1
+  P&L mismatch: Journal=$-15.24, Brokerage=$-5.08, Diff=$10.16
+
+Ticker: RIG (LONG)
+  Entry price mismatch: Journal=4.03, Brokerage=4.0173, Diff=$0.0127
+  P&L mismatch: Journal=$1.24, Brokerage=$-0.94, Diff=$2.18
+
+Ticker: OMER (LONG)
+  Exit price mismatch: Journal=15.4199, Brokerage=15.375, Diff=$0.0449
+  P&L mismatch: Journal=$-12.61, Brokerage=$0.39, Diff=$13.00
+
+Ticker: SOUN (LONG)
+  Entry price mismatch: Journal=10.975, Brokerage=10.8914, Diff=$0.0836
+  Exit price mismatch: Journal=10.9262, Brokerage=10.915, Diff=$0.0112
+  P&L mismatch: Journal=$-4.44, Brokerage=$2.11, Diff=$6.55
+
+Ticker: BITF (SHORT)
+  Entry price mismatch: Journal=2.698, Brokerage=2.6742, Diff=$0.0238
+  Exit price mismatch: Journal=2.705, Brokerage=2.6662, Diff=$0.0388
+  Quantity mismatch: Journal=371, Brokerage=374, Diff=3
+  P&L mismatch: Journal=$-2.60, Brokerage=$-1997.31, Diff=$1994.71
+
+Ticker: CLSK (SHORT)
+  Entry price mismatch: Journal=11.445, Brokerage=11.3996, Diff=$0.0454
+  Exit price mismatch: Journal=11.46, Brokerage=11.376, Diff=$0.0840
+  P&L mismatch: Journal=$-1.31, Brokerage=$-1981.48, Diff=$1980.17
+
+Ticker: IONQ (SHORT)
+  Entry price mismatch: Journal=49.62, Brokerage=49.5872, Diff=$0.0328
+  Exit price mismatch: Journal=49.74, Brokerage=49.6673, Diff=$0.0727
+  P&L mismatch: Journal=$-2.40, Brokerage=$-1985.09, Diff=$1982.69
+
+Ticker: ACHR (SHORT)
+  P&L mismatch: Journal=$3.67, Brokerage=$-1991.04, Diff=$1994.71
+
+Ticker: RGTI (SHORT)
+  P&L mismatch: Journal=$1.20, Brokerage=$-1964.97, Diff=$1966.17
+
+Ticker: PLUG (LONG)
+  P&L mismatch: Journal=$-6.29, Brokerage=$-5.27, Diff=$1.02
+
+Ticker: RIVN (LONG)
+  Exit price mismatch: Journal=21.16, Brokerage=21.185, Diff=$0.0250
+  P&L mismatch: Journal=$-3.50, Brokerage=$-2.14, Diff=$1.36
+
+Ticker: CIFR (LONG)
+  Entry price mismatch: Journal=16.26, Brokerage=16.2072, Diff=$0.0528
+  Exit price mismatch: Journal=16.165, Brokerage=16.2638, Diff=$0.0988
+  P&L mismatch: Journal=$-5.80, Brokerage=$3.43, Diff=$9.23
+
+Ticker: OMER (LONG)
+  Entry price mismatch: Journal=15.42, Brokerage=15.377, Diff=$0.0430
+  P&L mismatch: Journal=$-2.56, Brokerage=$-14.89, Diff=$12.33
+
+Ticker: RIG (SHORT)
+  P&L mismatch: Journal=$2.47, Brokerage=$-1992.08, Diff=$1994.55
+
+Ticker: MARA (SHORT)
+  P&L mismatch: Journal=$1.75, Brokerage=$-1985.18, Diff=$1986.93
+
+Ticker: RKLB (SHORT)
+  Exit price mismatch: Journal=76.9, Brokerage=76.9299, Diff=$0.0299
+  P&L mismatch: Journal=$4.08, Brokerage=$-1849.92, Diff=$1854.00
+
+Ticker: CDE (SHORT)
+  P&L mismatch: Journal=$1.06, Brokerage=$-1978.77, Diff=$1979.83
+
+Ticker: HL (SHORT)
+  P&L mismatch: Journal=$2.50, Brokerage=$-1983.00, Diff=$1985.50
+
+
+PERFORMANCE ANALYSIS:
+--------------------------------------------------------------------------------
+Total Trades: 119
+Win Rate: 47.90%
+Total P&L: $9.81
+
+
+STOP LOSS SUGGESTIONS:
+--------------------------------------------------------------------------------
+=== STRATEGY 1: Fixed Percentage Stop Loss ===
+Current max loss: -3.63%
+Average loss: -0.63%
+
+Loss distribution:
+  - 1% stop loss would have saved 11 trades
+  - 2% stop loss would have saved 4 trades
+  - 3% stop loss would have saved 1 trades
+  - 5% stop loss would have saved 0 trades
+
+2% stop loss would have saved $115.55 on 4 trades
+
+=== STRATEGY 2: Trailing Stop Loss ===
+28 winning trades gave back significant gains
+Average win that gave back: 0.17%
+Consider trailing stop loss at 50% of peak gain to lock in profits
+
+=== STRATEGY 3: Time-Based Stop Loss ===
+All trades are held for fixed 10 minutes
+Consider closing early if loss exceeds threshold before time limit
+
+=== STRATEGY 4: Volatility-Based Stop Loss ===
+For high volatility stocks, use wider stops (2-3%)
+For low volatility stocks, use tighter stops (1-1.5%)
+
+=== STRATEGY 5: Action-Specific Stop Loss ===
+LONG trades: Average loss -0.70%, Max loss -2.98%
+  Suggested stop: 1.5-2% for LONG positions
+SHORT trades: Average loss -0.55%, Max loss -3.63%
+  Suggested stop: 1.5-2% for SHORT positions
+
+=== STRATEGY 6: Risk/Reward Ratio ===
+Current risk/reward ratio: 1.06:1
+WARNING: Risk/Reward ratio is below 1.5:1 - consider tighter stops or better entry timing
