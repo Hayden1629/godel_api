@@ -30,6 +30,7 @@ make abort button
 # Global constants
 TRADE_HOLD_MINUTES = 10  # How long to hold trades before automatically closing them
 MARKET_OPEN_DELAY_MINUTES = 1  # How many minutes after market opens before starting to trade
+MARKET_CLOSE_BUFFER_MINUTES = 5  # Stop trading this many minutes before market close
 TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results
 NTFY_WEBHOOK_URL = "https://ntfy.sh/hayden_algo_api"  # Webhook URL for sending trade statistics
 TAKE_PROFIT_PERCENT = 1.5  # Close position if profit reaches this percentage
@@ -1386,23 +1387,25 @@ class AccountsTrading:
         intervals_passed = int(time_since_first / interval_minutes)
         next_execution = first_execution + timedelta(minutes=(intervals_passed + 1) * interval_minutes)
         
-        # Don't schedule past 3 minutes before close
-        stop_time = market_end - timedelta(minutes=3)
+        # Don't schedule past MARKET_CLOSE_BUFFER_MINUTES before close
+        stop_time = market_end - timedelta(minutes=MARKET_CLOSE_BUFFER_MINUTES)
         if next_execution > stop_time:
             return None  # No more executions today
         
         return next_execution
     
-    def is_market_about_to_close(self, minutes_before_close: int = 5) -> tuple[bool, str]:
+    def is_market_about_to_close(self, minutes_before_close: int = None) -> tuple[bool, str]:
         """
         Check if market is about to close (within specified minutes).
         
         Args:
-            minutes_before_close: How many minutes before close to trigger (default 5)
+            minutes_before_close: How many minutes before close to trigger (default uses MARKET_CLOSE_BUFFER_MINUTES)
             
         Returns:
             tuple: (is_about_to_close, message)
         """
+        if minutes_before_close is None:
+            minutes_before_close = MARKET_CLOSE_BUFFER_MINUTES
         try:
             close_time = self.get_market_close_time_today()
             eastern = pytz.timezone('US/Eastern')
@@ -2156,7 +2159,7 @@ def market_timing_loop(accounts_trading: AccountsTrading):
 def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalController):
     """
     Main algo loop that runs strategy and executes trades at scheduled times based on market hours.
-    Only runs when market has been open for MARKET_OPEN_DELAY_MINUTES until 3 minutes before close.
+    Only runs when market has been open for MARKET_OPEN_DELAY_MINUTES until MARKET_CLOSE_BUFFER_MINUTES before close.
     """
     logger.info("=== Starting algo loop ===")
     
@@ -2173,15 +2176,15 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
     
     try:
         while True:
-            # Verify we're still in valid trading window (MARKET_OPEN_DELAY_MINUTES min after open, 3 min before close)
+            # Verify we're still in valid trading window (MARKET_OPEN_DELAY_MINUTES min after open, MARKET_CLOSE_BUFFER_MINUTES min before close)
             is_market_open, open_message = accounts_trading.is_market_open_for_15_minutes()
             if not is_market_open:
                 logger.warning(f"Market no longer in valid trading window: {open_message}")
                 logger.warning("Exiting algo loop - returning to market timing loop")
                 break
             
-            # Check if market is about to close (within 3 minutes)
-            is_about_to_close, close_message = accounts_trading.is_market_about_to_close(minutes_before_close=3)
+            # Check if market is about to close (within MARKET_CLOSE_BUFFER_MINUTES)
+            is_about_to_close, close_message = accounts_trading.is_market_about_to_close()
             if is_about_to_close:
                 logger.warning(f"Market about to close: {close_message}")
                 logger.warning("Stopping algo loop - closing all positions before market close...")
@@ -2200,65 +2203,59 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
             else:
                 print_win_rate_stats(accounts_trading=accounts_trading)
             
-            # If we have active trades, wait for them to reach TRADE_HOLD_MINUTES before making new ones
+            # If we have active trades, monitor them until they're ready to close
             if accounts_trading.active_trades:
-                # Find the oldest trade to determine how long to wait
-                oldest_trade = min(accounts_trading.active_trades, key=lambda t: t.time_placed)
-                age_minutes = oldest_trade.get_age_minutes()
+                # Use wall-clock time for reliable timing (not affected by API call durations)
+                loop_start_time = time.time()
+                check_interval_seconds = 60  # Check stop losses and profit targets every 60 seconds
+                last_check_time = 0  # Track last API check time
+                is_about_to_close = False  # Initialize for safety
                 
-                logger.debug(f"Active trades: {len(accounts_trading.active_trades)}, oldest age: {age_minutes:.1f} minutes")
+                logger.info(f"=== Monitoring {len(accounts_trading.active_trades)} active trades ===")
                 
-                # If trades are already old enough, close them immediately
-                if age_minutes >= TRADE_HOLD_MINUTES:
-                    logger.info(f"Trades are {age_minutes:.1f} minutes old (>= {TRADE_HOLD_MINUTES}), closing now...")
-                    accounts_trading.check_and_close_old_trades()
-                    print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)
-                    continue
-                
-                if age_minutes < TRADE_HOLD_MINUTES:
-                    # Wait until the oldest trade reaches TRADE_HOLD_MINUTES
-                    wait_minutes = TRADE_HOLD_MINUTES - age_minutes
-                    wait_seconds = wait_minutes * 60
-                    logger.info(f"Waiting {wait_minutes:.1f} minutes for trades to reach {TRADE_HOLD_MINUTES} minute hold time...")
-                    logger.info(f"Oldest trade age: {age_minutes:.1f} minutes")
+                # Loop until all trades are closed or old enough to close
+                while accounts_trading.active_trades:
+                    # Get current oldest trade age (recalculate each iteration)
+                    oldest_trade = min(accounts_trading.active_trades, key=lambda t: t.time_placed)
+                    age_minutes = oldest_trade.get_age_minutes()
+                    remaining_minutes = TRADE_HOLD_MINUTES - age_minutes
                     
-                    # Track initial trade count to detect stop loss triggers during wait
-                    initial_trade_count = len(accounts_trading.active_trades)
+                    logger.info(f"Trade status: {len(accounts_trading.active_trades)} active, oldest age: {age_minutes:.1f} min (close in {max(0, remaining_minutes):.1f} min)")
                     
-                    # Sleep in smaller increments and check for market close and stop losses
-                    sleep_interval = 30  # Check every 30 seconds
-                    slept = 0
-                    while slept < wait_seconds:
-                        # Check if any stop loss orders were triggered
+                    # CRITICAL CHECK: If trades are old enough, close them immediately
+                    if age_minutes >= TRADE_HOLD_MINUTES:
+                        logger.info(f"✅ Trades reached {TRADE_HOLD_MINUTES} min hold time - closing now...")
+                        accounts_trading.check_and_close_old_trades()
+                        print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)
+                        break  # Exit wait loop, continue to make new trades
+                    
+                    # Check if market is about to close
+                    is_about_to_close, close_message = accounts_trading.is_market_about_to_close()
+                    if is_about_to_close:
+                        logger.warning(f"⚠️ Market about to close: {close_message}")
+                        accounts_trading.close_all_positions()
+                        print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)
+                        break  # Exit wait loop, main loop will also exit
+                    
+                    # Periodically check stop losses and profit targets (every check_interval_seconds)
+                    current_time = time.time()
+                    if current_time - last_check_time >= check_interval_seconds:
+                        logger.debug(f"Checking stop losses and profit targets...")
                         accounts_trading.check_stop_loss_orders()
-                        
-                        # Check if any trades hit profit target
                         accounts_trading.check_profit_targets()
-                        
-                        # Check if market is about to close
-                        is_about_to_close, close_message = accounts_trading.is_market_about_to_close(minutes_before_close=3)
-                        if is_about_to_close:
-                            logger.warning(f"Market about to close during wait: {close_message}")
-                            accounts_trading.close_all_positions()
-                            print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing all positions
-                            break
-                        
-                        # If stop loss was triggered, break out of wait loop
-                        current_trade_count = len(accounts_trading.active_trades)
-                        if current_trade_count < initial_trade_count:
-                            logger.info("Stop loss triggered - exiting wait loop")
-                            break
-                        
-                        time.sleep(min(sleep_interval, wait_seconds - slept))
-                        slept += sleep_interval
+                        last_check_time = current_time
                     
-                    # After waiting, close the trades
-                    accounts_trading.check_and_close_old_trades()
-                    print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing positions
-                    
-                    # Continue to next iteration to make new trades
-                    logger.info("Trades closed - looping again to make new trades")
-                    continue
+                    # Sleep for a short interval then check again
+                    # Use 30 second intervals to balance responsiveness vs CPU usage
+                    time.sleep(30)
+                
+                # If we exited because market is closing, propagate that to main loop
+                if is_about_to_close:
+                    break
+                
+                # Otherwise, continue to make new trades
+                logger.info("Trade monitoring complete - proceeding to next cycle")
+                continue
             
             # No active trades, run strategy to get new trades
             processed_trades = run_strategy(controller, accounts_trading)
@@ -2273,7 +2270,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 logger.info("No trades to execute")
                 # If no trades and no active trades, wait a bit before checking again
                 # But check market hours first
-                is_about_to_close, close_message = accounts_trading.is_market_about_to_close(minutes_before_close=3)
+                is_about_to_close, close_message = accounts_trading.is_market_about_to_close()
                 if is_about_to_close:
                     logger.warning(f"Market about to close: {close_message}")
                     accounts_trading.close_all_positions()
@@ -2340,7 +2337,7 @@ def main():
                 controller.load_layout("dev")
                 logger.info("Godel controller initialized successfully")
             
-            # Run algo loop - only runs from MARKET_OPEN_DELAY_MINUTES min after open until 3 min before close
+            # Run algo loop - only runs from MARKET_OPEN_DELAY_MINUTES min after open until MARKET_CLOSE_BUFFER_MINUTES min before close
             algo_loop(accounts_trading, controller)
             
             # Algo loop exited (market about to close or error)
