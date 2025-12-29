@@ -1191,9 +1191,18 @@ def main():
     print("QUICK STATS:")
     print("─" * 60)
     print(f"  Total P/L:        ${df['profit_loss'].sum():,.2f}")
-    print(f"  Win Rate:         {df['is_winner'].mean()*100:.1f}%")
-    print(f"  Avg Win:          ${df[df['is_winner']]['profit_loss'].mean():.2f}")
-    print(f"  Avg Loss:         ${df[~df['is_winner']]['profit_loss'].mean():.2f}")
+    
+    # Handle NaN values in is_winner for boolean filtering
+    winners = df[df['is_winner'] == True]
+    losers = df[df['is_winner'] == False]
+    
+    win_rate = len(winners) / len(df) * 100 if len(df) > 0 else 0
+    avg_win = winners['profit_loss'].mean() if len(winners) > 0 else 0
+    avg_loss = losers['profit_loss'].mean() if len(losers) > 0 else 0
+    
+    print(f"  Win Rate:         {win_rate:.1f}%")
+    print(f"  Avg Win:          ${avg_win:.2f}")
+    print(f"  Avg Loss:         ${avg_loss:.2f}")
     print(f"  Best Day:         ${df.groupby('date')['profit_loss'].sum().max():.2f}")
     print(f"  Worst Day:        ${df.groupby('date')['profit_loss'].sum().min():.2f}")
     print("─" * 60)

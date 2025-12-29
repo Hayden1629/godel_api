@@ -26,6 +26,7 @@ COMMISSION_BLACKLIST = {
     'UP',    # WHEELS UP EXPERIENCE INC CLASS A
     'AMC',   # AMC ENTMT HLDGS INC CLASS CLASS A
     'BTBT',  # BATTLEBIT TECHNOLOGIES INC CLASS A
+    'BTQ',
     'PLUG',  # PLUG POWER INC CLASS A
     'BITF',  # BITFINEX LTD CLASS A
     'DNN',
@@ -304,6 +305,17 @@ def process_trades(list_of_trades: list, ticker_and_share_price: dict, accounts_
             'ticker': ticker,
             'action': trade.get('direction', 'LONG'),  # LONG, SHORT, etc.
             'quantity': int(DOLLAR_AMOUNT / float(ticker_and_share_price[ticker])), #calculate quantity for certain dollar amount to nearest whole number of shares
+            # Preserve PRT data for trade journal
+            'prt_data': {
+                'edge': trade.get('edge'),
+                'prob_up': trade.get('prob_up'),
+                'mean': trade.get('mean'),
+                'p10': trade.get('p10'),
+                'p90': trade.get('p90'),
+                'dist1': trade.get('dist1'),
+                'n': trade.get('n'),
+                'timestamp': trade.get('timestamp'),
+            }
         }
         processed_trades.append(processed_trade)
     

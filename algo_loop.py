@@ -65,8 +65,14 @@ ORDER_CHECK_DELAY_SECONDS = 0.2  # Delay between checking order status
 API_MAX_RETRIES = 5  # Maximum retry attempts for API calls
 API_RETRY_DELAY_SECONDS = 2.0  # Initial delay between retries (uses exponential backoff)
 
-# Close order constants - keep these fast since market orders fill instantly
-CLOSE_FILL_PRICE_RETRIES = 1  # Only try once to get fill price when closing (market orders fill instantly)
+# Close order constants - use dynamic limit orders for better pricing
+USE_LIMIT_ORDERS_FOR_CLOSE = True  # Use limit orders when closing positions (reduces slippage)
+CLOSE_LIMIT_ORDER_TIMEOUT_SECONDS = 5  # Shorter timeout for closing (want to close faster than entry)
+CLOSE_LIMIT_ORDER_MAX_ATTEMPTS = 2  # Fewer attempts for closing before falling back to market
+CLOSE_LIMIT_ORDER_PRICE_OFFSET_PERCENT = 0.03  # Slightly more aggressive pricing for closing (3 basis points)
+CLOSE_LIMIT_ORDER_ADJUSTMENT_PERCENT = 0.08  # Larger adjustment per attempt for closing (8 basis points)
+
+CLOSE_FILL_PRICE_RETRIES = 1  # Only try once to get fill price when closing (limit orders should fill quickly)
 CLOSE_FILL_PRICE_DELAY = 0.3  # Brief delay when checking close order fill price
 
 # Debug mode flag - set to True for verbose API response logging
@@ -78,7 +84,11 @@ class Trade:
     Represents a trade with initial info and API response details.
     Tracks trades and handles automatic closing after TRADE_HOLD_MINUTES.
     """
-    def __init__(self, ticker: str, action: str, quantity: int):
+    def __init__(self, ticker: str, action: str, quantity: int, 
+                 prt_data: dict = None, 
+                 stop_loss_percent: float = None,
+                 take_profit_percent: float = None,
+                 trade_hold_minutes: float = None):
         """
         Initialize a trade with initial calculated values.
         
@@ -86,6 +96,10 @@ class Trade:
             ticker: Stock ticker symbol (e.g., 'RGTI')
             action: Trade action - 'LONG' (buy) or 'SHORT' (sell short)
             quantity: Number of shares
+            prt_data: Dictionary containing PRT analysis data (edge, prob_up, mean, p10, p90, dist1, n, timestamp)
+            stop_loss_percent: Stop loss percentage used for this trade (defaults to STOP_LOSS_PERCENT)
+            take_profit_percent: Take profit percentage used for this trade (defaults to TAKE_PROFIT_PERCENT)
+            trade_hold_minutes: Trade hold time in minutes used for this trade (defaults to TRADE_HOLD_MINUTES)
         """
         self.ticker = ticker
         self.action = action.upper()  # Ensure uppercase: LONG or SHORT
@@ -103,7 +117,28 @@ class Trade:
         self.profit_loss_percent = None  # Calculated P&L as percentage
         self.stop_loss_order_id = None  # Order ID for stop loss order
         self.stop_loss_price = None  # Stop loss price (2% from entry)
-        self.take_profit_price = None  # Take profit price (1.5% from entry)
+        self.take_profit_price = None  # Take profit price (TAKE_PROFIT_PERCENT% from entry)
+        
+        # Store parameters used for this trade
+        self.stop_loss_percent = stop_loss_percent if stop_loss_percent is not None else STOP_LOSS_PERCENT
+        self.take_profit_percent = take_profit_percent if take_profit_percent is not None else TAKE_PROFIT_PERCENT
+        self.trade_hold_minutes = trade_hold_minutes if trade_hold_minutes is not None else TRADE_HOLD_MINUTES
+        
+        # Store PRT analysis data
+        self.prt_edge = prt_data.get('edge') if prt_data else None
+        self.prt_prob_up = prt_data.get('prob_up') if prt_data else None
+        self.prt_mean = prt_data.get('mean') if prt_data else None
+        self.prt_p10 = prt_data.get('p10') if prt_data else None
+        self.prt_p90 = prt_data.get('p90') if prt_data else None
+        self.prt_dist1 = prt_data.get('dist1') if prt_data else None
+        self.prt_n = prt_data.get('n') if prt_data else None
+        self.prt_timestamp = prt_data.get('timestamp') if prt_data else None
+        
+        # Additional metadata for optimization
+        self.entry_order_type = None  # 'MARKET' or 'LIMIT'
+        self.exit_order_type = None  # 'MARKET', 'LIMIT', 'OCO_STOP_LOSS', 'OCO_TAKE_PROFIT', 'TIME_CLOSE'
+        self.entry_spread = None  # Bid-ask spread at entry (if available)
+        self.exit_spread = None  # Bid-ask spread at exit (if available)
         
     def update_from_api_response(self, api_response: dict):
         """
@@ -183,17 +218,20 @@ class Trade:
         else:
             return None
     
-    def mark_closed(self, close_order_id: str = None, exit_price: float = None):
+    def mark_closed(self, close_order_id: str = None, exit_price: float = None, exit_order_type: str = None):
         """
         Mark trade as closed and calculate P&L.
         
         Args:
             close_order_id: Order ID for the closing order
             exit_price: Price at which the trade was closed
+            exit_order_type: Type of exit order ('OCO_STOP_LOSS', 'OCO_TAKE_PROFIT', 'TIME_CLOSE', 'LIMIT', 'MARKET', 'PROFIT_TARGET')
         """
         self.is_closed = True
         self.close_order_id = close_order_id
         self.close_time = datetime.now(pytz.timezone('US/Eastern'))
+        if exit_order_type:
+            self.exit_order_type = exit_order_type
         if exit_price is not None:
             self.exit_price = exit_price
             self._calculate_pnl()
@@ -239,22 +277,22 @@ class Trade:
         else:
             return round(stop_price, 4)
     
-    def calculate_take_profit_price(self, entry_price: float, take_profit_percent: float = 1.5) -> float:
+    def calculate_take_profit_price(self, entry_price: float, take_profit_percent: float = TAKE_PROFIT_PERCENT) -> float:
         """
         Calculate take profit price based on entry price and action type.
         
         Args:
             entry_price: Entry price of the trade
-            take_profit_percent: Take profit percentage (default 1.5%)
+            take_profit_percent: Take profit percentage (default TAKE_PROFIT_PERCENT)
             
         Returns:
             float: Take profit price rounded to appropriate decimal places
         """
         if self.action == 'LONG':
-            # For LONG: take profit is above entry price (1.5% up)
+            # For LONG: take profit is above entry price
             profit_price = entry_price * (1 + take_profit_percent / 100)
         elif self.action == 'SHORT':
-            # For SHORT: take profit is below entry price (1.5% down)
+            # For SHORT: take profit is below entry price
             profit_price = entry_price * (1 - take_profit_percent / 100)
         else:
             return None
@@ -267,6 +305,12 @@ class Trade:
     
     def to_dict(self) -> dict:
         """Convert trade to dictionary for JSON storage."""
+        # Calculate hold time in minutes if trade is closed
+        hold_time_minutes = None
+        if self.close_time and self.time_placed:
+            hold_time = self.close_time - self.time_placed
+            hold_time_minutes = hold_time.total_seconds() / 60.0
+        
         return {
             'ticker': self.ticker,
             'action': self.action,
@@ -277,12 +321,35 @@ class Trade:
             'profit_loss_percent': self.profit_loss_percent,
             'time_placed': self.time_placed.isoformat() if self.time_placed else None,
             'close_time': self.close_time.isoformat() if self.close_time else None,
+            'hold_time_minutes': hold_time_minutes,
             'order_id': self.order_id,
             'close_order_id': self.close_order_id,
             'stop_loss_order_id': self.stop_loss_order_id,
             'stop_loss_price': self.stop_loss_price,
             'take_profit_price': self.take_profit_price,
-            'is_winner': self.profit_loss > 0 if self.profit_loss is not None else None
+            'is_winner': self.profit_loss > 0 if self.profit_loss is not None else None,
+            # Parameters used for this trade
+            'parameters': {
+                'stop_loss_percent': self.stop_loss_percent,
+                'take_profit_percent': self.take_profit_percent,
+                'trade_hold_minutes': self.trade_hold_minutes,
+            },
+            # PRT analysis data
+            'prt_data': {
+                'edge': self.prt_edge,
+                'prob_up': self.prt_prob_up,
+                'mean': self.prt_mean,
+                'p10': self.prt_p10,
+                'p90': self.prt_p90,
+                'dist1': self.prt_dist1,
+                'n': self.prt_n,
+                'timestamp': self.prt_timestamp,
+            },
+            # Additional metadata
+            'entry_order_type': self.entry_order_type,
+            'exit_order_type': self.exit_order_type,
+            'entry_spread': self.entry_spread,
+            'exit_spread': self.exit_spread,
         }
     
     def __repr__(self):
@@ -402,14 +469,29 @@ class AccountsTrading:
             
             response = requests.get(url, headers=self.headers)
             
+            # Log the API response for debugging (only if DEBUG_MODE is enabled)
+            if DEBUG_MODE:
+                logger.debug(f"get_positions API response: status={response.status_code}")
+                try:
+                    response_data = response.json()
+                    logger.debug(f"get_positions API response data: {json.dumps(response_data, indent=2)}")
+                except Exception:
+                    logger.debug(f"get_positions API response text: {response.text}")
+            
             if response.status_code == 200:
                 positions_data = response.json()
                 # Response might be a list or an object with positions array
                 if isinstance(positions_data, list):
+                    if DEBUG_MODE:
+                        logger.debug(f"Found {len(positions_data)} positions (list format)")
                     return positions_data
                 elif isinstance(positions_data, dict) and 'positions' in positions_data:
+                    if DEBUG_MODE:
+                        logger.debug(f"Found {len(positions_data['positions'])} positions (dict format)")
                     return positions_data['positions']
                 else:
+                    if DEBUG_MODE:
+                        logger.debug(f"Unexpected positions data format: {type(positions_data)}")
                     return []
             elif response.status_code == 404:
                 # 404 means no positions, which is a valid state
@@ -422,6 +504,70 @@ class AccountsTrading:
                 
         except Exception as e:
             logger.error(f"Error getting positions: {e}")
+            return []
+    
+    def get_all_open_orders(self) -> list:
+        """
+        Get all open/pending orders from the account.
+        
+        Returns:
+            list: List of order dictionaries or empty list if unavailable
+        """
+        try:
+            self._update_headers()
+            
+            if not self.account_hash_value:
+                logger.error("Account hash value not set")
+                return []
+            
+            # Schwab API requires fromEnteredTime and toEnteredTime parameters (ZonedDateTime format)
+            # Use start and end of today in Eastern timezone (ISO 8601 format with timezone)
+            eastern = pytz.timezone('US/Eastern')
+            now_eastern = datetime.now(eastern)
+            # Start of today (00:00:00) in Eastern timezone
+            start_of_today = now_eastern.replace(hour=0, minute=0, second=0, microsecond=0)
+            # End of today (23:59:59) in Eastern timezone
+            end_of_today = now_eastern.replace(hour=23, minute=59, second=59, microsecond=999999)
+            # Use isoformat() to get proper ISO 8601 format with timezone
+            from_date = start_of_today.isoformat()
+            to_date = end_of_today.isoformat()
+            
+            url = f"{self.base_url}/accounts/{self.account_hash_value}/orders"
+            params = {
+                'fromEnteredTime': from_date,
+                'toEnteredTime': to_date
+            }
+            
+            response = requests.get(url, headers=self.headers, params=params)
+            
+            # Log the API response for debugging (only if DEBUG_MODE is enabled)
+            if DEBUG_MODE:
+                logger.debug(f"get_all_open_orders API response: status={response.status_code}")
+                try:
+                    response_data = response.json()
+                    logger.debug(f"get_all_open_orders API response data: {json.dumps(response_data, indent=2)}")
+                except Exception:
+                    logger.debug(f"get_all_open_orders API response text: {response.text}")
+            
+            if response.status_code == 200:
+                orders = response.json()
+                # Filter to only open/pending orders (exclude filled, canceled, rejected, expired)
+                open_statuses = ['WORKING', 'PENDING_ACTIVATION', 'QUEUED', 'ACCEPTED', 'AWAITING_PARENT_ORDER']
+                open_orders = [o for o in orders if o.get('status', '').upper() in open_statuses]
+                if DEBUG_MODE:
+                    logger.debug(f"Filtered {len(open_orders)} open orders from {len(orders)} total orders")
+                return open_orders
+            elif response.status_code == 404:
+                # 404 means no orders, which is valid
+                if DEBUG_MODE:
+                    logger.debug("No orders found (404) - this is normal if there are no orders")
+                return []
+            else:
+                logger.warning(f"Failed to get orders: {response.status_code} - {response.text}")
+                return []
+                
+        except Exception as e:
+            logger.error(f"Error getting open orders: {e}")
             return []
     
     def is_market_open_for_15_minutes(self) -> tuple[bool, str]:
@@ -1266,8 +1412,8 @@ class AccountsTrading:
     
     def check_stop_loss_orders(self):
         """
-        Check if any stop loss orders have been triggered (filled).
-        If a stop loss was triggered, mark the trade as closed.
+        Check if any OCO/stop loss orders have been triggered (filled).
+        For OCO orders, determines whether the stop loss OR take profit leg filled.
         Includes rate limiting to avoid overwhelming the API with rapid requests.
         """
         # Update headers once at the start for all order checks
@@ -1278,86 +1424,165 @@ class AccountsTrading:
             if trade.is_closed or not trade.stop_loss_order_id:
                 continue
             
-            # Check stop loss order status (headers already updated at start of function)
+            # Check order status (headers already updated at start of function)
             # Add small delay between requests to avoid overwhelming API (except for first request)
             if not first_check:
                 time.sleep(ORDER_CHECK_DELAY_SECONDS)  # Delay between order checks to prevent rate limiting
             first_check = False
             
-            stop_order_details = self.get_order_details(trade.stop_loss_order_id, update_headers=False)
-            if 'error' not in stop_order_details:
-                order_status = stop_order_details.get('status', '').upper()
+            order_details = self.get_order_details(trade.stop_loss_order_id, update_headers=False)
+            if 'error' not in order_details:
+                order_status = order_details.get('status', '').upper()
+                order_strategy_type = order_details.get('orderStrategyType', 'SINGLE').upper()
                 
-                # If stop loss order is filled, the trade was closed by stop loss
+                # If order is filled, determine which leg and get the correct exit price
                 if order_status == 'FILLED':
-                    # Try multiple methods to get fill price
                     exit_price = None
+                    triggered_type = None  # 'STOP_LOSS' or 'TAKE_PROFIT'
                     
-                    # Method 1: Try to extract from order details directly
-                    if 'orderLegCollection' in stop_order_details and stop_order_details['orderLegCollection']:
-                        for leg in stop_order_details['orderLegCollection']:
-                            # Check executionDetails first (most accurate)
-                            if 'executionDetails' in leg and leg['executionDetails']:
-                                executions = leg['executionDetails']
-                                if executions:
-                                    total_price = 0
-                                    total_quantity = 0
-                                    for execution in executions:
-                                        if 'price' in execution and 'quantity' in execution:
-                                            total_price += execution['price'] * execution['quantity']
-                                            total_quantity += execution['quantity']
-                                    if total_quantity > 0:
-                                        exit_price = total_price / total_quantity
-                                        break
-                            # Check averagePrice
-                            if exit_price is None and 'averagePrice' in leg:
-                                exit_price = leg['averagePrice']
-                                break
-                            # Check filledPrice
-                            if exit_price is None and 'filledPrice' in leg:
-                                exit_price = leg['filledPrice']
-                                break
+                    # For OCO orders, check the childOrderStrategies to find which leg filled
+                    if order_strategy_type == 'OCO' and 'childOrderStrategies' in order_details:
+                        for child in order_details.get('childOrderStrategies', []):
+                            child_status = child.get('status', '').upper()
+                            if child_status == 'FILLED':
+                                child_order_type = child.get('orderType', '').upper()
+                                
+                                # Determine if this is stop loss (STOP order) or take profit (LIMIT order)
+                                if child_order_type == 'STOP':
+                                    triggered_type = 'STOP_LOSS'
+                                elif child_order_type == 'LIMIT':
+                                    triggered_type = 'TAKE_PROFIT'
+                                
+                                # Extract fill price from child order
+                                exit_price = self._extract_fill_price_from_order(child)
+                                if exit_price:
+                                    break
                     
-                    # Method 2: Check top-level fields
+                    # Fallback: Try to extract from parent order's orderLegCollection
                     if exit_price is None:
-                        if 'averageFillPrice' in stop_order_details:
-                            exit_price = stop_order_details['averageFillPrice']
-                        elif 'filledPrice' in stop_order_details:
-                            exit_price = stop_order_details['filledPrice']
-                        elif 'averagePrice' in stop_order_details:
-                            exit_price = stop_order_details['averagePrice']
+                        exit_price = self._extract_fill_price_from_order(order_details)
                     
-                    # Method 3: Use stop_loss_price as fallback (better than nothing)
+                    # If we still don't have exit_price, determine which leg based on price comparison
+                    if exit_price is None and trade.stop_loss_price and trade.take_profit_price and trade.entry_price:
+                        # Try to get current quote as a last resort
+                        current_price = self.get_quote(trade.ticker)
+                        if current_price:
+                            # Determine which trigger is closer to current price
+                            stop_diff = abs(current_price - trade.stop_loss_price)
+                            profit_diff = abs(current_price - trade.take_profit_price)
+                            
+                            if stop_diff < profit_diff:
+                                exit_price = trade.stop_loss_price
+                                triggered_type = 'STOP_LOSS'
+                                logger.warning(f"Could not get fill price for {trade.ticker} OCO, inferring STOP LOSS at ${exit_price:.4f} (quote: ${current_price:.4f})")
+                            else:
+                                exit_price = trade.take_profit_price
+                                triggered_type = 'TAKE_PROFIT'
+                                logger.warning(f"Could not get fill price for {trade.ticker} OCO, inferring TAKE PROFIT at ${exit_price:.4f} (quote: ${current_price:.4f})")
+                    
+                    # Last fallback: use stop_loss_price but warn loudly
                     if exit_price is None and trade.stop_loss_price is not None:
                         exit_price = trade.stop_loss_price
-                        logger.warning(f"Could not get exact fill price for stop loss {trade.stop_loss_order_id}, using stop loss price ${exit_price:.4f} as fallback")
+                        triggered_type = 'STOP_LOSS'
+                        logger.error(f"⚠️ Could not determine fill price for {trade.ticker} OCO order {trade.stop_loss_order_id}. "
+                                    f"Defaulting to stop loss ${exit_price:.4f} - THIS MAY BE INCORRECT!")
                     
-                    # Mark trade as closed regardless - we have at least a reasonable price
+                    # Mark trade as closed with the determined exit price
                     if exit_price is not None:
-                        logger.warning(f"Stop loss triggered for {trade.ticker} at ${exit_price:.4f}")
-                        trade.mark_closed(close_order_id=trade.stop_loss_order_id, exit_price=exit_price)
+                        # Determine exit order type based on which leg triggered
+                        exit_order_type = 'OCO_TAKE_PROFIT' if triggered_type == 'TAKE_PROFIT' else 'OCO_STOP_LOSS' if triggered_type == 'STOP_LOSS' else 'OCO_UNKNOWN'
+                        trade.mark_closed(close_order_id=trade.stop_loss_order_id, exit_price=exit_price, exit_order_type=exit_order_type)
                         save_trade_to_journal(trade)
                         
-                        if trade.profit_loss is not None:
-                            pnl_sign = "+" if trade.profit_loss >= 0 else ""
-                            logger.info(f"  Stop Loss P&L: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
+                        pnl_sign = "+" if trade.profit_loss and trade.profit_loss >= 0 else ""
+                        pnl_str = f"{pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)" if trade.profit_loss else "N/A"
+                        
+                        if triggered_type == 'TAKE_PROFIT':
+                            logger.info(f"🎯 Take profit triggered for {trade.ticker} at ${exit_price:.4f} | P&L: {pnl_str}")
+                        elif triggered_type == 'STOP_LOSS':
+                            logger.warning(f"🛑 Stop loss triggered for {trade.ticker} at ${exit_price:.4f} | P&L: {pnl_str}")
+                        else:
+                            logger.info(f"OCO order filled for {trade.ticker} at ${exit_price:.4f} | P&L: {pnl_str}")
                     else:
                         # Last resort: mark closed with entry price (shouldn't happen, but prevents infinite loop)
-                        logger.error(f"Stop loss order {trade.stop_loss_order_id} filled but could not determine exit price. Using entry price as fallback.")
+                        logger.error(f"OCO order {trade.stop_loss_order_id} filled but could not determine exit price. Using entry price as fallback.")
                         if trade.entry_price is not None:
-                            trade.mark_closed(close_order_id=trade.stop_loss_order_id, exit_price=trade.entry_price)
+                            trade.mark_closed(close_order_id=trade.stop_loss_order_id, exit_price=trade.entry_price, exit_order_type='OCO_UNKNOWN')
                             save_trade_to_journal(trade)
+                            
                 elif order_status in ['CANCELED', 'REJECTED', 'EXPIRED']:
-                    # Stop loss was cancelled/rejected, which is fine if we're closing manually
+                    # Order was cancelled/rejected, which is fine if we're closing manually
                     if DEBUG_MODE:
-                        logger.debug(f"Stop loss order {trade.stop_loss_order_id} for {trade.ticker} is {order_status}")
+                        logger.debug(f"OCO/Stop loss order {trade.stop_loss_order_id} for {trade.ticker} is {order_status}")
                     elif order_status == 'REJECTED':
                         # Log rejected orders even in non-debug mode as they indicate a problem
-                        status_desc = stop_order_details.get('statusDescription', 'Unknown reason')
-                        logger.warning(f"Stop loss order {trade.stop_loss_order_id} for {trade.ticker} was REJECTED: {status_desc}")
+                        status_desc = order_details.get('statusDescription', 'Unknown reason')
+                        logger.warning(f"OCO/Stop loss order {trade.stop_loss_order_id} for {trade.ticker} was REJECTED: {status_desc}")
         
         # Remove closed trades from active list
         self.active_trades = [t for t in self.active_trades if not t.is_closed]
+    
+    def _extract_fill_price_from_order(self, order_details: dict) -> float:
+        """
+        Extract the fill price from an order response using multiple methods.
+        
+        Args:
+            order_details: Order details dict from Schwab API
+            
+        Returns:
+            Fill price as float, or None if could not be extracted
+        """
+        exit_price = None
+        
+        # Method 1: Try to extract from orderLegCollection
+        if 'orderLegCollection' in order_details and order_details['orderLegCollection']:
+            for leg in order_details['orderLegCollection']:
+                # Check executionDetails first (most accurate)
+                if 'executionDetails' in leg and leg['executionDetails']:
+                    executions = leg['executionDetails']
+                    if executions:
+                        total_price = 0
+                        total_quantity = 0
+                        for execution in executions:
+                            if 'price' in execution and 'quantity' in execution:
+                                total_price += execution['price'] * execution['quantity']
+                                total_quantity += execution['quantity']
+                        if total_quantity > 0:
+                            exit_price = total_price / total_quantity
+                            return exit_price
+                # Check averagePrice
+                if 'averagePrice' in leg:
+                    return leg['averagePrice']
+                # Check filledPrice
+                if 'filledPrice' in leg:
+                    return leg['filledPrice']
+        
+        # Method 2: Check orderActivityCollection for execution info
+        if 'orderActivityCollection' in order_details:
+            for activity in order_details.get('orderActivityCollection', []):
+                if activity.get('activityType') == 'EXECUTION':
+                    exec_legs = activity.get('executionLegs', [])
+                    if exec_legs:
+                        total_price = 0
+                        total_quantity = 0
+                        for exec_leg in exec_legs:
+                            if 'price' in exec_leg and 'quantity' in exec_leg:
+                                total_price += exec_leg['price'] * exec_leg['quantity']
+                                total_quantity += exec_leg['quantity']
+                        if total_quantity > 0:
+                            return total_price / total_quantity
+        
+        # Method 3: Check top-level fields
+        if 'averageFillPrice' in order_details:
+            return order_details['averageFillPrice']
+        if 'filledPrice' in order_details:
+            return order_details['filledPrice']
+        if 'averagePrice' in order_details:
+            return order_details['averagePrice']
+        if 'price' in order_details and order_details.get('status', '').upper() == 'FILLED':
+            return order_details['price']
+        
+        return None
     
     def check_profit_targets(self):
         """
@@ -1396,38 +1621,51 @@ class AccountsTrading:
                 if trade.stop_loss_order_id:
                     self.close_order(trade.stop_loss_order_id)
                 
-                # Close position with market order immediately
+                # Close position with dynamic limit order for better pricing
                 close_action = trade.get_close_action()
                 if close_action:
-                    order_payload = {
-                        "orderType": "MARKET",
-                        "session": "NORMAL",
-                        "duration": "DAY",
-                        "orderStrategyType": "SINGLE",
-                        "orderLegCollection": [{
-                            "instruction": close_action,
-                            "quantity": trade.quantity,
-                            "instrument": {
-                                "symbol": trade.ticker,
-                                "assetType": "EQUITY"
-                            }
-                        }]
-                    }
-                    
-                    response = self.create_order(order_payload)
+                    if USE_LIMIT_ORDERS_FOR_CLOSE:
+                        response = self.create_dynamic_limit_order(
+                            ticker=trade.ticker,
+                            instruction=close_action,
+                            quantity=trade.quantity,
+                            timeout_seconds=CLOSE_LIMIT_ORDER_TIMEOUT_SECONDS,
+                            max_attempts=CLOSE_LIMIT_ORDER_MAX_ATTEMPTS,
+                            price_offset_percent=CLOSE_LIMIT_ORDER_PRICE_OFFSET_PERCENT,
+                            adjustment_percent=CLOSE_LIMIT_ORDER_ADJUSTMENT_PERCENT
+                        )
+                    else:
+                        order_payload = {
+                            "orderType": "MARKET",
+                            "session": "NORMAL",
+                            "duration": "DAY",
+                            "orderStrategyType": "SINGLE",
+                            "orderLegCollection": [{
+                                "instruction": close_action,
+                                "quantity": trade.quantity,
+                                "instrument": {
+                                    "symbol": trade.ticker,
+                                    "assetType": "EQUITY"
+                                }
+                            }]
+                        }
+                        response = self.create_order(order_payload)
                     
                     if 'error' not in response:
                         order_id = response.get('orderId', 'unknown')
-                        # Quick attempt to get fill price, fall back to quote immediately
-                        exit_price = self.get_fill_price_from_order(
-                            order_id, 
-                            max_retries=CLOSE_FILL_PRICE_RETRIES, 
-                            retry_delay=CLOSE_FILL_PRICE_DELAY
-                        )
+                        # For dynamic limit orders, fill price is returned directly
+                        exit_price = response.get('fillPrice')
+                        
+                        if exit_price is None:
+                            exit_price = self.get_fill_price_from_order(
+                                order_id, 
+                                max_retries=CLOSE_FILL_PRICE_RETRIES, 
+                                retry_delay=CLOSE_FILL_PRICE_DELAY
+                            )
                         if exit_price is None:
                             exit_price = current_price  # Fallback to quote
                         
-                        trade.mark_closed(close_order_id=order_id, exit_price=exit_price)
+                        trade.mark_closed(close_order_id=order_id, exit_price=exit_price, exit_order_type='PROFIT_TARGET')
                         save_trade_to_journal(trade)
                         
                         pnl_sign = "+" if trade.profit_loss >= 0 else ""
@@ -1492,10 +1730,9 @@ class AccountsTrading:
         time.sleep(0.2)
         
         # ============================================================
-        # PHASE 2: Place all close orders as fast as possible
+        # PHASE 2: Close positions using dynamic limit orders
         # ============================================================
-        close_results = []  # List of (trade, order_id) tuples
-        failed_trades = []  # Trades that failed to close - will retry
+        failed_trades = []  # Trades that failed to close - will retry with market order
         
         for trade in trades_needing_close:
             close_action = trade.get_close_action()
@@ -1503,60 +1740,74 @@ class AccountsTrading:
                 logger.error(f"Unknown action type for closing trade: {trade.action}")
                 continue
             
-            close_order_payload = {
-                "orderType": "MARKET",
-                "session": "NORMAL",
-                "duration": "DAY",
-                "orderStrategyType": "SINGLE",
-                "orderLegCollection": [{
-                    "instruction": close_action,
-                    "quantity": trade.quantity,
-                    "instrument": {
-                        "symbol": trade.ticker,
-                        "assetType": "EQUITY"
-                    }
-                }]
-            }
+            logger.info(f"Closing {trade.ticker} ({trade.action}) with dynamic limit order...")
             
-            response = self.create_order(close_order_payload)
+            if USE_LIMIT_ORDERS_FOR_CLOSE:
+                # Use dynamic limit order for better pricing
+                response = self.create_dynamic_limit_order(
+                    ticker=trade.ticker,
+                    instruction=close_action,
+                    quantity=trade.quantity,
+                    timeout_seconds=CLOSE_LIMIT_ORDER_TIMEOUT_SECONDS,
+                    max_attempts=CLOSE_LIMIT_ORDER_MAX_ATTEMPTS,
+                    price_offset_percent=CLOSE_LIMIT_ORDER_PRICE_OFFSET_PERCENT,
+                    adjustment_percent=CLOSE_LIMIT_ORDER_ADJUSTMENT_PERCENT
+                )
+            else:
+                # Fall back to market order if limit orders disabled
+                close_order_payload = {
+                    "orderType": "MARKET",
+                    "session": "NORMAL",
+                    "duration": "DAY",
+                    "orderStrategyType": "SINGLE",
+                    "orderLegCollection": [{
+                        "instruction": close_action,
+                        "quantity": trade.quantity,
+                        "instrument": {
+                            "symbol": trade.ticker,
+                            "assetType": "EQUITY"
+                        }
+                    }]
+                }
+                response = self.create_order(close_order_payload)
             
             if 'error' not in response:
                 order_id = response.get('orderId', 'unknown')
-                close_results.append((trade, order_id))
-                logger.info(f"Close order placed for {trade.ticker} ({trade.action}): Order ID {order_id}")
+                
+                # For dynamic limit orders, fill price is returned directly
+                exit_price = response.get('fillPrice')
+                
+                if exit_price is None:
+                    # Fall back to getting fill price from order details
+                    exit_price = self.get_fill_price_from_order(
+                        order_id, 
+                        max_retries=CLOSE_FILL_PRICE_RETRIES, 
+                        retry_delay=CLOSE_FILL_PRICE_DELAY
+                    )
+                
+                if exit_price is None:
+                    # Final fallback to quote
+                    exit_price = self.get_quote(trade.ticker)
+                    if exit_price is not None:
+                        logger.debug(f"Using quote for {trade.ticker}: ${exit_price:.4f}")
+                
+                # Determine exit order type based on whether limit orders were used
+                exit_order_type = 'TIME_CLOSE_LIMIT' if USE_LIMIT_ORDERS_FOR_CLOSE else 'TIME_CLOSE_MARKET'
+                trade.mark_closed(close_order_id=order_id, exit_price=exit_price, exit_order_type=exit_order_type)
+                save_trade_to_journal(trade)
+                
+                if trade.profit_loss is not None:
+                    pnl_sign = "+" if trade.profit_loss >= 0 else ""
+                    logger.info(f"  ✅ {trade.ticker}: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
             else:
-                logger.error(f"Failed to close {trade.ticker}: {response.get('error')} - will retry")
+                logger.error(f"Failed to close {trade.ticker}: {response.get('error')} - will retry with market order")
                 failed_trades.append(trade)
         
         # ============================================================
-        # PHASE 3: Get fill prices and record results
-        # ============================================================
-        for trade, order_id in close_results:
-            # Quick attempt to get fill price (market orders fill instantly)
-            exit_price = self.get_fill_price_from_order(
-                order_id, 
-                max_retries=CLOSE_FILL_PRICE_RETRIES, 
-                retry_delay=CLOSE_FILL_PRICE_DELAY
-            )
-            
-            if exit_price is None:
-                # Fall back to quote immediately - don't waste time retrying
-                exit_price = self.get_quote(trade.ticker)
-                if exit_price is not None:
-                    logger.debug(f"Using quote for {trade.ticker}: ${exit_price:.4f}")
-            
-            trade.mark_closed(close_order_id=order_id, exit_price=exit_price)
-            save_trade_to_journal(trade)
-            
-            if trade.profit_loss is not None:
-                pnl_sign = "+" if trade.profit_loss >= 0 else ""
-                logger.info(f"  {trade.ticker}: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
-        
-        # ============================================================
-        # PHASE 4: Retry any failed trades
+        # PHASE 3: Retry failed trades with market orders (final fallback)
         # ============================================================
         for trade in failed_trades:
-            logger.info(f"Retrying close for {trade.ticker}...")
+            logger.info(f"Retrying close for {trade.ticker} with MARKET order...")
             close_action = trade.get_close_action()
             if not close_action:
                 continue
@@ -1580,13 +1831,13 @@ class AccountsTrading:
             
             if 'error' not in response:
                 order_id = response.get('orderId', 'unknown')
-                exit_price = self.get_quote(trade.ticker)  # Just use quote for retries
-                trade.mark_closed(close_order_id=order_id, exit_price=exit_price)
+                exit_price = self.get_quote(trade.ticker)  # Just use quote for market order retries
+                trade.mark_closed(close_order_id=order_id, exit_price=exit_price, exit_order_type='TIME_CLOSE_MARKET')
                 save_trade_to_journal(trade)
                 
                 if trade.profit_loss is not None:
                     pnl_sign = "+" if trade.profit_loss >= 0 else ""
-                    logger.info(f"  {trade.ticker} (retry): {pnl_sign}${trade.profit_loss:.2f}")
+                    logger.info(f"  {trade.ticker} (market retry): {pnl_sign}${trade.profit_loss:.2f}")
             else:
                 logger.error(f"Failed to close {trade.ticker} on retry: {response.get('error')}")
         
@@ -2104,7 +2355,7 @@ class AccountsTrading:
                     if exit_price is not None:
                         logger.warning(f"Using quote price as fallback for {trade.ticker}: ${exit_price:.4f} (may not match execution price)")
                 
-                trade.mark_closed(close_order_id=order_id, exit_price=exit_price)
+                trade.mark_closed(close_order_id=order_id, exit_price=exit_price, exit_order_type='FORCE_CLOSE_MARKET')
                 
                 # Save trade result to journal
                 save_trade_to_journal(trade)
@@ -2123,6 +2374,142 @@ class AccountsTrading:
         # Remove closed trades from active list
         self.active_trades = [t for t in self.active_trades if not t.is_closed]
         logger.info(f"Close-all complete. Remaining active trades: {len(self.active_trades)}")
+    
+    def verify_and_force_close_all_positions(self, force_market: bool = False, reason: str = "safeguard check") -> bool:
+        """
+        Comprehensive safeguard to ensure all positions and orders are closed.
+        This handles edge cases like partial fills from OCO orders.
+        
+        Args:
+            force_market: If True, use market orders to close positions (for end-of-day)
+            reason: Reason for this check (for logging)
+            
+        Returns:
+            bool: True if all positions are closed, False if any remain after attempts
+        """
+        logger.warning(f"=== POSITION SAFEGUARD: {reason} ===")
+        
+        # Step 1: Cancel all open orders
+        logger.info("Step 1: Cancelling all open orders...")
+        open_orders = self.get_all_open_orders()
+        
+        if open_orders:
+            logger.warning(f"Found {len(open_orders)} open order(s) - cancelling...")
+            for order in open_orders:
+                order_id = order.get('orderId')
+                order_status = order.get('status', 'Unknown')
+                order_type = order.get('orderType', 'Unknown')
+                order_strategy = order.get('orderStrategyType', 'SINGLE')
+                
+                # Get symbol from order
+                symbol = 'Unknown'
+                if 'orderLegCollection' in order and order['orderLegCollection']:
+                    symbol = order['orderLegCollection'][0].get('instrument', {}).get('symbol', 'Unknown')
+                
+                logger.info(f"  Cancelling {order_strategy} {order_type} order for {symbol} (ID: {order_id}, Status: {order_status})")
+                
+                result = self.close_order(str(order_id))
+                if 'error' in result:
+                    error_msg = result.get('error', '')
+                    # Don't warn if it's already filled/canceled (race condition)
+                    if 'FILLED' not in error_msg and 'cannot be canceled' not in error_msg and 'CANCELED' not in error_msg:
+                        logger.warning(f"    Could not cancel order {order_id}: {error_msg}")
+            
+            # Wait for cancellations to process
+            logger.info("Waiting 2 seconds for cancellations to process...")
+            time.sleep(2)
+        else:
+            logger.info("No open orders found")
+        
+        # Step 2: Get actual positions from Schwab API
+        logger.info("Step 2: Checking actual account positions...")
+        positions = self.get_positions()
+        
+        if not positions:
+            logger.info("✅ No positions found - all clear!")
+            # Clear active_trades list since there are no actual positions
+            self.active_trades = []
+            return True
+        
+        logger.warning(f"Found {len(positions)} position(s) - closing them...")
+        
+        # Step 3: Close all actual positions
+        for position in positions:
+            symbol = position.get('instrument', {}).get('symbol', 'Unknown')
+            quantity = position.get('longQuantity', 0) or -position.get('shortQuantity', 0)
+            is_long = position.get('longQuantity', 0) > 0
+            
+            if quantity == 0:
+                continue
+            
+            logger.warning(f"  Closing position: {symbol} - {'LONG' if is_long else 'SHORT'} {abs(quantity)} shares")
+            
+            # Determine close action
+            if is_long:
+                close_action = 'SELL'
+            else:
+                close_action = 'BUY_TO_COVER'
+            
+            # Use market orders if force_market=True (for end-of-day), otherwise try limit first
+            if force_market:
+                order_type = "MARKET"
+                logger.info(f"    Using MARKET order (force close)")
+            else:
+                order_type = "MARKET"  # Use market for safety in safeguard mode
+                logger.info(f"    Using MARKET order (safeguard mode)")
+            
+            close_order_payload = {
+                "orderType": order_type,
+                "session": "NORMAL",
+                "duration": "DAY",
+                "orderStrategyType": "SINGLE",
+                "orderLegCollection": [{
+                    "instruction": close_action,
+                    "quantity": int(abs(quantity)),
+                    "instrument": {
+                        "symbol": symbol,
+                        "assetType": "EQUITY"
+                    }
+                }]
+            }
+            
+            response = self.create_order(close_order_payload)
+            
+            if 'error' not in response:
+                order_id = response.get('orderId', 'unknown')
+                logger.info(f"    Close order placed: Order ID {order_id}")
+                
+                # Wait a moment for fill
+                time.sleep(1.0)
+                
+                # Try to get fill price
+                fill_price = self.get_fill_price_from_order(order_id, max_retries=3, retry_delay=0.5)
+                if fill_price:
+                    logger.info(f"    Filled at ${fill_price:.4f}")
+                else:
+                    logger.warning(f"    Could not get fill price for order {order_id}")
+            else:
+                logger.error(f"    Failed to close position {symbol}: {response.get('error')}")
+        
+        # Step 4: Wait for positions to close and verify
+        logger.info("Step 3: Waiting 3 seconds for positions to close...")
+        time.sleep(3)
+        
+        # Step 5: Verify all positions are closed
+        final_positions = self.get_positions()
+        
+        if not final_positions:
+            logger.info("✅ VERIFICATION SUCCESSFUL: All positions closed!")
+            # Clear active_trades since actual positions are closed
+            self.active_trades = []
+            return True
+        else:
+            logger.error(f"❌ VERIFICATION FAILED: {len(final_positions)} position(s) still remain:")
+            for pos in final_positions:
+                symbol = pos.get('instrument', {}).get('symbol', 'Unknown')
+                qty = pos.get('longQuantity', 0) or -pos.get('shortQuantity', 0)
+                logger.error(f"  - {symbol}: {qty} shares")
+            return False
 
 
 def save_trade_to_journal(trade: Trade):
@@ -2499,11 +2886,23 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
             logger.error(f"Unknown action: {action}, skipping trade")
             continue
         
-        # Create Trade object
-        trade = Trade(ticker=ticker, action=action, quantity=quantity)
+        # Extract PRT data and parameters from trade_dict
+        prt_data = trade_dict.get('prt_data')
+        
+        # Create Trade object with PRT data and parameters
+        trade = Trade(
+            ticker=ticker, 
+            action=action, 
+            quantity=quantity,
+            prt_data=prt_data,
+            stop_loss_percent=STOP_LOSS_PERCENT,
+            take_profit_percent=TAKE_PROFIT_PERCENT,
+            trade_hold_minutes=TRADE_HOLD_MINUTES
+        )
         
         # Place order - use dynamic limit orders for better pricing if enabled
         if USE_LIMIT_ORDERS:
+            trade.entry_order_type = 'LIMIT'
             logger.info(f"Placing dynamic limit order: {ticker} {action} {quantity} shares")
             api_response = accounts_trading.create_dynamic_limit_order(ticker, instruction, quantity)
             
@@ -2562,6 +2961,8 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
             if entry_price is not None:
                 trade.entry_price = entry_price
                 logger.warning(f"Using quote price as fallback for {ticker}: ${entry_price:.4f} (may not match execution price)")
+        else:
+            trade.entry_order_type = 'MARKET'
         
         # Create OCO order (One-Cancels-Other) combining stop loss and take profit
         # When take profit fills, stop loss is canceled; when stop loss fills, take profit is canceled
@@ -2749,12 +3150,18 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
             if is_about_to_close:
                 logger.warning(f"Market about to close: {close_message}")
                 logger.warning("Stopping algo loop - closing all positions before market close...")
-                accounts_trading.close_all_positions()
+                accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
                 print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing all positions
                 break  # Exit algo loop when market is about to close
             
             # Check and close any trades that are TRADE_HOLD_MINUTES or older
             accounts_trading.check_and_close_old_trades()
+            
+            # SAFEGUARD: After closing old trades, verify all positions are actually closed
+            # This handles edge cases like partial fills where active_trades thinks trades are closed
+            if not accounts_trading.active_trades:
+                logger.info("All trades closed - running safeguard to verify zero positions...")
+                accounts_trading.verify_and_force_close_all_positions(force_market=False, reason="after closing old trades")
             
             # If we have active trades, monitor them until they're ready to close
             if accounts_trading.active_trades:
@@ -2787,7 +3194,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     is_about_to_close, close_message = accounts_trading.is_market_about_to_close()
                     if is_about_to_close:
                         logger.warning(f"⚠️ Market about to close: {close_message}")
-                        accounts_trading.close_all_positions()
+                        accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
                         break  # Exit wait loop, main loop will also exit
                     
                     # Periodically check stop losses and profit targets (every check_interval_seconds)
@@ -2805,18 +3212,28 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 # Print stats ONCE after all trades are closed
                 print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)
                 
+                # SAFEGUARD: Verify all positions are closed after monitoring completes
+                # This handles edge cases where monitoring thinks trades are closed but positions remain
+                logger.info("Trade monitoring complete - running safeguard to verify zero positions...")
+                accounts_trading.verify_and_force_close_all_positions(force_market=False, reason="after trade monitoring")
+                
                 # If we exited because market is closing, propagate that to main loop
                 if is_about_to_close:
                     break
                 
                 # Otherwise, continue to make new trades
-                logger.info("Trade monitoring complete - proceeding to next cycle")
+                logger.info("Proceeding to next cycle")
                 continue
             
             # No active trades, run strategy to get new trades
             processed_trades = run_strategy(controller, accounts_trading)
             
             if processed_trades:
+                # SAFEGUARD: Verify all positions are closed before placing new trades
+                # This handles edge cases like partial fills from OCO orders
+                logger.info("Running position safeguard before placing new trades...")
+                accounts_trading.verify_and_force_close_all_positions(force_market=False, reason="before new trades")
+                
                 # Execute trades via Schwab API
                 send_trades(processed_trades, accounts_trading)
                 logger.info(f"Placed {len(processed_trades)} new trades - will wait {TRADE_HOLD_MINUTES} minutes before closing")
@@ -2829,7 +3246,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 is_about_to_close, close_message = accounts_trading.is_market_about_to_close()
                 if is_about_to_close:
                     logger.warning(f"Market about to close: {close_message}")
-                    accounts_trading.close_all_positions()
+                    accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
                     print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing all positions
                     break
                 
@@ -2885,7 +3302,7 @@ def main():
     def cleanup_on_exit():
         if accounts_trading:
             logger.warning("Program exiting - closing all positions...")
-            accounts_trading.close_all_positions()
+            accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="program exit")
     
     atexit.register(cleanup_on_exit)
     
@@ -2893,7 +3310,7 @@ def main():
     def signal_handler(signum, frame):
         logger.warning(f"Received signal {signum} - closing all positions and exiting...")
         if accounts_trading:
-            accounts_trading.close_all_positions()
+            accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="signal handler")
         exit(0)
     
     signal.signal(signal.SIGINT, signal_handler)
@@ -2966,7 +3383,7 @@ def main():
     
     if accounts_trading:
         logger.warning("Closing all positions...")
-        accounts_trading.close_all_positions()
+        accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="shutdown")
     
     if controller:
         try:
