@@ -455,23 +455,28 @@ class AccountsTrading:
         """
         Get current account positions.
         
+        Uses the same endpoint as close_all_positions.py which is known to work.
+        
         Returns:
-            list: List of position dictionaries or empty list if unavailable
+            list: List of position dictionaries or empty list if no positions
+            None: If there was an API error (to distinguish from "no positions")
         """
         try:
             self._update_headers()
             
             if not self.account_hash_value:
                 logger.error("Account hash value not set")
-                return []
+                return None  # Return None to indicate error, not empty list
             
-            url = f"{self.base_url}/accounts/{self.account_hash_value}/positions"
+            # Use the endpoint that works (same as close_all_positions.py)
+            # This endpoint returns account data with positions nested in securitiesAccount.positions
+            url = f"{self.base_url}/accounts/{self.account_hash_value}?fields=positions"
             
-            response = requests.get(url, headers=self.headers)
+            response = requests.get(url, headers=self.headers, timeout=10)
             
-            # Log the API response for debugging (only if DEBUG_MODE is enabled)
+            # Log the API response for debugging
+            logger.debug(f"get_positions API response: status={response.status_code}")
             if DEBUG_MODE:
-                logger.debug(f"get_positions API response: status={response.status_code}")
                 try:
                     response_data = response.json()
                     logger.debug(f"get_positions API response data: {json.dumps(response_data, indent=2)}")
@@ -479,32 +484,68 @@ class AccountsTrading:
                     logger.debug(f"get_positions API response text: {response.text}")
             
             if response.status_code == 200:
+                account_data = response.json()
+                # Parse the response structure: account_data -> securitiesAccount -> positions
+                securities_account = account_data.get('securitiesAccount', {})
+                positions = securities_account.get('positions', [])
+                
+                # Filter out zero-quantity positions
+                valid_positions = [p for p in positions if (p.get('longQuantity', 0) != 0 or p.get('shortQuantity', 0) != 0)]
+                logger.debug(f"Found {len(valid_positions)} positions (from {len(positions)} total)")
+                return valid_positions
+            elif response.status_code == 404:
+                # 404 means no positions, which is a valid state
+                logger.debug("No positions found (404) - this is normal if account has no open positions")
+                return []
+            else:
+                logger.error(f"CRITICAL: Failed to get positions: {response.status_code} - {response.text}")
+                # Try fallback endpoint
+                logger.info("Attempting fallback positions endpoint...")
+                return self._get_positions_fallback()
+                
+        except requests.exceptions.RequestException as e:
+            logger.error(f"CRITICAL: Network error getting positions: {e}")
+            # Try fallback endpoint
+            logger.info("Attempting fallback positions endpoint...")
+            return self._get_positions_fallback()
+        except Exception as e:
+            logger.error(f"CRITICAL: Error getting positions: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
+            return None  # Return None to indicate error
+    
+    def _get_positions_fallback(self) -> list:
+        """
+        Fallback method to get positions using direct /positions endpoint.
+        This is used if the primary account endpoint fails.
+        """
+        try:
+            url = f"{self.base_url}/accounts/{self.account_hash_value}/positions"
+            response = requests.get(url, headers=self.headers, timeout=10)
+            
+            if response.status_code == 200:
                 positions_data = response.json()
                 # Response might be a list or an object with positions array
                 if isinstance(positions_data, list):
-                    if DEBUG_MODE:
-                        logger.debug(f"Found {len(positions_data)} positions (list format)")
-                    return positions_data
+                    valid_positions = [p for p in positions_data if (p.get('longQuantity', 0) != 0 or p.get('shortQuantity', 0) != 0)]
+                    logger.info(f"Fallback endpoint found {len(valid_positions)} positions (list format)")
+                    return valid_positions
                 elif isinstance(positions_data, dict) and 'positions' in positions_data:
-                    if DEBUG_MODE:
-                        logger.debug(f"Found {len(positions_data['positions'])} positions (dict format)")
-                    return positions_data['positions']
+                    valid_positions = [p for p in positions_data['positions'] if (p.get('longQuantity', 0) != 0 or p.get('shortQuantity', 0) != 0)]
+                    logger.info(f"Fallback endpoint found {len(valid_positions)} positions (dict format)")
+                    return valid_positions
                 else:
-                    if DEBUG_MODE:
-                        logger.debug(f"Unexpected positions data format: {type(positions_data)}")
+                    logger.warning(f"Fallback endpoint: Unexpected data format: {type(positions_data)}")
                     return []
             elif response.status_code == 404:
-                # 404 means no positions, which is a valid state
-                if DEBUG_MODE:
-                    logger.debug("No positions found (404) - this is normal if account has no open positions")
+                logger.debug("Fallback endpoint: No positions found (404)")
                 return []
             else:
-                logger.warning(f"Failed to get positions: {response.status_code} - {response.text}")
-                return []
-                
+                logger.error(f"Fallback endpoint also failed: {response.status_code} - {response.text}")
+                return None
         except Exception as e:
-            logger.error(f"Error getting positions: {e}")
-            return []
+            logger.error(f"Fallback endpoint error: {e}")
+            return None
     
     def get_all_open_orders(self) -> list:
         """
@@ -554,20 +595,25 @@ class AccountsTrading:
                 # Filter to only open/pending orders (exclude filled, canceled, rejected, expired)
                 open_statuses = ['WORKING', 'PENDING_ACTIVATION', 'QUEUED', 'ACCEPTED', 'AWAITING_PARENT_ORDER']
                 open_orders = [o for o in orders if o.get('status', '').upper() in open_statuses]
-                if DEBUG_MODE:
-                    logger.debug(f"Filtered {len(open_orders)} open orders from {len(orders)} total orders")
+                logger.debug(f"Filtered {len(open_orders)} open orders from {len(orders)} total orders")
                 return open_orders
             elif response.status_code == 404:
                 # 404 means no orders, which is valid
-                if DEBUG_MODE:
-                    logger.debug("No orders found (404) - this is normal if there are no orders")
+                logger.debug("No orders found (404) - this is normal if there are no orders")
                 return []
             else:
-                logger.warning(f"Failed to get orders: {response.status_code} - {response.text}")
+                logger.error(f"CRITICAL: Failed to get orders: {response.status_code} - {response.text}")
+                # Return empty list but log as error so we know something went wrong
+                # This is different from "no orders" - this is an API error
                 return []
                 
+        except requests.exceptions.RequestException as e:
+            logger.error(f"CRITICAL: Network error getting open orders: {e}")
+            return []
         except Exception as e:
-            logger.error(f"Error getting open orders: {e}")
+            logger.error(f"CRITICAL: Error getting open orders: {e}")
+            import traceback
+            logger.error(traceback.format_exc())
             return []
     
     def is_market_open_for_15_minutes(self) -> tuple[bool, str]:
@@ -2421,9 +2467,26 @@ class AccountsTrading:
         else:
             logger.info("No open orders found")
         
-        # Step 2: Get actual positions from Schwab API
+        # Step 2: Get actual positions from Schwab API (with retries)
         logger.info("Step 2: Checking actual account positions...")
-        positions = self.get_positions()
+        positions = None
+        max_position_check_retries = 3
+        for attempt in range(max_position_check_retries):
+            positions = self.get_positions()
+            if positions is not None:  # None means error, empty list means no positions
+                break
+            if attempt < max_position_check_retries - 1:
+                logger.warning(f"  Position check failed, retrying ({attempt + 1}/{max_position_check_retries})...")
+                time.sleep(2)
+            else:
+                logger.error("CRITICAL: Could not retrieve positions after multiple attempts!")
+                logger.error("Cannot verify positions are closed - this is a critical error!")
+                return False
+        
+        if positions is None:
+            logger.error("CRITICAL: get_positions() returned None - API error occurred!")
+            logger.error("Cannot proceed with position verification!")
+            return False
         
         if not positions:
             logger.info("✅ No positions found - all clear!")
@@ -2434,6 +2497,7 @@ class AccountsTrading:
         logger.warning(f"Found {len(positions)} position(s) - closing them...")
         
         # Step 3: Close all actual positions
+        close_order_ids = []
         for position in positions:
             symbol = position.get('instrument', {}).get('symbol', 'Unknown')
             quantity = position.get('longQuantity', 0) or -position.get('shortQuantity', 0)
@@ -2450,13 +2514,9 @@ class AccountsTrading:
             else:
                 close_action = 'BUY_TO_COVER'
             
-            # Use market orders if force_market=True (for end-of-day), otherwise try limit first
-            if force_market:
-                order_type = "MARKET"
-                logger.info(f"    Using MARKET order (force close)")
-            else:
-                order_type = "MARKET"  # Use market for safety in safeguard mode
-                logger.info(f"    Using MARKET order (safeguard mode)")
+            # Always use market orders for closing positions (safest)
+            order_type = "MARKET"
+            logger.info(f"    Using MARKET order to close position")
             
             close_order_payload = {
                 "orderType": order_type,
@@ -2477,39 +2537,107 @@ class AccountsTrading:
             
             if 'error' not in response:
                 order_id = response.get('orderId', 'unknown')
+                close_order_ids.append((symbol, order_id))
                 logger.info(f"    Close order placed: Order ID {order_id}")
-                
-                # Wait a moment for fill
-                time.sleep(1.0)
-                
-                # Try to get fill price
-                fill_price = self.get_fill_price_from_order(order_id, max_retries=3, retry_delay=0.5)
-                if fill_price:
-                    logger.info(f"    Filled at ${fill_price:.4f}")
-                else:
-                    logger.warning(f"    Could not get fill price for order {order_id}")
             else:
-                logger.error(f"    Failed to close position {symbol}: {response.get('error')}")
+                logger.error(f"    CRITICAL: Failed to place close order for {symbol}: {response.get('error')}")
         
-        # Step 4: Wait for positions to close and verify
-        logger.info("Step 3: Waiting 3 seconds for positions to close...")
-        time.sleep(3)
+        # Step 4: Wait for orders to fill and verify with retries
+        if close_order_ids:
+            logger.info(f"Step 3: Waiting for {len(close_order_ids)} close order(s) to fill...")
+            # Wait longer for market orders to fill
+            time.sleep(5)
+            
+            # Check order status
+            for symbol, order_id in close_order_ids:
+                fill_price = self.get_fill_price_from_order(order_id, max_retries=5, retry_delay=1.0)
+                if fill_price:
+                    logger.info(f"    {symbol} filled at ${fill_price:.4f}")
+                else:
+                    logger.warning(f"    Could not confirm fill for {symbol} order {order_id}")
         
-        # Step 5: Verify all positions are closed
-        final_positions = self.get_positions()
+        # Step 5: Verify all positions are closed (with retries)
+        logger.info("Step 4: Verifying all positions are closed...")
+        max_verification_attempts = 5
+        verification_delay = 3
         
-        if not final_positions:
-            logger.info("✅ VERIFICATION SUCCESSFUL: All positions closed!")
-            # Clear active_trades since actual positions are closed
-            self.active_trades = []
-            return True
-        else:
-            logger.error(f"❌ VERIFICATION FAILED: {len(final_positions)} position(s) still remain:")
-            for pos in final_positions:
-                symbol = pos.get('instrument', {}).get('symbol', 'Unknown')
-                qty = pos.get('longQuantity', 0) or -pos.get('shortQuantity', 0)
-                logger.error(f"  - {symbol}: {qty} shares")
-            return False
+        for attempt in range(max_verification_attempts):
+            time.sleep(verification_delay)
+            final_positions = self.get_positions()
+            
+            if final_positions is None:
+                logger.warning(f"  Verification attempt {attempt + 1}: Could not retrieve positions (API error)")
+                if attempt < max_verification_attempts - 1:
+                    continue
+                else:
+                    logger.error("CRITICAL: Could not verify positions after all attempts!")
+                    return False
+            
+            if not final_positions:
+                logger.info("✅ VERIFICATION SUCCESSFUL: All positions closed!")
+                # Clear active_trades since actual positions are closed
+                self.active_trades = []
+                return True
+            else:
+                remaining_count = len(final_positions)
+                logger.warning(f"  Verification attempt {attempt + 1}/{max_verification_attempts}: {remaining_count} position(s) still remain:")
+                for pos in final_positions:
+                    symbol = pos.get('instrument', {}).get('symbol', 'Unknown')
+                    qty = pos.get('longQuantity', 0) or -pos.get('shortQuantity', 0)
+                    logger.warning(f"    - {symbol}: {qty} shares")
+                
+                if attempt < max_verification_attempts - 1:
+                    logger.info(f"  Waiting {verification_delay} seconds before retry...")
+                else:
+                    # Last attempt failed - try to close remaining positions again
+                    logger.error("❌ VERIFICATION FAILED: Attempting emergency close of remaining positions...")
+                    for pos in final_positions:
+                        symbol = pos.get('instrument', {}).get('symbol', 'Unknown')
+                        quantity = pos.get('longQuantity', 0) or -pos.get('shortQuantity', 0)
+                        is_long = pos.get('longQuantity', 0) > 0
+                        
+                        if quantity == 0:
+                            continue
+                        
+                        close_action = 'SELL' if is_long else 'BUY_TO_COVER'
+                        emergency_order = {
+                            "orderType": "MARKET",
+                            "session": "NORMAL",
+                            "duration": "DAY",
+                            "orderStrategyType": "SINGLE",
+                            "orderLegCollection": [{
+                                "instruction": close_action,
+                                "quantity": int(abs(quantity)),
+                                "instrument": {"symbol": symbol, "assetType": "EQUITY"}
+                            }]
+                        }
+                        response = self.create_order(emergency_order)
+                        if 'error' not in response:
+                            logger.warning(f"    Emergency close order placed for {symbol}: {response.get('orderId')}")
+                        else:
+                            logger.error(f"    Emergency close failed for {symbol}: {response.get('error')}")
+                    
+                    # Final wait and check
+                    time.sleep(5)
+                    final_check = self.get_positions()
+                    if final_check is None:
+                        logger.error("CRITICAL: Cannot verify final state - API error!")
+                        return False
+                    elif not final_check:
+                        logger.info("✅ Emergency close successful - all positions closed!")
+                        self.active_trades = []
+                        return True
+                    else:
+                        logger.error(f"❌ CRITICAL: {len(final_check)} position(s) STILL remain after emergency close!")
+                        for pos in final_check:
+                            symbol = pos.get('instrument', {}).get('symbol', 'Unknown')
+                            qty = pos.get('longQuantity', 0) or -pos.get('shortQuantity', 0)
+                            logger.error(f"  - {symbol}: {qty} shares")
+                        return False
+        
+        # Should never reach here, but just in case
+        logger.error("CRITICAL: Verification loop completed unexpectedly!")
+        return False
 
 
 def save_trade_to_journal(trade: Trade):
