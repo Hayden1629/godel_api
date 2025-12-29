@@ -2655,40 +2655,42 @@ def send_stats_to_webhook(stats: dict):
     Args:
         stats: Dictionary containing trade statistics
     """
-    try:
-        # Format the message
-        message = f"""Trade Statistics Update
+    # Commented out - webhook disabled
+    # try:
+    #     # Format the message
+    #     message = f"""Trade Statistics Update
 
-Total Trades: {stats['total_trades']}
-Winners: {stats['winners']}
-Losers: {stats['losers']}
-Breakeven: {stats['breakeven']}
-Win Rate: {stats['win_rate_percent']:.2f}%
-Total P&L: ${stats['total_profit_loss']:.2f}"""
+    # Total Trades: {stats['total_trades']}
+    # Winners: {stats['winners']}
+    # Losers: {stats['losers']}
+    # Breakeven: {stats['breakeven']}
+    # Win Rate: {stats['win_rate_percent']:.2f}%
+    # Total P&L: ${stats['total_profit_loss']:.2f}"""
         
-        if stats['winners'] > 0:
-            message += f"\nAverage Win: ${stats['average_win']:.2f}"
-        if stats['losers'] > 0:
-            message += f"\nAverage Loss: ${stats['average_loss']:.2f}"
+    #     if stats['winners'] > 0:
+    #         message += f"\nAverage Win: ${stats['average_win']:.2f}"
+    #     if stats['losers'] > 0:
+    #         message += f"\nAverage Loss: ${stats['average_loss']:.2f}"
         
-        # Send POST request to ntfy.sh
-        response = requests.post(
-            NTFY_WEBHOOK_URL,
-            data=message.encode('utf-8'),
-            headers={
-                'Content-Type': 'text/plain',
-                'Title': 'Algo Trade Statistics'
-            },
-            timeout=10
-        )
+    #     # Send POST request to ntfy.sh
+    #     response = requests.post(
+    #         NTFY_WEBHOOK_URL,
+    #         data=message.encode('utf-8'),
+    #         headers={
+    #             'Content-Type': 'text/plain',
+    #             'Title': 'Algo Trade Statistics'
+    #         },
+    #         timeout=10
+    #     )
         
-        if response.status_code == 200:
-            logger.info("Trade statistics sent to webhook successfully")
-        else:
-            logger.warning(f"Webhook returned status {response.status_code}: {response.text}")
+    #     if response.status_code == 200:
+    #         logger.info("Trade statistics sent to webhook successfully")
+    #     else:
+    #         logger.warning(f"Webhook returned status {response.status_code}: {response.text}")
             
-    except Exception as e:
-        logger.error(f"Error sending statistics to webhook: {e}")
+    # except Exception as e:
+    #     logger.error(f"Error sending statistics to webhook: {e}")
+    pass
 
 
 def calculate_portfolio_value_over_time(journal_file: str = TRADE_JOURNAL_FILE, current_account_value: float = None) -> list:
@@ -2912,8 +2914,9 @@ def print_win_rate_stats(send_webhook: bool = False, accounts_trading: AccountsT
         logger.info(f"Average Loss: ${stats['average_loss']:.2f}")
     
     # Send to webhook if requested
-    if send_webhook:
-        send_stats_to_webhook(stats)
+    # Commented out - webhook disabled
+    # if send_webhook:
+    #     send_stats_to_webhook(stats)
     
     # Send to dashboard if requested
     if send_dashboard and accounts_trading:
@@ -3074,6 +3077,15 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
         logger.info(f"Trade placed: {trade}")
     
     logger.info(f"Executed {len(executed_trades)} trades via Schwab API")
+    
+    # Send dashboard data to website after placing trades
+    try:
+        dashboard_data = collect_dashboard_data(accounts_trading)
+        send_dashboard_data_to_website(dashboard_data)
+        logger.info("Dashboard data sent to website after placing trades")
+    except Exception as e:
+        logger.error(f"Error sending dashboard data after placing trades: {e}")
+    
     return executed_trades
 
 def get_minutes_until_market_open(accounts_trading: AccountsTrading) -> int | None:
@@ -3227,7 +3239,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 logger.warning(f"Market about to close: {close_message}")
                 logger.warning("Stopping algo loop - closing all positions before market close...")
                 accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
-                print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing all positions
+                print_win_rate_stats(send_webhook=False, accounts_trading=accounts_trading)  # Webhook disabled
                 break  # Exit algo loop when market is about to close
             
             # Check and close any trades that are TRADE_HOLD_MINUTES or older
@@ -3286,7 +3298,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     time.sleep(30)
                 
                 # Print stats ONCE after all trades are closed
-                print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)
+                print_win_rate_stats(send_webhook=False, accounts_trading=accounts_trading)  # Webhook disabled
                 
                 # SAFEGUARD: Verify all positions are closed after monitoring completes
                 # This handles edge cases where monitoring thinks trades are closed but positions remain
@@ -3323,7 +3335,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 if is_about_to_close:
                     logger.warning(f"Market about to close: {close_message}")
                     accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
-                    print_win_rate_stats(send_webhook=True, accounts_trading=accounts_trading)  # Send webhook after closing all positions
+                    print_win_rate_stats(send_webhook=False, accounts_trading=accounts_trading)  # Webhook disabled
                     break
                 
                 # Wait a short time before checking again
