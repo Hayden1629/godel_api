@@ -5,7 +5,7 @@ https://www.reddit.com/r/Schwab/comments/1c2ioe1/the_unofficial_guide_to_charles
 '''
 from godel_core import GodelTerminalController
 import time
-from config import GODEL_USERNAME, GODEL_PASSWORD
+from config import GODEL_USERNAME, GODEL_PASSWORD, DASHBOARD_SECURITY_HASH
 import requests
 import pandas
 from loguru import logger
@@ -2877,7 +2877,10 @@ def send_dashboard_data_to_website(dashboard_data: dict, local_port: int = 4131)
             response = requests.post(
                 endpoint,
                 json=dashboard_data,
-                headers={'Content-Type': 'application/json'},
+                headers={
+                    'Content-Type': 'application/json',
+                    'X-Dashboard-Hash': DASHBOARD_SECURITY_HASH
+                },
                 timeout=10
             )
             if response.status_code == 200:
