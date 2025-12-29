@@ -325,8 +325,8 @@ class Trade:
             'order_id': self.order_id,
             'close_order_id': self.close_order_id,
             'stop_loss_order_id': self.stop_loss_order_id,
-            'stop_loss_price': self.stop_loss_price,
-            'take_profit_price': self.take_profit_price,
+            'stop_loss_percent': self.stop_loss_percent,
+            'take_profit_percent': self.take_profit_percent,
             'is_winner': self.profit_loss > 0 if self.profit_loss is not None else None,
             # Parameters used for this trade
             'parameters': {
@@ -2691,6 +2691,75 @@ Total P&L: ${stats['total_profit_loss']:.2f}"""
         logger.error(f"Error sending statistics to webhook: {e}")
 
 
+def calculate_portfolio_value_over_time(journal_file: str = TRADE_JOURNAL_FILE, current_account_value: float = None) -> list:
+    """
+    Calculate portfolio value over time from trade journal.
+    
+    Args:
+        journal_file: Path to the trade journal file
+        current_account_value: Current account value to use as reference point
+        
+    Returns:
+        list: List of dicts with 'timestamp' and 'portfolio_value' keys, sorted by timestamp
+    """
+    script_dir = Path(__file__).parent
+    journal_path = script_dir / journal_file
+    
+    if not journal_path.exists():
+        return []
+    
+    try:
+        with open(journal_path, 'r') as f:
+            all_trades = json.load(f)
+    except Exception as e:
+        logger.error(f"Error reading trade journal for portfolio value: {e}")
+        return []
+    
+    if not all_trades:
+        return []
+    
+    # Filter trades with valid close_time and profit_loss
+    valid_trades = [
+        t for t in all_trades 
+        if t.get('close_time') is not None and t.get('profit_loss') is not None
+    ]
+    
+    if not valid_trades:
+        return []
+    
+    # Sort by close_time
+    valid_trades.sort(key=lambda x: x['close_time'])
+    
+    # Calculate total P&L first
+    total_pnl = sum(float(t.get('profit_loss', 0)) for t in valid_trades)
+    
+    # Determine starting value
+    if current_account_value is not None:
+        # Work backwards: starting value = current value - total P&L
+        starting_value = current_account_value - total_pnl
+    else:
+        # No current value available, start from 0 (just show cumulative P&L)
+        starting_value = 0.0
+    
+    # Build portfolio history with cumulative P&L added to starting value
+    portfolio_history = []
+    cumulative_pnl = 0.0
+    
+    for trade in valid_trades:
+        try:
+            cumulative_pnl += float(trade.get('profit_loss', 0))
+            portfolio_value = starting_value + cumulative_pnl
+            portfolio_history.append({
+                'timestamp': trade['close_time'],
+                'portfolio_value': portfolio_value
+            })
+        except (ValueError, KeyError) as e:
+            logger.debug(f"Error processing trade for portfolio value: {e}")
+            continue
+    
+    return portfolio_history
+
+
 def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
     """
     Collect all dashboard data including stats, trades, and account information.
@@ -2773,6 +2842,12 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
         # Remove None values
         account_metrics = {k: v for k, v in account_metrics.items() if v is not None}
     
+    # Calculate portfolio value over time
+    current_value = account_metrics.get('account_value')
+    portfolio_value_over_time = calculate_portfolio_value_over_time(
+        current_account_value=current_value
+    )
+    
     dashboard_data = {
         'timestamp': datetime.now(pytz.timezone('US/Eastern')).isoformat(),
         'statistics': stats,
@@ -2780,7 +2855,8 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
         'recent_trades': recent_trades,
         'account_metrics': account_metrics,
         'positions': positions,
-        'account_info': account_info  # Include full account info for debugging
+        'account_info': account_info,  # Include full account info for debugging
+        'portfolio_value_over_time': portfolio_value_over_time
     }
     
     return dashboard_data
