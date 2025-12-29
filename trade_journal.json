@@ -1108,5 +1108,42 @@
     "exit_order_type": "TIME_CLOSE_LIMIT",
     "entry_spread": null,
     "exit_spread": null
+  },
+  {
+    "ticker": "INTC",
+    "action": "LONG",
+    "quantity": 13,
+    "entry_price": 36.465,
+    "exit_price": 36.61,
+    "profit_loss": 1.8849999999999483,
+    "profit_loss_percent": 0.39764157411215134,
+    "time_placed": "2025-12-29T14:22:57.589394-05:00",
+    "close_time": "2025-12-29T14:42:36.553562-05:00",
+    "hold_time_minutes": 19.6494028,
+    "order_id": "1005013060042",
+    "close_order_id": "1005013060043",
+    "stop_loss_order_id": "1005013060043",
+    "stop_loss_percent": 2.0,
+    "take_profit_percent": 0.4,
+    "is_winner": true,
+    "parameters": {
+      "stop_loss_percent": 2.0,
+      "take_profit_percent": 0.4,
+      "trade_hold_minutes": 25
+    },
+    "prt_data": {
+      "edge": 0.00011945895262,
+      "prob_up": 0.525,
+      "mean": 0.0002275408621333,
+      "p10": -0.0013446911480799,
+      "p90": 0.0012646755031652,
+      "dist1": 1.1920928955e-06,
+      "n": 40,
+      "timestamp": "2025-12-29 14:21"
+    },
+    "entry_order_type": "MARKET",
+    "exit_order_type": "OCO_TAKE_PROFIT",
+    "entry_spread": null,
+    "exit_spread": null
   }
 ]

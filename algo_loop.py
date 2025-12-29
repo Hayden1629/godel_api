@@ -3270,6 +3270,13 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     
                     logger.info(f"Trade status: {len(accounts_trading.active_trades)} active, oldest age: {age_minutes:.1f} min (close in {max(0, remaining_minutes):.1f} min)")
                     
+                    # Send dashboard data update whenever trade status is logged
+                    try:
+                        dashboard_data = collect_dashboard_data(accounts_trading)
+                        send_dashboard_data_to_website(dashboard_data)
+                    except Exception as e:
+                        logger.debug(f"Could not send dashboard data update: {e}")
+                    
                     # CRITICAL CHECK: If trades are old enough, close them immediately
                     if age_minutes >= TRADE_HOLD_MINUTES:
                         logger.info(f"✅ Trades reached {TRADE_HOLD_MINUTES} min hold time - closing now...")
@@ -3291,6 +3298,12 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                         logger.debug(f"Checking stop losses and profit targets...")
                         accounts_trading.check_stop_loss_orders()
                         accounts_trading.check_profit_targets()
+                        # Send dashboard data update during periodic checks
+                        try:
+                            dashboard_data = collect_dashboard_data(accounts_trading)
+                            send_dashboard_data_to_website(dashboard_data)
+                        except Exception as e:
+                            logger.debug(f"Could not send dashboard data update: {e}")
                         last_check_time = current_time
                     
                     # Sleep for a short interval then check again
