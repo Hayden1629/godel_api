@@ -17,6 +17,7 @@ import atexit
 import signal
 import os
 from pathlib import Path
+from db_manager import DatabaseManager
 
 '''
 #TODO
@@ -34,6 +35,21 @@ MARKET_CLOSE_BUFFER_MINUTES = 5  # Stop trading this many minutes before market 
 TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results
 NTFY_WEBHOOK_URL = "https://ntfy.sh/hayden_algo_api"  # Webhook URL for sending trade statistics
 
+# Global database manager (lazy initialization)
+_db_manager = None
+
+def get_db_manager():
+    """Get or create database manager instance."""
+    global _db_manager
+    if _db_manager is None:
+        try:
+            _db_manager = DatabaseManager()
+            logger.info("Database manager initialized")
+        except Exception as e:
+            logger.warning(f"Could not initialize database manager: {e}. Continuing without database.")
+            _db_manager = None
+    return _db_manager
+
 # Dashboard endpoints for sending live trading data
 DASHBOARD_LOCAL_PORT = 4131  # Local development server port
 DASHBOARD_ENDPOINTS = [
@@ -42,8 +58,8 @@ DASHBOARD_ENDPOINTS = [
 ]
 
 # Risk management constants
-STOP_LOSS_PERCENT = 2.0  # Stop loss percentage from entry price
-TAKE_PROFIT_PERCENT = 0.4  # Take profit percentage from entry price (0.4% = $2 on $500 position)
+STOP_LOSS_PERCENT = 1.5  # Stop loss percentage from entry price (reduced from 2.0% - no trades hit 2% SL anyway)
+TAKE_PROFIT_PERCENT = 0.30  # Take profit percentage from entry price (reduced from 0.4% to increase TP hit rate)
 
 # Supervisor loop constants
 SUPERVISOR_CHECK_INTERVAL_MINUTES = 15  # How often to check market status and refresh tokens when market is closed
@@ -1175,6 +1191,17 @@ class AccountsTrading:
                     }
                 elif order_status in ['CANCELED', 'REJECTED', 'EXPIRED']:
                     logger.warning(f"Order {current_order_id} ended with status: {order_status}")
+                    # Log rejection reason if available
+                    messages = order_details.get('messages', [])
+                    if messages:
+                        logger.warning(f"Rejection messages: {messages}")
+                    # Check for error details
+                    if 'error' in order_details:
+                        logger.warning(f"Order error: {order_details['error']}")
+                    # Log key fields for debugging
+                    logger.debug(f"Order details keys: {list(order_details.keys())}")
+                    if 'orderLegCollection' in order_details:
+                        logger.debug(f"Order leg collection: {order_details['orderLegCollection']}")
                     break
             
             # Order not filled in time - cancel and adjust price
@@ -1274,7 +1301,7 @@ class AccountsTrading:
         
         return None
     
-    def get_order_details(self, order_id: str, update_headers: bool = True, max_retries: int = 3, retry_delay: float = 1.0) -> dict:
+    def get_order_details(self, order_id: str, update_headers: bool = True, max_retries: int = 3, retry_delay: float = 0.1) -> dict:
         """
         Get order details including execution/fill price from Schwab API.
         Includes retry logic for SSL/connection errors.
@@ -1340,7 +1367,7 @@ class AccountsTrading:
         
         return {'error': f'Failed after {max_retries} attempts'}
     
-    def get_fill_price_from_order(self, order_id: str, max_retries: int = 5, retry_delay: float = 1.0, update_headers: bool = True) -> float | None:
+    def get_fill_price_from_order(self, order_id: str, max_retries: int = 5, retry_delay: float = 0.1, update_headers: bool = True) -> float | None:
         """
         Get the actual fill/execution price from an order by checking its status.
         Retries until order is filled or max retries reached.
@@ -1371,8 +1398,28 @@ class AccountsTrading:
             # Schwab API structure may vary, try multiple possible paths
             fill_price = None
             
-            # Check for orderLegCollection with executionDetails
-            if 'orderLegCollection' in order_details and order_details['orderLegCollection']:
+            # Method 1: Check orderActivityCollection first (most reliable for filled orders)
+            if 'orderActivityCollection' in order_details:
+                activities = order_details.get('orderActivityCollection', [])
+                for activity in activities:
+                    if activity.get('activityType') == 'EXECUTION':
+                        exec_legs = activity.get('executionLegs', [])
+                        if exec_legs:
+                            # Calculate average fill price from all execution legs
+                            total_price = 0
+                            total_quantity = 0
+                            for leg in exec_legs:
+                                price = leg.get('price')
+                                quantity = leg.get('quantity', 1.0)
+                                if price is not None:
+                                    total_price += price * quantity
+                                    total_quantity += quantity
+                            if total_quantity > 0:
+                                fill_price = total_price / total_quantity
+                                break
+            
+            # Method 2: Check for orderLegCollection with executionDetails (older format)
+            if fill_price is None and 'orderLegCollection' in order_details and order_details['orderLegCollection']:
                 for leg in order_details['orderLegCollection']:
                     if 'executionDetails' in leg and leg['executionDetails']:
                         # Get average fill price from executions
@@ -1397,7 +1444,7 @@ class AccountsTrading:
                         fill_price = leg['filledPrice']
                         break
             
-            # Check top-level fields
+            # Method 3: Check top-level fields
             if fill_price is None:
                 if 'averageFillPrice' in order_details:
                     fill_price = order_details['averageFillPrice']
@@ -1413,8 +1460,52 @@ class AccountsTrading:
             # Check if order is still pending
             order_status = order_details.get('status', '').upper()
             if order_status in ['FILLED', 'CANCELED', 'REJECTED', 'EXPIRED']:
-                # Order is in final state but no fill price found
+                # Order is in final state but no fill price found - log diagnostic info
                 logger.warning(f"Order {order_id} is in state {order_status} but no fill price found")
+                
+                # Diagnostic logging: show what fields are available
+                logger.debug(f"Order {order_id} - Available top-level keys: {list(order_details.keys())}")
+                
+                # Check orderActivityCollection (where fill prices are actually stored)
+                if 'orderActivityCollection' in order_details:
+                    activities = order_details.get('orderActivityCollection', [])
+                    logger.debug(f"Order {order_id} - orderActivityCollection type: {type(activities)}, length: {len(activities) if isinstance(activities, list) else 'N/A'}")
+                    if isinstance(activities, list) and len(activities) > 0:
+                        for i, activity in enumerate(activities):
+                            logger.debug(f"Order {order_id} - Activity {i} keys: {list(activity.keys()) if isinstance(activity, dict) else 'Not a dict'}")
+                            if isinstance(activity, dict) and activity.get('activityType') == 'EXECUTION':
+                                exec_legs = activity.get('executionLegs', [])
+                                logger.debug(f"Order {order_id} - executionLegs: {exec_legs}")
+                                for leg in exec_legs:
+                                    if 'price' in leg:
+                                        logger.debug(f"Order {order_id} - Found price in executionLeg: {leg.get('price')}")
+                
+                # Check orderLegCollection structure
+                if 'orderLegCollection' in order_details:
+                    legs = order_details['orderLegCollection']
+                    logger.debug(f"Order {order_id} - orderLegCollection type: {type(legs)}, length: {len(legs) if isinstance(legs, list) else 'N/A'}")
+                    if isinstance(legs, list) and len(legs) > 0:
+                        logger.debug(f"Order {order_id} - First leg keys: {list(legs[0].keys()) if isinstance(legs[0], dict) else 'Not a dict'}")
+                        if isinstance(legs[0], dict):
+                            first_leg = legs[0]
+                            if 'executionDetails' in first_leg:
+                                exec_details = first_leg['executionDetails']
+                                logger.debug(f"Order {order_id} - executionDetails type: {type(exec_details)}, value: {exec_details}")
+                            if 'averagePrice' in first_leg:
+                                logger.debug(f"Order {order_id} - leg averagePrice: {first_leg['averagePrice']}")
+                            if 'filledPrice' in first_leg:
+                                logger.debug(f"Order {order_id} - leg filledPrice: {first_leg['filledPrice']}")
+                
+                # Log top-level price fields
+                price_fields = ['averageFillPrice', 'filledPrice', 'averagePrice', 'price', 'limitPrice', 'stopPrice']
+                for field in price_fields:
+                    if field in order_details:
+                        logger.debug(f"Order {order_id} - {field}: {order_details[field]}")
+                
+                # Log a sample of the order structure (first 2000 chars to avoid huge logs)
+                order_json = json.dumps(order_details, indent=2, default=str)
+                logger.debug(f"Order {order_id} - Full order structure (first 2000 chars):\n{order_json[:2000]}")
+                
                 break
             
             # Order not yet filled, wait and retry
@@ -2435,6 +2526,12 @@ class AccountsTrading:
         """
         logger.warning(f"=== POSITION SAFEGUARD: {reason} ===")
         
+        # Step 0: Check for any OCO orders that may have filled (catch fills that happened right before safeguard)
+        logger.info("Step 0: Checking for OCO order fills...")
+        self.check_stop_loss_orders()
+        # Remove any trades that were just closed by OCO orders
+        self.active_trades = [t for t in self.active_trades if not t.is_closed]
+        
         # Step 1: Cancel all open orders
         logger.info("Step 1: Cancelling all open orders...")
         open_orders = self.get_all_open_orders()
@@ -2497,7 +2594,7 @@ class AccountsTrading:
         logger.warning(f"Found {len(positions)} position(s) - closing them...")
         
         # Step 3: Close all actual positions
-        close_order_ids = []
+        close_order_info = []  # List of (symbol, order_id, is_long) tuples
         for position in positions:
             symbol = position.get('instrument', {}).get('symbol', 'Unknown')
             quantity = position.get('longQuantity', 0) or -position.get('shortQuantity', 0)
@@ -2537,22 +2634,44 @@ class AccountsTrading:
             
             if 'error' not in response:
                 order_id = response.get('orderId', 'unknown')
-                close_order_ids.append((symbol, order_id))
+                close_order_info.append((symbol, order_id, is_long))
                 logger.info(f"    Close order placed: Order ID {order_id}")
             else:
                 logger.error(f"    CRITICAL: Failed to place close order for {symbol}: {response.get('error')}")
         
-        # Step 4: Wait for orders to fill and verify with retries
-        if close_order_ids:
-            logger.info(f"Step 3: Waiting for {len(close_order_ids)} close order(s) to fill...")
+        # Step 4: Wait for orders to fill and update trades in database
+        if close_order_info:
+            logger.info(f"Step 3: Waiting for {len(close_order_info)} close order(s) to fill...")
             # Wait longer for market orders to fill
             time.sleep(5)
             
-            # Check order status
-            for symbol, order_id in close_order_ids:
+            # Check order status and update trades
+            for symbol, order_id, is_long in close_order_info:
                 fill_price = self.get_fill_price_from_order(order_id, max_retries=5, retry_delay=1.0)
                 if fill_price:
                     logger.info(f"    {symbol} filled at ${fill_price:.4f}")
+                    
+                    # Find matching trade in active_trades and mark as closed
+                    # Match by ticker and action type (LONG vs SHORT)
+                    matching_trade = None
+                    for trade in self.active_trades:
+                        if trade.ticker == symbol and not trade.is_closed:
+                            # Match the action type (LONG position -> LONG trade, SHORT position -> SHORT trade)
+                            if (is_long and trade.action == 'LONG') or (not is_long and trade.action == 'SHORT'):
+                                matching_trade = trade
+                                break
+                    
+                    if matching_trade:
+                        # Mark trade as closed and save to database
+                        matching_trade.mark_closed(
+                            close_order_id=str(order_id),
+                            exit_price=fill_price,
+                            exit_order_type='FORCE_CLOSE_MARKET'
+                        )
+                        save_trade_to_journal(matching_trade)
+                        logger.info(f"    Updated trade {symbol} in database (closed at ${fill_price:.4f})")
+                    else:
+                        logger.warning(f"    Could not find matching active trade for {symbol} - position closed but trade not updated in database")
                 else:
                     logger.warning(f"    Could not confirm fill for {symbol} order {order_id}")
         
@@ -2642,7 +2761,7 @@ class AccountsTrading:
 
 def save_trade_to_journal(trade: Trade):
     """
-    Save a closed trade to the trade journal file.
+    Save a closed trade to the trade journal file and database.
     
     Args:
         trade: Trade object that has been closed
@@ -2651,7 +2770,7 @@ def save_trade_to_journal(trade: Trade):
         logger.warning(f"Attempted to save trade {trade.ticker} that is not closed")
         return
     
-    # Use absolute path to ensure file is saved in the script's directory
+    # Save to JSON file (backup/legacy support)
     script_dir = Path(__file__).parent
     journal_path = script_dir / TRADE_JOURNAL_FILE
     
@@ -2673,9 +2792,47 @@ def save_trade_to_journal(trade: Trade):
     try:
         with open(journal_path, 'w') as f:
             json.dump(trades, f, indent=2)
-        logger.info(f"Saved trade {trade.ticker} to journal")
+        logger.info(f"Saved trade {trade.ticker} to journal file")
     except Exception as e:
-        logger.error(f"Error saving trade to journal: {e}")
+        logger.error(f"Error saving trade to journal file: {e}")
+    
+    # Save to database
+    db = get_db_manager()
+    if db:
+        try:
+            # Check if trade already exists in database (by order_id)
+            # If it exists, update it; otherwise insert it
+            trade_dict_db = trade.to_dict()
+            # Remove stop_loss_percent and take_profit_percent from top level (they're in parameters)
+            trade_dict_db.pop('stop_loss_percent', None)
+            trade_dict_db.pop('take_profit_percent', None)
+            
+            # Try to update first (in case trade was inserted when created)
+            update_data = {
+                'exit_price': trade.exit_price,
+                'profit_loss': trade.profit_loss,
+                'profit_loss_percent': trade.profit_loss_percent,
+                'close_time': trade.close_time.isoformat() if trade.close_time else None,
+                'hold_time_minutes': trade_dict.get('hold_time_minutes'),
+                'close_order_id': trade.close_order_id,
+                'is_winner': trade.profit_loss > 0 if trade.profit_loss is not None else None,
+                'is_closed': True,
+                'exit_order_type': trade.exit_order_type,
+                'exit_spread': trade.exit_spread
+            }
+            
+            updated = db.update_trade(trade.order_id, update_data)
+            if not updated:
+                # Trade doesn't exist, insert it
+                trade_id = db.insert_trade(trade_dict_db)
+                if trade_id:
+                    logger.info(f"Saved trade {trade.ticker} to database (ID: {trade_id})")
+                else:
+                    logger.warning(f"Failed to save trade {trade.ticker} to database")
+            else:
+                logger.info(f"Updated trade {trade.ticker} in database")
+        except Exception as e:
+            logger.error(f"Error saving trade to database: {e}")
 
 
 def calculate_win_rate(journal_file: str = TRADE_JOURNAL_FILE) -> dict:
@@ -2972,11 +3129,31 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
         # Remove None values
         account_metrics = {k: v for k, v in account_metrics.items() if v is not None}
     
-    # Calculate portfolio value over time
+    # Get portfolio value over time from database (stored in portfolio_value_history table)
+    portfolio_value_over_time = []
+    db = get_db_manager()
+    if db:
+        try:
+            portfolio_value_over_time = db.get_portfolio_value_over_time()
+        except Exception as e:
+            logger.debug(f"Could not get portfolio value from database: {e}")
+    
+    # Save current portfolio value snapshot to database
     current_value = account_metrics.get('account_value')
-    portfolio_value_over_time = calculate_portfolio_value_over_time(
-        current_account_value=current_value
-    )
+    if db and current_value is not None:
+        try:
+            # Calculate cumulative P&L from closed trades for reference
+            cumulative_pnl = None
+            if stats.get('total_profit_loss') is not None:
+                cumulative_pnl = stats['total_profit_loss']
+            
+            db.insert_portfolio_value(
+                portfolio_value=current_value,
+                account_value=current_value,
+                cumulative_pnl=cumulative_pnl
+            )
+        except Exception as e:
+            logger.debug(f"Could not save portfolio value snapshot: {e}")
     
     dashboard_data = {
         'timestamp': datetime.now(pytz.timezone('US/Eastern')).isoformat(),
@@ -2992,13 +3169,43 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
     return dashboard_data
 
 
-def send_dashboard_data_to_website(dashboard_data: dict, local_port: int = 4131):
+def send_dashboard_data_to_website(dashboard_data: dict, local_port: int = 4131, accounts_trading=None):
     """
-    Send dashboard data to both local and remote website endpoints.
+    Send dashboard data to both local and remote website endpoints and save to database.
     
     Args:
         dashboard_data: Dashboard data dictionary
         local_port: Unused, kept for backwards compatibility (uses DASHBOARD_ENDPOINTS constant)
+        accounts_trading: AccountsTrading instance (optional, for active trades lookup)
+    """
+    # Save dashboard snapshot to database
+    db = get_db_manager()
+    if db:
+        try:
+            db.insert_dashboard_snapshot(dashboard_data)
+        except Exception as e:
+            logger.debug(f"Could not save dashboard snapshot to database: {e}")
+    
+    # Update active trades in database
+    if db and 'active_trades' in dashboard_data and accounts_trading:
+        try:
+            for active_trade in dashboard_data.get('active_trades', []):
+                # Find corresponding trade object to get order_id
+                order_id = None
+                for trade in accounts_trading.active_trades:
+                    if trade.ticker == active_trade.get('ticker') and trade.entry_price == active_trade.get('entry_price'):
+                        order_id = trade.order_id
+                        break
+                
+                if order_id:
+                    active_trade['order_id'] = order_id
+                    db.upsert_active_trade(active_trade)
+        except Exception as e:
+            logger.debug(f"Could not update active trades in database: {e}")
+    
+    # Send to HTTP endpoints (legacy/backup)
+    # TEMPORARILY DISABLED - Testing database-only mode
+    # Uncomment below to re-enable HTTP packet sending
     """
     for endpoint in DASHBOARD_ENDPOINTS:
         try:
@@ -3019,6 +3226,8 @@ def send_dashboard_data_to_website(dashboard_data: dict, local_port: int = 4131)
             logger.debug(f"Could not send dashboard data to {endpoint}: {e}")
         except Exception as e:
             logger.error(f"Error sending dashboard data to {endpoint}: {e}")
+    """
+    logger.debug("HTTP packet sending DISABLED - Dashboard must read from database")
 
 
 def print_win_rate_stats(send_webhook: bool = False, accounts_trading: AccountsTrading = None, send_dashboard: bool = True):
@@ -3053,7 +3262,7 @@ def print_win_rate_stats(send_webhook: bool = False, accounts_trading: AccountsT
     if send_dashboard and accounts_trading:
         try:
             dashboard_data = collect_dashboard_data(accounts_trading)
-            send_dashboard_data_to_website(dashboard_data)
+            send_dashboard_data_to_website(dashboard_data, accounts_trading=accounts_trading)
         except Exception as e:
             logger.error(f"Error sending dashboard data: {e}")
 
@@ -3205,6 +3414,34 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
         accounts_trading.active_trades.append(trade)
         executed_trades.append(trade)
         
+        # Insert trade into database (as active trade, will be updated when closed)
+        db = get_db_manager()
+        if db:
+            try:
+                trade_dict = trade.to_dict()
+                # Remove stop_loss_percent and take_profit_percent from top level
+                trade_dict.pop('stop_loss_percent', None)
+                trade_dict.pop('take_profit_percent', None)
+                # Set is_closed to False for new trades
+                trade_dict['is_closed'] = False
+                trade_id = db.insert_trade(trade_dict)
+                if trade_id:
+                    # Also add to active_trades table
+                    active_trade_data = {
+                        'order_id': trade.order_id,
+                        'ticker': trade.ticker,
+                        'action': trade.action,
+                        'quantity': trade.quantity,
+                        'entry_price': trade.entry_price,
+                        'time_placed': trade.time_placed.isoformat() if trade.time_placed else None,
+                        'age_minutes': trade.get_age_minutes(),
+                        'stop_loss_price': trade.stop_loss_price
+                    }
+                    db.upsert_active_trade(active_trade_data)
+                    logger.debug(f"Trade {trade.ticker} inserted into database")
+            except Exception as e:
+                logger.warning(f"Could not insert trade into database: {e}")
+        
         logger.info(f"Trade placed: {trade}")
     
     logger.info(f"Executed {len(executed_trades)} trades via Schwab API")
@@ -3212,7 +3449,7 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
     # Send dashboard data to website after placing trades
     try:
         dashboard_data = collect_dashboard_data(accounts_trading)
-        send_dashboard_data_to_website(dashboard_data)
+        send_dashboard_data_to_website(dashboard_data, accounts_trading=accounts_trading)
         logger.info("Dashboard data sent to website after placing trades")
     except Exception as e:
         logger.error(f"Error sending dashboard data after placing trades: {e}")
@@ -3351,7 +3588,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
     # Send initial dashboard data
     try:
         dashboard_data = collect_dashboard_data(accounts_trading)
-        send_dashboard_data_to_website(dashboard_data)
+        send_dashboard_data_to_website(dashboard_data, accounts_trading=accounts_trading)
     except Exception as e:
         logger.debug(f"Could not send initial dashboard data: {e}")
     
@@ -3404,7 +3641,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     # Send dashboard data update whenever trade status is logged
                     try:
                         dashboard_data = collect_dashboard_data(accounts_trading)
-                        send_dashboard_data_to_website(dashboard_data)
+                        send_dashboard_data_to_website(dashboard_data, accounts_trading=accounts_trading)
                     except Exception as e:
                         logger.debug(f"Could not send dashboard data update: {e}")
                     
@@ -3432,7 +3669,7 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                         # Send dashboard data update during periodic checks
                         try:
                             dashboard_data = collect_dashboard_data(accounts_trading)
-                            send_dashboard_data_to_website(dashboard_data)
+                            send_dashboard_data_to_website(dashboard_data, accounts_trading=accounts_trading)
                         except Exception as e:
                             logger.debug(f"Could not send dashboard data update: {e}")
                         last_check_time = current_time
@@ -3483,8 +3720,8 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     break
                 
                 # Wait a short time before checking again
-                logger.info("No trades available - waiting 1 minute before checking again...")
-                time.sleep(60)
+                logger.info("No trades available - waiting 10 seconds before checking again...")
+                time.sleep(10)
             
     except KeyboardInterrupt:
         logger.info("\nStopping algo loop (KeyboardInterrupt)...")
@@ -3535,6 +3772,14 @@ def main():
         if accounts_trading:
             logger.warning("Program exiting - closing all positions...")
             accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="program exit")
+        # Close database connection
+        db = get_db_manager()
+        if db:
+            try:
+                db.close()
+                logger.info("Database connection closed")
+            except Exception as e:
+                logger.debug(f"Error closing database connection: {e}")
     
     atexit.register(cleanup_on_exit)
     
@@ -3543,6 +3788,14 @@ def main():
         logger.warning(f"Received signal {signum} - closing all positions and exiting...")
         if accounts_trading:
             accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="signal handler")
+        # Close database connection
+        db = get_db_manager()
+        if db:
+            try:
+                db.close()
+                logger.info("Database connection closed")
+            except Exception as e:
+                logger.debug(f"Error closing database connection: {e}")
         exit(0)
     
     signal.signal(signal.SIGINT, signal_handler)

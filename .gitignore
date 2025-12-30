@@ -10,5 +10,12 @@ config.py
 # Token storage (contains sensitive API tokens)
 schwab_tokens.json
 
+# Railway MySQL credentials (contains sensitive passwords)
+setup_railway_env.sh
+
+# Environment files with secrets
+.env
+.env.local
+
 html_frameworks/
 

@@ -9,13 +9,13 @@ from commands.prt_command import PRTCommand
 import pandas as pd
 from loguru import logger
 
-DOLLAR_AMOUNT = 500
+DOLLAR_AMOUNT = 1000
 
-# Edge threshold - minimum edge value to consider a trade valid
-EDGE_THRESHOLD = 0.00010
+# Edge threshold - minimum edge value to consider a trade valid (increased from 0.00010 to filter for higher quality trades)
+EDGE_THRESHOLD = 0.00020
 
 # Maximum number of trades to execute per cycle (must be even for market neutral strategy)
-_MAX_TRADES_RAW = 50
+_MAX_TRADES_RAW = 20
 # Ensure MAX_TRADES is even (subtract 1 if odd)
 MAX_TRADES = _MAX_TRADES_RAW if _MAX_TRADES_RAW % 2 == 0 else _MAX_TRADES_RAW - 1
 MAX_TRADES_PER_DIRECTION = MAX_TRADES // 2  # Half long, half short
