@@ -28,7 +28,7 @@ make abort button
 '''
 
 # Global constants
-TRADE_HOLD_MINUTES = 25  # How long to hold trades before automatically closing them
+TRADE_HOLD_MINUTES = 20  # How long to hold trades before automatically closing them
 MARKET_OPEN_DELAY_MINUTES = 1  # How many minutes after market opens before starting to trade
 MARKET_CLOSE_BUFFER_MINUTES = 5  # Stop trading this many minutes before market close
 TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results

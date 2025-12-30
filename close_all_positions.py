@@ -10,28 +10,65 @@ Flow:
 import time
 import requests
 from loguru import logger
+from datetime import datetime
+import pytz
 
 # Import the same class algo_loop uses
 from algo_loop import AccountsTrading
 
 
 def get_open_orders(client: AccountsTrading) -> list:
-    """Get all open/pending orders."""
-    client._update_headers()
-    url = f"{client.base_url}/accounts/{client.account_hash_value}/orders"
-    
-    response = requests.get(url, headers=client.headers)
-    
-    if response.status_code == 200:
-        orders = response.json()
-        # Filter to only open/pending orders
-        open_orders = [o for o in orders if o.get('status', '').upper() in 
-                       ['WORKING', 'PENDING_ACTIVATION', 'QUEUED', 'ACCEPTED', 'AWAITING_PARENT_ORDER']]
-        return open_orders
-    elif response.status_code == 404:
+    """
+    Get all open/pending orders.
+    Uses the same logic as algo_loop.py's get_all_open_orders() method.
+    """
+    try:
+        client._update_headers()
+        
+        if not client.account_hash_value:
+            logger.error("Account hash value not set")
+            return []
+        
+        # Schwab API requires fromEnteredTime and toEnteredTime parameters (ZonedDateTime format)
+        # Use start and end of today in Eastern timezone (ISO 8601 format with timezone)
+        eastern = pytz.timezone('US/Eastern')
+        now_eastern = datetime.now(eastern)
+        # Start of today (00:00:00) in Eastern timezone
+        start_of_today = now_eastern.replace(hour=0, minute=0, second=0, microsecond=0)
+        # End of today (23:59:59) in Eastern timezone
+        end_of_today = now_eastern.replace(hour=23, minute=59, second=59, microsecond=999999)
+        # Use isoformat() to get proper ISO 8601 format with timezone
+        from_date = start_of_today.isoformat()
+        to_date = end_of_today.isoformat()
+        
+        url = f"{client.base_url}/accounts/{client.account_hash_value}/orders"
+        params = {
+            'fromEnteredTime': from_date,
+            'toEnteredTime': to_date
+        }
+        
+        response = requests.get(url, headers=client.headers, params=params)
+        
+        if response.status_code == 200:
+            orders = response.json()
+            # Filter to only open/pending orders (exclude filled, canceled, rejected, expired)
+            open_statuses = ['WORKING', 'PENDING_ACTIVATION', 'QUEUED', 'ACCEPTED', 'AWAITING_PARENT_ORDER']
+            open_orders = [o for o in orders if o.get('status', '').upper() in open_statuses]
+            logger.debug(f"Filtered {len(open_orders)} open orders from {len(orders)} total orders")
+            return open_orders
+        elif response.status_code == 404:
+            # 404 means no orders, which is valid
+            logger.debug("No orders found (404) - this is normal if there are no orders")
+            return []
+        else:
+            logger.error(f"Failed to get orders: {response.status_code} - {response.text}")
+            return []
+            
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Network error getting open orders: {e}")
         return []
-    else:
-        logger.warning(f"Failed to get orders: {response.status_code} - {response.text}")
+    except Exception as e:
+        logger.error(f"Error getting open orders: {e}")
         return []
 
 
