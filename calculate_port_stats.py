@@ -51,17 +51,34 @@ def get_beta_from_yfinance(symbol: str) -> Optional[float]:
     try:
         ticker = yf.Ticker(symbol)
         info = ticker.info
+        print(info)
+        # Check if info is None or empty (Yahoo Finance sometimes blocks requests)
+        if not info or not isinstance(info, dict):
+            logger.debug(f"Yahoo Finance returned no data for {symbol}")
+            return None
+        
         beta = info.get('beta')
         
-        if beta is not None:
+        if beta is not None and isinstance(beta, (int, float)):
             logger.debug(f"Retrieved beta {beta:.2f} for {symbol} from Yahoo Finance")
             return float(beta)
         else:
-            logger.warning(f"Beta not available for {symbol} from Yahoo Finance")
+            logger.debug(f"Beta not available for {symbol} from Yahoo Finance")
             return None
             
+    except KeyError as e:
+        logger.debug(f"Beta key not found in Yahoo Finance data for {symbol}: {e}")
+        return None
+    except (AttributeError, TypeError) as e:
+        logger.debug(f"Error accessing Yahoo Finance data for {symbol}: {e}")
+        return None
     except Exception as e:
-        logger.warning(f"Error getting beta from Yahoo Finance for {symbol}: {e}")
+        # Yahoo Finance often blocks requests with 401 errors - handle gracefully
+        error_str = str(e)
+        if "401" in error_str or "Unauthorized" in error_str or "Crumb" in error_str:
+            logger.debug(f"Yahoo Finance access blocked for {symbol} (common issue)")
+        else:
+            logger.warning(f"Error getting beta from Yahoo Finance for {symbol}: {e}")
         return None
 
 
@@ -127,6 +144,9 @@ def calculate_portfolio_statistics(client: AccountsTrading) -> Dict:
             'avg_pe_long': None,
             'avg_pe_short': None,
             'portfolio_beta': None,
+            'total_cost_basis': 0.0,
+            'total_unrealized_pl': 0.0,
+            'total_unrealized_pl_percent': 0.0,
             'positions': []
         }
     
@@ -332,6 +352,19 @@ def main():
         # Initialize
         logger.info("Initializing Schwab API client...")
         client = AccountsTrading()
+        
+        # Verify token refresh actually worked by trying to get access token
+        try:
+            client._update_headers()
+            logger.info("Token verified successfully")
+        except RuntimeError as e:
+            if "Failed to refresh access token" in str(e) or "token" in str(e).lower():
+                logger.error("❌ Token refresh failed during initialization. Cannot proceed.")
+                logger.error("Please run get_OG_tokens.py to refresh your tokens.")
+                return
+            else:
+                raise
+        
         logger.info(f"Connected to account: {client.account_hash_value[:8]}...")
         
         # Calculate statistics

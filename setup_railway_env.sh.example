@@ -1,0 +1,33 @@
+#!/bin/bash
+# Setup script for Railway MySQL connection
+# This sets environment variables for local development to connect to Railway MySQL
+# 
+# Copy this file to setup_railway_env.sh and fill in your actual Railway credentials
+
+echo "Setting up Railway MySQL environment variables..."
+echo ""
+
+# Railway MySQL credentials (from your Railway dashboard)
+# Get the private domain from: Railway dashboard -> MySQL service -> Connect -> Private Networking
+
+export MYSQLHOST="your-railway-private-domain.railway.app"  # ⚠️ REPLACE with actual Railway private domain
+export MYSQLPORT="3306"
+export MYSQLUSER="root"
+export MYSQLPASSWORD="your-railway-mysql-password"  # ⚠️ REPLACE with your actual Railway MySQL password
+export MYSQLDATABASE="railway"
+
+echo "Environment variables set:"
+echo "  MYSQLHOST=$MYSQLHOST"
+echo "  MYSQLPORT=$MYSQLPORT"
+echo "  MYSQLUSER=$MYSQLUSER"
+echo "  MYSQLDATABASE=$MYSQLDATABASE"
+echo ""
+echo "⚠️  IMPORTANT: Replace placeholder values with your actual Railway MySQL credentials"
+echo "   Find them in: Railway dashboard -> MySQL service -> Connect -> Private Networking"
+echo ""
+echo "To use these variables, run:"
+echo "  source setup_railway_env.sh"
+echo "  python init_database.py"
+echo ""
+echo "Or add them to your shell profile (~/.bashrc or ~/.zshrc) to make them permanent"
+
