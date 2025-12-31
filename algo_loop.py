@@ -124,7 +124,9 @@ class Trade:
         self.ticker = ticker
         self.action = action.upper()  # Ensure uppercase: LONG or SHORT
         self.quantity = quantity
-        self.time_placed = datetime.now(pytz.timezone('US/Eastern'))
+        # Store time in UTC for consistency (convert from Eastern to UTC)
+        eastern = pytz.timezone('US/Eastern')
+        self.time_placed = datetime.now(eastern).astimezone(pytz.UTC)
         self.order_id = None
         self.order_status = None
         self.api_response = None  # Full API response from order placement
@@ -218,7 +220,8 @@ class Trade:
     def get_age_minutes(self) -> float:
         """Get the age of the trade in minutes."""
         if self.time_placed:
-            age = datetime.now(pytz.timezone('US/Eastern')) - self.time_placed
+            # Calculate age using UTC to match stored time_placed
+            age = datetime.now(pytz.UTC) - self.time_placed
             return age.total_seconds() / 60
         return 0.0
     
@@ -249,7 +252,9 @@ class Trade:
         """
         self.is_closed = True
         self.close_order_id = close_order_id
-        self.close_time = datetime.now(pytz.timezone('US/Eastern'))
+        # Store time in UTC for consistency (convert from Eastern to UTC)
+        eastern = pytz.timezone('US/Eastern')
+        self.close_time = datetime.now(eastern).astimezone(pytz.UTC)
         if exit_order_type:
             self.exit_order_type = exit_order_type
         if exit_price is not None:
@@ -2821,24 +2826,41 @@ def save_trade_to_journal(trade: Trade):
     script_dir = Path(__file__).parent
     journal_path = script_dir / TRADE_JOURNAL_FILE
     
-    # Load existing trades
-    trades = []
+    # Load existing journal (can be list format or dict format with metadata)
+    journal_data = {}
     if journal_path.exists():
         try:
             with open(journal_path, 'r') as f:
-                trades = json.load(f)
+                data = json.load(f)
+                # Handle both old list format and new dict format
+                if isinstance(data, list):
+                    journal_data = {
+                        'trades': data,
+                        'metadata': {}
+                    }
+                elif isinstance(data, dict):
+                    journal_data = data
+                    # Ensure required sections exist
+                    if 'trades' not in journal_data:
+                        journal_data['trades'] = []
+                    if 'metadata' not in journal_data:
+                        journal_data['metadata'] = {}
+                else:
+                    journal_data = {'trades': [], 'metadata': {}}
         except Exception as e:
             logger.error(f"Error reading trade journal: {e}")
-            trades = []
+            journal_data = {'trades': [], 'metadata': {}}
+    else:
+        journal_data = {'trades': [], 'metadata': {}}
     
     # Add new trade
     trade_dict = trade.to_dict()
-    trades.append(trade_dict)
+    journal_data['trades'].append(trade_dict)
     
-    # Save back to file
+    # Save back to file (preserving metadata if it exists)
     try:
         with open(journal_path, 'w') as f:
-            json.dump(trades, f, indent=2)
+            json.dump(journal_data, f, indent=2)
         logger.info(f"Saved trade {trade.ticker} to journal file")
     except Exception as e:
         logger.error(f"Error saving trade to journal file: {e}")
@@ -2882,6 +2904,38 @@ def save_trade_to_journal(trade: Trade):
             logger.error(f"Error saving trade to database: {e}")
 
 
+def _read_trade_journal(journal_file: str = TRADE_JOURNAL_FILE) -> list:
+    """
+    Helper function to read trade journal, handling both old list format and new dict format.
+    
+    Args:
+        journal_file: Path to journal file
+        
+    Returns:
+        list: List of trades
+    """
+    script_dir = Path(__file__).parent
+    journal_path = script_dir / journal_file
+    
+    if not journal_path.exists():
+        return []
+    
+    try:
+        with open(journal_path, 'r') as f:
+            data = json.load(f)
+        
+        # Handle both formats
+        if isinstance(data, list):
+            return data
+        elif isinstance(data, dict):
+            return data.get('trades', [])
+        else:
+            return []
+    except Exception as e:
+        logger.error(f"Error reading trade journal: {e}")
+        return []
+
+
 def calculate_win_rate(journal_file: str = TRADE_JOURNAL_FILE) -> dict:
     """
     Calculate win rate statistics from the trade journal.
@@ -2892,12 +2946,11 @@ def calculate_win_rate(journal_file: str = TRADE_JOURNAL_FILE) -> dict:
     Returns:
         dict: Statistics including win rate, total trades, winners, losers, total P&L
     """
-    # Use absolute path to ensure file is found in the script's directory
-    script_dir = Path(__file__).parent
-    journal_path = script_dir / journal_file
+    # Use helper function to read journal (handles both formats)
+    trades = _read_trade_journal(journal_file)
     
-    if not journal_path.exists():
-        logger.warning(f"Trade journal file {journal_file} does not exist")
+    if not trades:
+        logger.warning(f"No trades found in journal file {journal_file}")
         return {
             'total_trades': 0,
             'winners': 0,
@@ -2909,22 +2962,7 @@ def calculate_win_rate(journal_file: str = TRADE_JOURNAL_FILE) -> dict:
             'average_loss': 0.0
         }
     
-    try:
-        with open(journal_path, 'r') as f:
-            trades = json.load(f)
-    except Exception as e:
-        logger.error(f"Error reading trade journal: {e}")
-        return {
-            'total_trades': 0,
-            'winners': 0,
-            'losers': 0,
-            'breakeven': 0,
-            'win_rate_percent': 0.0,
-            'total_profit_loss': 0.0,
-            'average_win': 0.0,
-            'average_loss': 0.0
-        }
-    
+    # Filter for closed trades with P&L data
     if not trades:
         return {
             'total_trades': 0,
@@ -3201,6 +3239,189 @@ def get_des_data_from_db(ticker: str) -> Optional[dict]:
         return None
 
 
+def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[float]:
+    """
+    Calculate portfolio beta by getting positions, querying beta values from database,
+    and computing weighted average beta.
+    
+    Portfolio beta formula:
+    portfolio_beta = sum(beta_i * market_value_i) / sum(abs(market_value_i))
+    Where longs contribute positive beta and shorts contribute negative beta.
+    
+    Args:
+        accounts_trading: AccountsTrading instance
+        
+    Returns:
+        float: Portfolio beta value, or None if calculation cannot be performed
+    """
+    try:
+        # Get current positions
+        positions = accounts_trading.get_positions()
+        if positions is None:
+            logger.warning("Could not retrieve positions for portfolio beta calculation")
+            return None
+            
+        if not positions:
+            logger.info("No positions found - portfolio beta is undefined")
+            return None
+        
+        weighted_beta_sum = 0.0
+        total_abs_market_value = 0.0
+        position_details = []
+        missing_betas = []
+        
+        for position in positions:
+            # Extract ticker symbol (remove exchange suffix if present)
+            symbol = position.get('symbol', '')
+            if not symbol:
+                continue
+            ticker = symbol.split(':')[0].upper()
+            
+            # Calculate market value
+            # Long positions have positive market value, short positions have negative
+            long_quantity = position.get('longQuantity', 0) or 0
+            short_quantity = position.get('shortQuantity', 0) or 0
+            avg_price = position.get('averagePrice', 0) or 0
+            current_price = position.get('currentPrice', 0) or 0
+            
+            # Use current price if available, otherwise use average price
+            price = current_price if current_price > 0 else avg_price
+            
+            # Market value: positive for longs, negative for shorts
+            quantity = long_quantity - short_quantity
+            market_value = quantity * price
+            abs_market_value = abs(market_value)
+            
+            if abs_market_value == 0:
+                continue
+            
+            # Get beta from database
+            des_data = get_des_data_from_db(ticker)
+            beta = None
+            
+            if des_data:
+                # Beta is stored in the snapshot dict (reconstructed by get_des_data)
+                snapshot = des_data.get('snapshot', {})
+                if snapshot:
+                    beta_str = snapshot.get('Beta')
+                    if beta_str:
+                        try:
+                            # Remove any non-numeric characters (like "x" suffix)
+                            beta = float(beta_str.replace('x', '').strip())
+                        except (ValueError, AttributeError):
+                            pass
+            
+            if beta is None:
+                missing_betas.append(ticker)
+                logger.debug(f"No beta found in database for {ticker}")
+                continue
+            
+            # Calculate weighted contribution
+            # Long positions: beta * market_value (positive)
+            # Short positions: -beta * abs_market_value (negative exposure)
+            beta_contribution = beta * market_value
+            weighted_beta_sum += beta_contribution
+            total_abs_market_value += abs_market_value
+            
+            position_details.append({
+                'ticker': ticker,
+                'quantity': quantity,
+                'market_value': market_value,
+                'beta': beta,
+                'weight': abs_market_value
+            })
+        
+        if total_abs_market_value == 0:
+            logger.warning("No valid positions with market value found for beta calculation")
+            return None
+        
+        # Calculate portfolio beta
+        portfolio_beta = weighted_beta_sum / total_abs_market_value
+        
+        # Log results
+        logger.info(f"📊 Portfolio Beta Calculation:")
+        logger.info(f"   Portfolio Beta: {portfolio_beta:.3f}")
+        logger.info(f"   Positions analyzed: {len(position_details)}")
+        if missing_betas:
+            logger.info(f"   Missing betas for: {', '.join(missing_betas)}")
+        
+        # Log individual position contributions
+        logger.debug("   Position details:")
+        for pos in position_details:
+            weight_pct = (pos['weight'] / total_abs_market_value * 100) if total_abs_market_value > 0 else 0
+            logger.debug(f"     {pos['ticker']}: Beta={pos['beta']:.2f}, Weight={weight_pct:.1f}%, Market Value=${pos['market_value']:,.2f}")
+        
+        # Save to trade journal
+        save_portfolio_beta_to_journal(portfolio_beta, position_details, missing_betas)
+        
+        return portfolio_beta
+        
+    except Exception as e:
+        logger.error(f"Error calculating portfolio beta: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
+        return None
+
+
+def save_portfolio_beta_to_journal(portfolio_beta: float, position_details: list, missing_betas: list):
+    """
+    Save portfolio beta calculation to trade journal as metadata.
+    
+    Args:
+        portfolio_beta: Calculated portfolio beta value
+        position_details: List of position information used in calculation
+        missing_betas: List of tickers that don't have beta data
+    """
+    try:
+        script_dir = Path(__file__).parent
+        journal_path = script_dir / TRADE_JOURNAL_FILE
+        
+        # Load existing journal
+        journal_data = {}
+        if journal_path.exists():
+            try:
+                with open(journal_path, 'r') as f:
+                    data = json.load(f)
+                    # If it's a list (old format), convert to dict
+                    if isinstance(data, list):
+                        journal_data = {
+                            'trades': data,
+                            'metadata': {}
+                        }
+                    elif isinstance(data, dict):
+                        journal_data = data
+                    else:
+                        journal_data = {'trades': [], 'metadata': {}}
+            except Exception as e:
+                logger.debug(f"Error reading journal for beta save: {e}")
+                journal_data = {'trades': [], 'metadata': {}}
+        else:
+            journal_data = {'trades': [], 'metadata': {}}
+        
+        # Ensure metadata section exists
+        if 'metadata' not in journal_data:
+            journal_data['metadata'] = {}
+        
+        # Save portfolio beta information
+        from datetime import datetime
+        journal_data['metadata']['portfolio_beta'] = {
+            'value': portfolio_beta,
+            'calculated_at': datetime.now().isoformat(),
+            'positions_count': len(position_details),
+            'position_details': position_details,
+            'missing_betas': missing_betas
+        }
+        
+        # Save back to file
+        with open(journal_path, 'w') as f:
+            json.dump(journal_data, f, indent=2)
+        
+        logger.debug(f"Saved portfolio beta ({portfolio_beta:.3f}) to trade journal")
+        
+    except Exception as e:
+        logger.warning(f"Could not save portfolio beta to journal: {e}")
+
+
 def collect_des_data_for_ticker(controller: GodelTerminalController, ticker: str) -> bool:
     """
     Collect DES data for a single ticker and save to JSON.
@@ -3315,17 +3536,11 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
     stats = calculate_win_rate()
     
     # Get recent trades from journal
-    script_dir = Path(__file__).parent
-    journal_path = script_dir / TRADE_JOURNAL_FILE
+    all_trades = _read_trade_journal()
     recent_trades = []
-    if journal_path.exists():
-        try:
-            with open(journal_path, 'r') as f:
-                all_trades = json.load(f)
-                # Get last 50 trades
-                recent_trades = all_trades[-50:] if len(all_trades) > 50 else all_trades
-        except Exception as e:
-            logger.error(f"Error reading trade journal for dashboard: {e}")
+    if all_trades:
+        # Get last 50 trades
+        recent_trades = all_trades[-50:] if len(all_trades) > 50 else all_trades
     
     # Get active trades
     active_trades = []

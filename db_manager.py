@@ -75,14 +75,31 @@ class DatabaseManager:
                 )
             """
             
-            # Parse datetime strings if needed
+            # Parse datetime strings if needed - ensure UTC for storage
             time_placed = trade_data.get('time_placed')
             if isinstance(time_placed, str):
                 time_placed = datetime.fromisoformat(time_placed.replace('Z', '+00:00'))
+                # Ensure timezone-aware UTC
+                if time_placed.tzinfo is None:
+                    time_placed = pytz.UTC.localize(time_placed)
+                else:
+                    time_placed = time_placed.astimezone(pytz.UTC)
+            elif time_placed and hasattr(time_placed, 'tzinfo') and time_placed.tzinfo is not None:
+                # If datetime is timezone-aware, convert to UTC
+                time_placed = time_placed.astimezone(pytz.UTC)
             
             close_time = trade_data.get('close_time')
-            if close_time and isinstance(close_time, str):
-                close_time = datetime.fromisoformat(close_time.replace('Z', '+00:00'))
+            if close_time:
+                if isinstance(close_time, str):
+                    close_time = datetime.fromisoformat(close_time.replace('Z', '+00:00'))
+                    # Ensure timezone-aware UTC
+                    if close_time.tzinfo is None:
+                        close_time = pytz.UTC.localize(close_time)
+                    else:
+                        close_time = close_time.astimezone(pytz.UTC)
+                elif hasattr(close_time, 'tzinfo') and close_time.tzinfo is not None:
+                    # If datetime is timezone-aware, convert to UTC
+                    close_time = close_time.astimezone(pytz.UTC)
             
             trade_values = {
                 'ticker': trade_data.get('ticker'),
@@ -311,12 +328,18 @@ class DatabaseManager:
         try:
             cursor = self.connection.cursor()
             
-            # Parse timestamp if needed
+            # Parse timestamp if needed - convert to UTC for storage
             timestamp = snapshot_data.get('timestamp')
             if isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                # Ensure timezone-aware UTC
+                if timestamp.tzinfo is None:
+                    timestamp = pytz.UTC.localize(timestamp)
+                else:
+                    timestamp = timestamp.astimezone(pytz.UTC)
             else:
-                timestamp = datetime.now(pytz.timezone('US/Eastern'))
+                # Default to current time in UTC
+                timestamp = datetime.now(pytz.UTC)
             
             stats = snapshot_data.get('statistics', {})
             account_metrics = snapshot_data.get('account_metrics', {})
@@ -484,10 +507,22 @@ class DatabaseManager:
         try:
             cursor = self.connection.cursor()
             
+            # Convert timestamp to UTC for storage
             if timestamp is None:
-                timestamp = datetime.now(pytz.timezone('US/Eastern'))
+                timestamp = datetime.now(pytz.UTC)
             elif isinstance(timestamp, str):
                 timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                # Ensure timezone-aware UTC
+                if timestamp.tzinfo is None:
+                    timestamp = pytz.UTC.localize(timestamp)
+                else:
+                    timestamp = timestamp.astimezone(pytz.UTC)
+            elif hasattr(timestamp, 'tzinfo') and timestamp.tzinfo is not None:
+                # If timestamp is timezone-aware, convert to UTC
+                timestamp = timestamp.astimezone(pytz.UTC)
+            else:
+                # If timestamp is naive, assume it's UTC and localize
+                timestamp = pytz.UTC.localize(timestamp)
             
             insert_query = """
                 INSERT INTO portfolio_value_history (timestamp, portfolio_value, account_value, cumulative_pnl)
