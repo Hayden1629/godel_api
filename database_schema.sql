@@ -124,12 +124,33 @@ CREATE TABLE IF NOT EXISTS des_data (
     ceo VARCHAR(255) NULL,
     description TEXT NULL,
     eps_estimates JSON NULL,  -- Store EPS estimates as JSON: {"Q4, Dec 25": "0.72", ...}
-    snapshot JSON NULL,  -- Store snapshot data as JSON: {"Exchange": "XNYS", "Beta": "0.64", ...}
-    last_updated DATETIME NOT NULL,
+    -- Snapshot fields (flattened from JSON)
+    exchange VARCHAR(255) NULL,
+    currency VARCHAR(10) NULL,
+    float_value VARCHAR(50) NULL,
+    employees VARCHAR(50) NULL,
+    insiders VARCHAR(20) NULL,
+    institutions VARCHAR(20) NULL,
+    p_sales VARCHAR(20) NULL,
+    p_book VARCHAR(20) NULL,
+    ev_ebitda VARCHAR(20) NULL,
+    ev_r VARCHAR(20) NULL,
+    ev VARCHAR(50) NULL,
+    trl_pe VARCHAR(20) NULL,
+    fwd_pe VARCHAR(20) NULL,
+    trl_yld VARCHAR(20) NULL,
+    fwd_yld VARCHAR(20) NULL,
+    five_y_avg_yld VARCHAR(20) NULL,
+    payout_ratio VARCHAR(20) NULL,
+    ex_div_date DATE NULL,
+    div_date DATE NULL,
+    beta VARCHAR(20) NULL,
+    short VARCHAR(50) NULL,
+    short_ratio VARCHAR(20) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     UNIQUE KEY unique_ticker (ticker),
     INDEX idx_ticker (ticker),
-    INDEX idx_last_updated (last_updated)
+    INDEX idx_updated_at (updated_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

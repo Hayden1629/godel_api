@@ -602,8 +602,65 @@ class DatabaseManager:
                 import json
                 if result.get('eps_estimates'):
                     result['eps_estimates'] = json.loads(result['eps_estimates']) if isinstance(result['eps_estimates'], str) else result['eps_estimates']
-                if result.get('snapshot'):
-                    result['snapshot'] = json.loads(result['snapshot']) if isinstance(result['snapshot'], str) else result['snapshot']
+                
+                # Reconstruct snapshot dict from individual fields for backward compatibility
+                snapshot = {}
+                if result.get('exchange'):
+                    snapshot['Exchange'] = result['exchange']
+                if result.get('currency'):
+                    snapshot['Currency'] = result['currency']
+                if result.get('float_value'):
+                    snapshot['Float'] = result['float_value']
+                if result.get('employees'):
+                    snapshot['Employees'] = result['employees']
+                if result.get('insiders'):
+                    snapshot['Insiders'] = result['insiders']
+                if result.get('institutions'):
+                    snapshot['Institutions'] = result['institutions']
+                if result.get('p_sales'):
+                    snapshot['P/Sales'] = result['p_sales']
+                if result.get('p_book'):
+                    snapshot['P/Book'] = result['p_book']
+                if result.get('ev_ebitda'):
+                    snapshot['EV/EBITDA'] = result['ev_ebitda']
+                if result.get('ev_r'):
+                    snapshot['EV/R'] = result['ev_r']
+                if result.get('ev'):
+                    snapshot['EV'] = result['ev']
+                if result.get('trl_pe'):
+                    snapshot['Trl P/E'] = result['trl_pe']
+                if result.get('fwd_pe'):
+                    snapshot['Fwd P/E'] = result['fwd_pe']
+                if result.get('trl_yld'):
+                    snapshot['Trl Yld'] = result['trl_yld']
+                if result.get('fwd_yld'):
+                    snapshot['Fwd Yld'] = result['fwd_yld']
+                if result.get('five_y_avg_yld'):
+                    snapshot['5Y Avg Yld'] = result['five_y_avg_yld']
+                if result.get('payout_ratio'):
+                    snapshot['Payout R'] = result['payout_ratio']
+                if result.get('ex_div_date'):
+                    # Convert date to string format "YYYY-MM-DD"
+                    ex_div_date = result['ex_div_date']
+                    if hasattr(ex_div_date, 'strftime'):
+                        snapshot['Ex Div Date'] = ex_div_date.strftime('%Y-%m-%d')
+                    else:
+                        snapshot['Ex Div Date'] = str(ex_div_date)
+                if result.get('div_date'):
+                    # Convert date to string format "YYYY-MM-DD"
+                    div_date = result['div_date']
+                    if hasattr(div_date, 'strftime'):
+                        snapshot['Div Date'] = div_date.strftime('%Y-%m-%d')
+                    else:
+                        snapshot['Div Date'] = str(div_date)
+                if result.get('beta'):
+                    snapshot['Beta'] = result['beta']
+                if result.get('short'):
+                    snapshot['Short'] = result['short']
+                if result.get('short_ratio'):
+                    snapshot['Short R'] = result['short_ratio']
+                
+                result['snapshot'] = snapshot if snapshot else None
             
             return result
         except Error as e:
@@ -633,7 +690,7 @@ class DatabaseManager:
             cursor = self.connection.cursor()
             placeholders = ','.join(['%s'] * len(all_tickers))
             cursor.execute(f"""
-                SELECT ticker, last_updated 
+                SELECT ticker, updated_at 
                 FROM des_data 
                 WHERE ticker IN ({placeholders})
             """, all_tickers)
@@ -676,6 +733,7 @@ class DatabaseManager:
         
         try:
             import json
+            from datetime import datetime
             
             # Extract company info
             company_info = des_data.get('company_info', {})
@@ -684,18 +742,32 @@ class DatabaseManager:
             eps_estimates = des_data.get('eps_estimates', {})
             eps_estimates_json = json.dumps(eps_estimates) if eps_estimates else None
             
-            # Prepare snapshot as JSON
+            # Extract snapshot fields individually
             snapshot = des_data.get('snapshot', {})
-            snapshot_json = json.dumps(snapshot) if snapshot else None
+            
+            # Helper function to parse dates (format: "2026-01-15")
+            def parse_date(date_str):
+                if not date_str:
+                    return None
+                try:
+                    return datetime.strptime(date_str, "%Y-%m-%d").date() if date_str else None
+                except (ValueError, TypeError):
+                    return None
             
             cursor = self.connection.cursor()
             
             upsert_query = """
                 INSERT INTO des_data (
                     ticker, company_name, asset_class, logo_url, website, address, ceo,
-                    description, eps_estimates, snapshot, last_updated
+                    description, eps_estimates,
+                    exchange, currency, float_value, employees, insiders, institutions,
+                    p_sales, p_book, ev_ebitda, ev_r, ev,
+                    trl_pe, fwd_pe, trl_yld, fwd_yld, five_y_avg_yld,
+                    payout_ratio, ex_div_date, div_date, beta, short, short_ratio
                 ) VALUES (
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW()
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
                 ON DUPLICATE KEY UPDATE
                     company_name = VALUES(company_name),
@@ -706,8 +778,28 @@ class DatabaseManager:
                     ceo = VALUES(ceo),
                     description = VALUES(description),
                     eps_estimates = VALUES(eps_estimates),
-                    snapshot = VALUES(snapshot),
-                    last_updated = NOW(),
+                    exchange = VALUES(exchange),
+                    currency = VALUES(currency),
+                    float_value = VALUES(float_value),
+                    employees = VALUES(employees),
+                    insiders = VALUES(insiders),
+                    institutions = VALUES(institutions),
+                    p_sales = VALUES(p_sales),
+                    p_book = VALUES(p_book),
+                    ev_ebitda = VALUES(ev_ebitda),
+                    ev_r = VALUES(ev_r),
+                    ev = VALUES(ev),
+                    trl_pe = VALUES(trl_pe),
+                    fwd_pe = VALUES(fwd_pe),
+                    trl_yld = VALUES(trl_yld),
+                    fwd_yld = VALUES(fwd_yld),
+                    five_y_avg_yld = VALUES(five_y_avg_yld),
+                    payout_ratio = VALUES(payout_ratio),
+                    ex_div_date = VALUES(ex_div_date),
+                    div_date = VALUES(div_date),
+                    beta = VALUES(beta),
+                    short = VALUES(short),
+                    short_ratio = VALUES(short_ratio),
                     updated_at = CURRENT_TIMESTAMP
             """
             
@@ -727,7 +819,29 @@ class DatabaseManager:
                 company_info.get('ceo'),
                 des_data.get('description'),
                 eps_estimates_json,
-                snapshot_json
+                # Snapshot fields
+                snapshot.get('Exchange'),
+                snapshot.get('Currency'),
+                snapshot.get('Float'),
+                snapshot.get('Employees'),
+                snapshot.get('Insiders'),
+                snapshot.get('Institutions'),
+                snapshot.get('P/Sales'),
+                snapshot.get('P/Book'),
+                snapshot.get('EV/EBITDA'),
+                snapshot.get('EV/R'),
+                snapshot.get('EV'),
+                snapshot.get('Trl P/E'),
+                snapshot.get('Fwd P/E'),
+                snapshot.get('Trl Yld'),
+                snapshot.get('Fwd Yld'),
+                snapshot.get('5Y Avg Yld'),
+                snapshot.get('Payout R'),
+                parse_date(snapshot.get('Ex Div Date')),
+                parse_date(snapshot.get('Div Date')),
+                snapshot.get('Beta'),
+                snapshot.get('Short'),
+                snapshot.get('Short R')
             ))
             
             self.connection.commit()
