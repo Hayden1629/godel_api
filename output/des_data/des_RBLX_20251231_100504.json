@@ -1,0 +1,277 @@
+{
+  "timestamp": "2025-12-31T16:05:01.205552Z",
+  "window_id": "4628-window",
+  "ticker": "RBLX US",
+  "company_info": {
+    "company_name": "Roblox Corporation",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/corp.roblox.com",
+    "website": "https://corp.roblox.com/",
+    "address": "3150 SOUTH DELAWARE STREET, SAN MATEO, CA, 94403",
+    "ceo": "CEO: MR. DAVID BASZUCKI"
+  },
+  "description": "Roblox Corporation develops and operates an online entertainment platform. The company offers Roblox Studio, a free toolset that allows developers and creators to build, publish, and operate 3D experiences, and other content; Roblox Client, an application that allows users to explore 3D digital world; Roblox Education for learning experiences; and Roblox Cloud, which provides services and infrastructure that power the human co-experience platform. It serves customers in the United States, the United Kingdom, Canada, Europe, China, the Asia-Pacific, and internationally. The company was incorporated in 2004 and is headquartered in San Mateo, California.",
+  "eps_estimates": {
+    "Q4, Dec 25": "-0.47",
+    "FY25, Dec 25": "-1.56",
+    "FY26, Dec 26": "-1.68"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Cory Carpenter",
+      "Rating": "Neutral",
+      "Old_Target": "$145",
+      "New_Target": "$100",
+      "Date": "12/12/25 14:58"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "James Heaney",
+      "Rating": "Hold",
+      "Old_Target": "$115",
+      "New_Target": "$100",
+      "Date": "12/11/25 21:40"
+    },
+    {
+      "Firm": "B. Riley Securities",
+      "Analyst": "Drew Crum",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/10/25 13:33"
+    },
+    {
+      "Firm": "Freedom Capital Markets",
+      "Analyst": "Nick McKay",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/09/25 13:27"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Christopher Schoell",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/03/25 20:15"
+    },
+    {
+      "Firm": "Macquarie",
+      "Analyst": "Aaron Lee",
+      "Rating": "Outperform",
+      "Old_Target": "$158",
+      "New_Target": "$164",
+      "Date": "11/04/25 23:39"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Ross Sandler",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$120",
+      "New_Target": "$130",
+      "Date": "11/01/25 01:47"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "Bernie McTernan",
+      "Rating": "Buy",
+      "Old_Target": "$159",
+      "New_Target": "$159",
+      "Date": "10/31/25 17:08"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Cory Carpenter",
+      "Rating": "Overweight",
+      "Old_Target": "$160",
+      "New_Target": "$145",
+      "Date": "11/01/25 00:16"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Eric Sheridan",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$180",
+      "Date": "10/31/25 23:06"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Ken Gawrelski",
+      "Rating": "Overweight",
+      "Old_Target": "$155",
+      "New_Target": "$141",
+      "Date": "11/01/25 02:27"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Clark Lampen",
+      "Rating": "Buy",
+      "Old_Target": "$180",
+      "New_Target": "$174",
+      "Date": "10/30/25 13:26"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Clark Lampen",
+      "Rating": "Buy",
+      "Old_Target": "$173",
+      "New_Target": "$180",
+      "Date": "10/16/25 15:25"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "James Heaney",
+      "Rating": "Hold",
+      "Old_Target": "$126",
+      "New_Target": "$130",
+      "Date": "10/14/25 17:22"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Andrew Marok",
+      "Rating": "Outperform",
+      "Old_Target": "$155",
+      "New_Target": "$165",
+      "Date": "10/14/25 19:23"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Jason Bazinet",
+      "Rating": "Buy",
+      "Old_Target": "$152",
+      "New_Target": "$155",
+      "Date": "10/08/25 23:24"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Ken Gawrelski",
+      "Rating": "Overweight",
+      "Old_Target": "$153",
+      "New_Target": "$155",
+      "Date": "10/03/25 19:37"
+    },
+    {
+      "Firm": "BMO Capital",
+      "Analyst": "Brian Pitz",
+      "Rating": "Outperform",
+      "Old_Target": "$150",
+      "New_Target": "$160",
+      "Date": "10/02/25 17:07"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Thomas Champion",
+      "Rating": "Overweight",
+      "Old_Target": "$175",
+      "New_Target": "$180",
+      "Date": "09/24/25 21:03"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Cory Carpenter",
+      "Rating": "Overweight",
+      "Old_Target": "$150",
+      "New_Target": "$160",
+      "Date": "09/22/25 17:27"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Clark Lampen",
+      "Rating": "Buy",
+      "Old_Target": "$159",
+      "New_Target": "$173",
+      "Date": "09/09/25 15:53"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Alicia Reese",
+      "Rating": "Outperform",
+      "Old_Target": "$165",
+      "New_Target": "$165",
+      "Date": "09/08/25 17:45"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Omar Dessouky",
+      "Rating": "Buy",
+      "Old_Target": "$159",
+      "New_Target": "$171",
+      "Date": "09/08/25 16:30"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Alicia Reese",
+      "Rating": "Outperform",
+      "Old_Target": "$165",
+      "New_Target": "$165",
+      "Date": "08/25/25 19:31"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Ken Gawrelski",
+      "Rating": "Overweight",
+      "Old_Target": "$116",
+      "New_Target": "$153",
+      "Date": "08/01/25 19:47"
+    },
+    {
+      "Firm": "BMO Capital",
+      "Analyst": "Brian Pitz",
+      "Rating": "Outperform",
+      "Old_Target": "$135",
+      "New_Target": "$150",
+      "Date": "08/01/25 22:17"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "Bernie McTernan",
+      "Rating": "Buy",
+      "Old_Target": "$79",
+      "New_Target": "$159",
+      "Date": "08/01/25 15:05"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Matthew Cost",
+      "Rating": "Overweight",
+      "Old_Target": "$76",
+      "New_Target": "$170",
+      "Date": "08/01/25 19:24"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Ross Sandler",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$62",
+      "New_Target": "$120",
+      "Date": "08/01/25 18:40"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "626.7M",
+    "Employees": "2,474",
+    "Insiders": "4.44%",
+    "Institutions": "82.59%",
+    "P/Sales": "12.82",
+    "P/Book": "140.31",
+    "EV/EBITDA": "-63.34",
+    "EV/R": "12.57",
+    "EV": "56.1B",
+    "Trl P/E": "-",
+    "Fwd P/E": "-",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "1.63",
+    "Short": "13.9M",
+    "Short R": "2.03"
+  }
+}

@@ -1,0 +1,281 @@
+{
+  "timestamp": "2025-12-31T16:14:37.928949Z",
+  "window_id": "4647-window",
+  "ticker": "SHOP US",
+  "company_info": {
+    "company_name": "Shopify Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/shopify.com",
+    "website": "https://shopify.com/",
+    "address": "151 OCONNOR STREET, GROUND FLOOR, OTTAWA, A6, K2P 2L8",
+    "ceo": "CEO: MR. TOBIAS LUTKE"
+  },
+  "description": "Shopify Inc., a commerce company, provides a commerce platform and services in Canada, the United States, Europe, the Middle East, Africa, the Asia Pacific, and Latin America. The companys platform enables merchants to displays, manages, markets, and sells its products through various sales channels, including web and mobile storefronts, physical retail locations, pop-up shops, social media storefronts, native mobile apps, buy buttons, and marketplaces; and enables to manage products and inventory, process orders and payments, fulfill and ship orders, new buyers and build customer relationships, source products, leverage analytics and reporting, manage cash, payments and transactions, and access financing. It also sells custom themes and apps, and registration of domain names; and merchant solutions, which include accepting payments, shipping and fulfillment, and securing working capital. The company was formerly known as Jaded Pixel Technologies Inc. and changed its name to Shopify Inc. in November 2011. Shopify Inc. was incorporated in 2004 and is headquartered in Ottawa, Canada.",
+  "eps_estimates": {},
+  "analyst_ratings": [
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Jeff Cantwell",
+      "Rating": "Overweight",
+      "Old_Target": "$125",
+      "New_Target": "$198",
+      "Date": "12/17/25 16:47"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Deepak Mathivanan",
+      "Rating": "Neutral",
+      "Old_Target": "$156",
+      "New_Target": "$181",
+      "Date": "11/05/25 21:50"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Trevor Young",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$120",
+      "New_Target": "$140",
+      "Date": "11/05/25 23:58"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "Scott Berg",
+      "Rating": "Buy",
+      "Old_Target": "$180",
+      "New_Target": "$180",
+      "Date": "11/05/25 16:57"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Chiodo",
+      "Rating": "Neutral",
+      "Old_Target": "$145",
+      "New_Target": "$165",
+      "Date": "11/06/25 05:13"
+    },
+    {
+      "Firm": "CIBC",
+      "Analyst": "Todd Coupland",
+      "Rating": "Outperformer",
+      "Old_Target": "$185",
+      "New_Target": "$200",
+      "Date": "11/06/25 00:50"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Keith Weiss",
+      "Rating": "Overweight",
+      "Old_Target": "$165",
+      "New_Target": "$192",
+      "Date": "11/05/25 19:21"
+    },
+    {
+      "Firm": "BMO Capital",
+      "Analyst": "Thanos Moschopoulos",
+      "Rating": "Outperform",
+      "Old_Target": "$180",
+      "New_Target": "$190",
+      "Date": "11/05/25 19:06"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Reginald Smith",
+      "Rating": "Overweight",
+      "Old_Target": "$179",
+      "New_Target": "$180",
+      "Date": "11/06/25 01:41"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "Terry Tillman",
+      "Rating": "Hold",
+      "Old_Target": "$150",
+      "New_Target": "$155",
+      "Date": "11/05/25 22:38"
+    },
+    {
+      "Firm": "DA Davidson",
+      "Analyst": "Gil Luria",
+      "Rating": "Buy",
+      "Old_Target": "$185",
+      "New_Target": "$195",
+      "Date": "11/05/25 20:38"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Kevin Krishnaratne",
+      "Rating": "Sector Perform",
+      "Old_Target": "$150",
+      "New_Target": "$165",
+      "Date": "11/05/25 20:32"
+    },
+    {
+      "Firm": "Canaccord Genuity",
+      "Analyst": "David Hynes",
+      "Rating": "Buy",
+      "Old_Target": "$165",
+      "New_Target": "$185",
+      "Date": "11/05/25 00:40"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "Austin Wurschmidt",
+      "Rating": "Overweight",
+      "Old_Target": "$175",
+      "New_Target": "$200",
+      "Date": "10/30/25 17:49"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Ken Wong",
+      "Rating": "Outperform",
+      "Old_Target": "$180",
+      "New_Target": "$200",
+      "Date": "10/28/25 21:17"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Paul Treiber",
+      "Rating": "Outperform",
+      "Old_Target": "$170",
+      "New_Target": "$200",
+      "Date": "10/17/25 18:53"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Daniel Chan",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/03/25 16:39"
+    },
+    {
+      "Firm": "TD Securities",
+      "Analyst": "Daniel Chan",
+      "Rating": "Hold",
+      "Old_Target": "$130",
+      "New_Target": "$156",
+      "Date": "10/03/25 12:23"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Tyler Radke",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$195",
+      "Date": "08/09/25 03:43"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Mark Mahaney",
+      "Rating": "Outperform",
+      "Old_Target": "$120",
+      "New_Target": "$170",
+      "Date": "08/08/25 17:42"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Parker Lane",
+      "Rating": "Hold",
+      "Old_Target": "$110",
+      "New_Target": "$150",
+      "Date": "08/07/25 20:34"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Siti Panigrahi",
+      "Rating": "Neutral",
+      "Old_Target": "$85",
+      "New_Target": "$150",
+      "Date": "08/07/25 18:21"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "Justin Patterson",
+      "Rating": "Overweight",
+      "Old_Target": "$145",
+      "New_Target": "$175",
+      "Date": "08/07/25 19:02"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Chiodo",
+      "Rating": "Neutral",
+      "Old_Target": "$110",
+      "New_Target": "$145",
+      "Date": "08/07/25 21:57"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Gabriela Borges",
+      "Rating": "Buy",
+      "Old_Target": "$120",
+      "New_Target": "$176",
+      "Date": "08/07/25 22:42"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "Terry Tillman",
+      "Rating": "Hold",
+      "Old_Target": "$95",
+      "New_Target": "$150",
+      "Date": "08/07/25 19:26"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Ken Wong",
+      "Rating": "Outperform",
+      "Old_Target": "$145",
+      "New_Target": "$180",
+      "Date": "08/07/25 18:23"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Mark Zgutowicz",
+      "Rating": "Buy",
+      "Old_Target": "$140",
+      "New_Target": "$190",
+      "Date": "08/07/25 17:06"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Trevor Young",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$94",
+      "New_Target": "$120",
+      "Date": "08/07/25 18:42"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Paul Treiber",
+      "Rating": "Outperform",
+      "Old_Target": "$145",
+      "New_Target": "$170",
+      "Date": "08/07/25 20:19"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "1.2B",
+    "Employees": "8,100",
+    "Insiders": "0.19%",
+    "Institutions": "74.28%",
+    "P/Sales": "20.43",
+    "P/Book": "17.46",
+    "EV/EBITDA": "125.82",
+    "EV/R": "20.30",
+    "EV": "217.2B",
+    "Trl P/E": "125.28x",
+    "Fwd P/E": "90.72x",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "2.83",
+    "Short": "17.7M",
+    "Short R": "2.73"
+  }
+}

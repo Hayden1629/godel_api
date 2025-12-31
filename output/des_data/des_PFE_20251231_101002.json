@@ -1,0 +1,253 @@
+{
+  "timestamp": "2025-12-31T16:09:59.068870Z",
+  "window_id": "4638-window",
+  "ticker": "PFE US",
+  "company_info": {
+    "company_name": "Pfizer Inc.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/pfizer.com",
+    "website": "https://pfizer.com/",
+    "address": "66 HUDSON BOULEVARD EAST, NEW YORK, NY, 10001-2192",
+    "ceo": "CEO: DR. ALBERT BOURLA D.V.M., PH.D."
+  },
+  "description": "Pfizer Inc. discovers, develops, manufactures, markets, distributes, and sells biopharmaceutical products worldwide. It offers medicines and vaccines in various therapeutic areas, including cardiovascular metabolic and womens health under the Premarin family and Eliquis brands; biologics, small molecules, immunotherapies, and biosimilars under the Ibrance, Xtandi, Sutent, Inlyta, Retacrit, Lorbrena, and Braftovi brands; and sterile injectable and anti-infective medicines, and oral COVID-19 treatment under the Sulperazon, Medrol, Zavicefta, Zithromax, Vfend, Panzyga, and Paxlovid brands. The company also provides medicines and vaccines in various therapeutic areas, such as pneumococcal disease, meningococcal disease, tick-borne encephalitis, and COVID-19 under the Comirnaty/BNT162b2, Nimenrix, FSME/IMMUN-TicoVac, Trumenba, and the Prevnar family brands; biosimilars for chronic immune and inflammatory diseases under the Xeljanz, Enbrel, Inflectra, Eucrisa/Staquis, and Cibinqo brands; and amyloidosis, hemophilia, and endocrine diseases under the Vyndaqel/Vyndamax, BeneFIX, and Genotropin brands. In addition, the company is involved in the contract manufacturing business. It serves wholesalers, retailers, hospitals, clinics, government agencies, pharmacies, and individual provider offices, as well as disease control and prevention centers. The company has collaboration agreements with Bristol-Myers Squibb Company; Astellas Pharma US, Inc.; Myovant Sciences Ltd.; Akcea Therapeutics, Inc; Merck KGaA; Valneva SE; BioNTech SE; and Arvinas, Inc. Pfizer Inc. was founded in 1849 and is headquartered in New York, New York.",
+  "eps_estimates": {
+    "Q4, Dec 25": "0.56",
+    "FY25, Dec 25": "3.12",
+    "FY26, Dec 26": "3.00"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Terence Flynn",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$28",
+      "New_Target": "$27",
+      "Date": "12/17/25 16:28"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Jason Gerberry",
+      "Rating": "Neutral",
+      "Old_Target": "$29",
+      "New_Target": "$28",
+      "Date": "12/15/25 14:24"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Terence Flynn",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$32",
+      "New_Target": "$28",
+      "Date": "12/12/25 18:23"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Geoff Meacham",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/02/25 13:56"
+    },
+    {
+      "Firm": "Guggenheim",
+      "Analyst": "Vamil Divan",
+      "Rating": "Buy",
+      "Old_Target": "$33",
+      "New_Target": "$35",
+      "Date": "11/24/25 19:31"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Terence Flynn",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$33",
+      "New_Target": "$32",
+      "Date": "10/10/25 22:41"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Tim Anderson",
+      "Rating": "Neutral",
+      "Old_Target": "$28",
+      "New_Target": "$30",
+      "Date": "10/03/25 18:06"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Tim Anderson",
+      "Rating": "Neutral",
+      "Old_Target": "$27",
+      "New_Target": "$28",
+      "Date": "08/06/25 17:42"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Andrew Baum",
+      "Rating": "Neutral",
+      "Old_Target": "$25",
+      "New_Target": "$26",
+      "Date": "08/07/25 03:04"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Terence Flynn",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$32",
+      "New_Target": "$33",
+      "Date": "08/06/25 21:26"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Trung Huynh",
+      "Rating": "Neutral",
+      "Old_Target": "$24",
+      "New_Target": "$25",
+      "Date": "04/30/25 19:06"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Carter Gould",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "04/22/25 16:46"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Trung Huynh",
+      "Rating": "Neutral",
+      "Old_Target": "$28",
+      "New_Target": "$24",
+      "Date": "04/09/25 02:39"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Asad Haider",
+      "Rating": "Neutral",
+      "Old_Target": "$32",
+      "New_Target": "$25",
+      "Date": "04/08/25 21:00"
+    },
+    {
+      "Firm": "Guggenheim",
+      "Analyst": "Vamil Divan",
+      "Rating": "Buy",
+      "Old_Target": "$33",
+      "New_Target": "$33",
+      "Date": "02/10/25 19:57"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Colin Bristow",
+      "Rating": "Neutral",
+      "Old_Target": "$29",
+      "New_Target": "$28",
+      "Date": "02/05/25 16:29"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Andrew Baum",
+      "Rating": "Neutral",
+      "Old_Target": "$30",
+      "New_Target": "$29",
+      "Date": "01/28/25 18:26"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Colin Bristow",
+      "Rating": "Neutral",
+      "Old_Target": "$31",
+      "New_Target": "$29",
+      "Date": "01/08/25 20:58"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "Srikripa Devarakonda",
+      "Rating": "Buy",
+      "Old_Target": "$36",
+      "New_Target": "$32",
+      "Date": "12/18/24 21:27"
+    },
+    {
+      "Firm": "Guggenheim",
+      "Analyst": "Vamil Divan",
+      "Rating": "Buy",
+      "Old_Target": "$35",
+      "New_Target": "$33",
+      "Date": "12/11/24 22:46"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Tim Anderson",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/10/24 13:41"
+    },
+    {
+      "Firm": "Wolfe Research",
+      "Analyst": "Alexandria Hammond",
+      "Rating": "Underperform",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "11/15/24 16:54"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Louise Chen",
+      "Rating": "Overweight",
+      "Old_Target": "$45",
+      "New_Target": "$45",
+      "Date": "10/25/24 20:52"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Louise Chen",
+      "Rating": "Overweight",
+      "Old_Target": "$45",
+      "New_Target": "$45",
+      "Date": "10/23/24 21:28"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Courtney Breen",
+      "Rating": "Market Perform",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/17/24 16:41"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Louise Chen",
+      "Rating": "Overweight",
+      "Old_Target": "$45",
+      "New_Target": "$45",
+      "Date": "10/03/24 19:52"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "5.7B",
+    "Employees": "81,000",
+    "Insiders": "0.08%",
+    "Institutions": "67.51%",
+    "P/Sales": "2.26",
+    "P/Book": "1.53",
+    "EV/EBITDA": "7.76",
+    "EV/R": "3.02",
+    "EV": "189.9B",
+    "Trl P/E": "14.62x",
+    "Fwd P/E": "8.33x",
+    "Trl Yld": "6.91%",
+    "Fwd Yld": "6.91%",
+    "5Y Avg Yld": "4.82",
+    "Payout R": "99.42%",
+    "Ex Div Date": "2026-01-23",
+    "Div Date": "2026-03-06",
+    "Beta": "0.42",
+    "Short": "139.5M",
+    "Short R": "2.97"
+  }
+}

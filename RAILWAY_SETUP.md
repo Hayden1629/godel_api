@@ -15,7 +15,7 @@
    export MYSQLHOST="your-actual-domain.railway.app"  # Replace with actual domain
    export MYSQLPORT="3306"
    export MYSQLUSER="root"
-   export MYSQLPASSWORD="eFpkmKiauoilGietfPxhphBgBngicXwT"
+   export MYSQLPASSWORD="your-password-here"  # Replace with your actual password
    export MYSQLDATABASE="railway"
    ```
    
@@ -24,7 +24,7 @@
    echo 'export MYSQLHOST="your-actual-domain.railway.app"' >> ~/.bashrc
    echo 'export MYSQLPORT="3306"' >> ~/.bashrc
    echo 'export MYSQLUSER="root"' >> ~/.bashrc
-   echo 'export MYSQLPASSWORD="eFpkmKiauoilGietfPxhphBgBngicXwT"' >> ~/.bashrc
+   echo 'export MYSQLPASSWORD="your-password-here"' >> ~/.bashrc  # Replace with your actual password
    echo 'export MYSQLDATABASE="railway"' >> ~/.bashrc
    source ~/.bashrc
    ```

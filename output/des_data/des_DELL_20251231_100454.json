@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:04:51.101485Z",
+  "window_id": "4627-window",
+  "ticker": "DELL US",
+  "company_info": {
+    "company_name": "Dell Technologies Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/dell.com",
+    "website": "https://delltechnologies.com/",
+    "address": "ONE DELL WAY, ROUND ROCK, TX, 78682",
+    "ceo": "CEO: MR. MICHAEL SAUL DELL"
+  },
+  "description": "Dell Technologies Inc. designs, develops, manufactures, markets, sells, and supports information technology (IT) solutions, products, and services worldwide. The company operates through three segments: Infrastructure Solutions Group (ISG), Client Solutions Group (CSG), and VMware. The ISG segment provides traditional and next-generation storage solutions; and rack, blade, tower, and hyperscale servers. This segment also offers networking products and services that help its business customers to transform and modernize their infrastructure, mobilize and enrich end-user experiences, and accelerate business applications and processes; attached software and peripherals; and support and deployment, configuration, and extended warranty services. The CSG segment provides desktops, workstations, and notebooks; displays and projectors; attached and third-party software and peripherals, as well as support and deployment, configuration, and extended warranty services. The VMware segment supports customers in the areas of hybrid and multi-cloud, modern applications, networking, security, and digital workspaces, helping customers to manage IT resource across private clouds and complex multi-cloud, multi-device environments. Dell Technologies Inc. also provides information security; and cloud software and infrastructure-as-a-service solutions that enable customers to migrate, run, and manage mission-critical applications in cloud-based IT environments. The company was formerly known as Denali Holding Inc. and changed its name to Dell Technologies Inc. in August 2016. Dell Technologies Inc. was founded in 1984 and is headquartered in Round Rock, Texas.",
+  "eps_estimates": {
+    "Q4, Jan 26": "3.52",
+    "FY26, Jan 26": "9.92",
+    "FY27, Jan 27": "11.46"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Barclays",
+      "Analyst": "Tim Long",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$151",
+      "New_Target": "$148",
+      "Date": "11/26/25 16:58"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Buy",
+      "Old_Target": "$160",
+      "New_Target": "$163",
+      "Date": "11/26/25 12:52"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$170",
+      "New_Target": "$175",
+      "Date": "11/26/25 18:54"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "David Vogt",
+      "Rating": "Buy",
+      "Old_Target": "$186",
+      "New_Target": "$167",
+      "Date": "11/26/25 16:27"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Erik Woodring",
+      "Rating": "Underweight",
+      "Old_Target": "$110",
+      "New_Target": "$113",
+      "Date": "11/26/25 15:57"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Buy",
+      "Old_Target": "$170",
+      "New_Target": "$160",
+      "Date": "11/20/25 13:20"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Erik Woodring",
+      "Rating": "Underweight",
+      "Old_Target": "$144",
+      "New_Target": "$110",
+      "Date": "11/17/25 16:32"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$165",
+      "New_Target": "$170",
+      "Date": "11/17/25 23:13"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "James Fish",
+      "Rating": "Overweight",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/22/25 19:54"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Simon Leopold",
+      "Rating": "Outperform",
+      "Old_Target": "$152",
+      "New_Target": "$161",
+      "Date": "10/21/25 22:52"
+    },
+    {
+      "Firm": "Argus Research",
+      "Analyst": "Jim Kelleher",
+      "Rating": "Buy",
+      "Old_Target": "$150",
+      "New_Target": "$200",
+      "Date": "10/09/25 18:36"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$145",
+      "New_Target": "$165",
+      "Date": "10/08/25 22:39"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$160",
+      "New_Target": "$175",
+      "Date": "10/08/25 23:30"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Mark Newman",
+      "Rating": "Outperform",
+      "Old_Target": "$175",
+      "New_Target": "$180",
+      "Date": "10/08/25 19:26"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$160",
+      "New_Target": "$170",
+      "Date": "10/08/25 22:11"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Tim Long",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$133",
+      "New_Target": "$151",
+      "Date": "10/08/25 20:22"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "David Vogt",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$186",
+      "Date": "10/08/25 20:54"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Aaron Rakers",
+      "Rating": "Overweight",
+      "Old_Target": "$160",
+      "New_Target": "$180",
+      "Date": "10/08/25 19:25"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Michael Ng",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$175",
+      "Date": "10/08/25 23:09"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Buy",
+      "Old_Target": "$167",
+      "New_Target": "$170",
+      "Date": "10/01/25 19:06"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Tim Long",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$131",
+      "New_Target": "$133",
+      "Date": "09/17/25 18:02"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Mark Newman",
+      "Rating": "Outperform",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "09/16/25 18:40"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Tim Long",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$123",
+      "New_Target": "$131",
+      "Date": "08/29/25 18:11"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Buy",
+      "Old_Target": "$165",
+      "New_Target": "$167",
+      "Date": "08/29/25 17:25"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Simon Leopold",
+      "Rating": "Outperform",
+      "Old_Target": "$150",
+      "New_Target": "$152",
+      "Date": "08/29/25 19:13"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "David Vogt",
+      "Rating": "Buy",
+      "Old_Target": "$145",
+      "New_Target": "$155",
+      "Date": "08/29/25 20:05"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Aaron Rakers",
+      "Rating": "Overweight",
+      "Old_Target": "$150",
+      "New_Target": "$160",
+      "Date": "08/29/25 19:44"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Erik Woodring",
+      "Rating": "Overweight",
+      "Old_Target": "$135",
+      "New_Target": "$144",
+      "Date": "08/21/25 23:06"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Amit Daryanani",
+      "Rating": "Outperform",
+      "Old_Target": "$150",
+      "New_Target": "$160",
+      "Date": "08/15/25 16:21"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$135",
+      "New_Target": "$160",
+      "Date": "08/11/25 18:01"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "311.4M",
+    "Employees": "108,000",
+    "Insiders": "6.54%",
+    "Institutions": "73.90%",
+    "P/Sales": "0.82",
+    "P/Book": "-32.76",
+    "EV/EBITDA": "10.19",
+    "EV/R": "1.03",
+    "EV": "106.9B",
+    "Trl P/E": "17.27x",
+    "Fwd P/E": "11.12x",
+    "Trl Yld": "1.58%",
+    "Fwd Yld": "1.64%",
+    "5Y Avg Yld": "-",
+    "Payout R": "27.01%",
+    "Ex Div Date": "2026-01-20",
+    "Div Date": "2026-01-30",
+    "Beta": "1.11",
+    "Short": "20.6M",
+    "Short R": "3.61"
+  }
+}

@@ -1,0 +1,229 @@
+{
+  "timestamp": "2025-12-31T16:09:40.449581Z",
+  "window_id": "4636-window",
+  "ticker": "ABT US",
+  "company_info": {
+    "company_name": "Abbott Laboratories",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/abbott.com",
+    "website": "https://abbott.com/",
+    "address": "100 ABBOTT PARK ROAD, ABBOTT PARK, IL, 60064-3500",
+    "ceo": "CEO: MR. ROBERT B. FORD"
+  },
+  "description": "Abbott Laboratories, together with its subsidiaries, discovers, develops, manufactures, and sells health care products worldwide. It operates in four segments: Established Pharmaceutical Products, Diagnostic Products, Nutritional Products, and Medical Devices. The Established Pharmaceutical Products segment provides generic pharmaceuticals for the treatment of pancreatic exocrine insufficiency, irritable bowel syndrome or biliary spasm, intrahepatic cholestasis or depressive symptoms, gynecological disorder, hormone replacement therapy, dyslipidemia, hypertension, hypothyroidism, M\u00e9ni\u00e8res disease and vestibular vertigo, pain, fever, inflammation, and migraine, as well as provides anti-infective clarithromycin, influenza vaccine, and products to regulate physiological rhythm of the colon. The Diagnostic Products segment offers laboratory systems in the areas of immunoassay, clinical chemistry, hematology, and transfusion; molecular diagnostics systems that automate the extraction, purification, and preparation of DNA and RNA from patient samples, as well as detect and measure infectious agents; point of care systems; cartridges for testing blood; rapid diagnostics lateral flow testing products; molecular point-of-care testing for HIV, SARS-CoV-2, influenza A and B, RSV, and strep A; cardiometabolic test systems; drug and alcohol test, and remote patient monitoring and consumer self-test systems; and informatics and automation solutions for use in laboratories. The Nutritional Products segment provides pediatric and adult nutritional products. The Medical Devices segment offers rhythm management, electrophysiology, heart failure, vascular, and structural heart devices for the treatment of cardiovascular diseases; and diabetes care products, as well as neuromodulation devices for the management of chronic pain and movement disorders. Abbott Laboratories was founded in 1888 and is based in North Chicago, Illinois.",
+  "eps_estimates": {
+    "Q4, Dec 25": "1.50",
+    "FY25, Dec 25": "5.17",
+    "FY26, Dec 26": "5.68"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "BTIG",
+      "Analyst": "Marie Thibault",
+      "Rating": "Buy",
+      "Old_Target": "$145",
+      "New_Target": "$145",
+      "Date": "11/20/25 11:14"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Matt Miksic",
+      "Rating": "Overweight",
+      "Old_Target": "$159",
+      "New_Target": "$162",
+      "Date": "10/17/25 18:17"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Vijay Kumar",
+      "Rating": "Outperform",
+      "Old_Target": "$144",
+      "New_Target": "$142",
+      "Date": "10/16/25 19:47"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Lawrence Biegelsen",
+      "Rating": "Overweight",
+      "Old_Target": "$142",
+      "New_Target": "$146",
+      "Date": "10/16/25 18:43"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Shagun Singh",
+      "Rating": "Outperform",
+      "Old_Target": "$147",
+      "New_Target": "$147",
+      "Date": "10/16/25 18:57"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Jayson Bedford",
+      "Rating": "Outperform",
+      "Old_Target": "$141",
+      "New_Target": "$146",
+      "Date": "10/16/25 21:06"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Marie Thibault",
+      "Rating": "Buy",
+      "Old_Target": "$145",
+      "New_Target": "$145",
+      "Date": "10/15/25 14:56"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Bruce Jackson",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/10/25 17:24"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Vijay Kumar",
+      "Rating": "Outperform",
+      "Old_Target": "$140",
+      "New_Target": "$144",
+      "Date": "10/07/25 21:06"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Jayson Bedford",
+      "Rating": "Outperform",
+      "Old_Target": "$142",
+      "New_Target": "$141",
+      "Date": "07/18/25 19:22"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Lawrence Biegelsen",
+      "Rating": "Overweight",
+      "Old_Target": "$147",
+      "New_Target": "$142",
+      "Date": "07/18/25 23:42"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Matthew Taylor",
+      "Rating": "Buy",
+      "Old_Target": "$143",
+      "New_Target": "$145",
+      "Date": "07/18/25 16:47"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Marie Thibault",
+      "Rating": "Buy",
+      "Old_Target": "$148",
+      "New_Target": "$145",
+      "Date": "07/18/25 14:21"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Anthony Petrone",
+      "Rating": "Neutral",
+      "Old_Target": "$140",
+      "New_Target": "$135",
+      "Date": "07/18/25 17:35"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Anthony Petrone",
+      "Rating": "Neutral",
+      "Old_Target": "$130",
+      "New_Target": "$140",
+      "Date": "07/16/25 17:21"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Shagun Singh",
+      "Rating": "Outperform",
+      "Old_Target": "$145",
+      "New_Target": "$147",
+      "Date": "07/15/25 20:08"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "David Lewis",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$127",
+      "New_Target": "$137",
+      "Date": "07/15/25 18:02"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Vijay Kumar",
+      "Rating": "Outperform",
+      "Old_Target": "$140",
+      "New_Target": "$145",
+      "Date": "07/08/25 17:44"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Matthew Taylor",
+      "Rating": "Hold",
+      "Old_Target": "$135",
+      "New_Target": "$137",
+      "Date": "04/17/25 17:43"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Matt Miksic",
+      "Rating": "Overweight",
+      "Old_Target": "$158",
+      "New_Target": "$159",
+      "Date": "04/17/25 20:06"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Lawrence Biegelsen",
+      "Rating": "Overweight",
+      "Old_Target": "$136",
+      "New_Target": "$147",
+      "Date": "04/17/25 20:46"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Rick Wise",
+      "Rating": "Buy",
+      "Old_Target": "$135",
+      "New_Target": "$145",
+      "Date": "04/17/25 18:04"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Adam Maeder",
+      "Rating": "Overweight",
+      "Old_Target": "$133",
+      "New_Target": "$145",
+      "Date": "04/17/25 21:46"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "1.7B",
+    "Employees": "114,000",
+    "Insiders": "0.55%",
+    "Institutions": "81.42%",
+    "P/Sales": "4.95",
+    "P/Book": "4.25",
+    "EV/EBITDA": "18.91",
+    "EV/R": "5.07",
+    "EV": "222.2B",
+    "Trl P/E": "15.67x",
+    "Fwd P/E": "21.95x",
+    "Trl Yld": "1.88%",
+    "Fwd Yld": "1.88%",
+    "5Y Avg Yld": "1.72",
+    "Payout R": "29.15%",
+    "Ex Div Date": "2026-01-15",
+    "Div Date": "2026-02-13",
+    "Beta": "0.71",
+    "Short": "15.9M",
+    "Short R": "2.82"
+  }
+}

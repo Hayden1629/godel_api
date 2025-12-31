@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:13:05.412002Z",
+  "window_id": "4644-window",
+  "ticker": "C US",
+  "company_info": {
+    "company_name": "Citigroup Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/citigroup.com",
+    "website": "https://citigroup.com/",
+    "address": "388 GREENWICH STREET, NEW YORK, NY, 10013",
+    "ceo": "CEO: MS. JANE NIND FRASER PH.D."
+  },
+  "description": "Citigroup Inc., a diversified financial services holding company, provides various financial products and services to consumers, corporations, governments, and institutions in North America, Latin America, Asia, Europe, the Middle East, and Africa. The company operates in two segments, Global Consumer Banking (GCB) and Institutional Clients Group (ICG). The GCB segment offers traditional banking services to retail customers through retail banking, Citi-branded cards, and Citi retail services. It also provides various banking, credit card, lending, and investment services through a network of local branches, offices, and electronic delivery systems. The ICG segment offers wholesale banking products and services, including fixed income and equity sales and trading, foreign exchange, prime brokerage, derivative, equity and fixed income research, corporate lending, investment banking and advisory, private banking, cash management, trade finance, and securities services to corporate, institutional, public sector_name, and high-net-worth clients. As of December 31, 2020, it operated 2,303 branches primarily in the United States, Mexico, and Asia. Citigroup Inc. was founded in 1812 and is headquartered in New York, New York.",
+  "eps_estimates": {
+    "Q4, Dec 25": "1.79",
+    "FY25, Dec 25": "7.60",
+    "FY26, Dec 26": "10.02"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$112",
+      "New_Target": "$123",
+      "Date": "12/18/25 15:19"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "David Konrad",
+      "Rating": "Outperform",
+      "Old_Target": "$118",
+      "New_Target": "$131",
+      "Date": "12/17/25 18:53"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Vivek Juneja",
+      "Rating": "Overweight",
+      "Old_Target": "$107",
+      "New_Target": "$124",
+      "Date": "12/12/25 15:25"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Overweight",
+      "Old_Target": "$110",
+      "New_Target": "$120",
+      "Date": "12/10/25 23:07"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$123",
+      "New_Target": "$120",
+      "Date": "11/19/25 22:12"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "David Konrad",
+      "Rating": "Outperform",
+      "Old_Target": "$112",
+      "New_Target": "$118",
+      "Date": "10/17/25 16:35"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Ebrahim Poonawala",
+      "Rating": "Buy",
+      "Old_Target": "$115",
+      "New_Target": "$120",
+      "Date": "10/15/25 19:53"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jason Goldberg",
+      "Rating": "Overweight",
+      "Old_Target": "$100",
+      "New_Target": "$115",
+      "Date": "10/15/25 19:42"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Overweight",
+      "Old_Target": "$107",
+      "New_Target": "$110",
+      "Date": "10/15/25 19:01"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Steven Alexopoulos",
+      "Rating": "Hold",
+      "Old_Target": "$105",
+      "New_Target": "$110",
+      "Date": "10/15/25 19:20"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$129",
+      "New_Target": "$134",
+      "Date": "10/15/25 18:12"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$107",
+      "New_Target": "$129",
+      "Date": "09/29/25 21:58"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$105",
+      "New_Target": "$112",
+      "Date": "09/24/25 22:18"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$124",
+      "New_Target": "$123",
+      "Date": "09/23/25 22:41"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Mike Mayo",
+      "Rating": "Overweight",
+      "Old_Target": "$115",
+      "New_Target": "$125",
+      "Date": "09/16/25 18:16"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$99",
+      "New_Target": "$105",
+      "Date": "09/03/25 17:31"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$123",
+      "New_Target": "$124",
+      "Date": "07/30/25 18:33"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$103",
+      "New_Target": "$107",
+      "Date": "07/16/25 17:07"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Mike Mayo",
+      "Rating": "Overweight",
+      "Old_Target": "$110",
+      "New_Target": "$115",
+      "Date": "07/16/25 21:08"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Overweight",
+      "Old_Target": "$84",
+      "New_Target": "$104",
+      "Date": "07/16/25 18:22"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$107",
+      "New_Target": "$123",
+      "Date": "07/16/25 18:19"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jason Goldberg",
+      "Rating": "Overweight",
+      "Old_Target": "$95",
+      "New_Target": "$100",
+      "Date": "07/16/25 18:18"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$93",
+      "New_Target": "$99",
+      "Date": "07/16/25 19:16"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Steven Alexopoulos",
+      "Rating": "Hold",
+      "Old_Target": "$85",
+      "New_Target": "$95",
+      "Date": "07/16/25 17:15"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Erika Najarian",
+      "Rating": "Neutral",
+      "Old_Target": "$89",
+      "New_Target": "$89",
+      "Date": "07/15/25 21:32"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$84",
+      "New_Target": "$93",
+      "Date": "07/09/25 19:24"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$94",
+      "New_Target": "$103",
+      "Date": "07/03/25 20:37"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Richard Ramsden",
+      "Rating": "Buy",
+      "Old_Target": "$85",
+      "New_Target": "$96",
+      "Date": "07/02/25 22:28"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Glenn Schorr",
+      "Rating": "In-Line",
+      "Old_Target": "$76",
+      "New_Target": "$77",
+      "Date": "07/02/25 20:53"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Ebrahim Poonawala",
+      "Rating": "Buy",
+      "Old_Target": "$89",
+      "New_Target": "$100",
+      "Date": "06/26/25 18:11"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "1.8B",
+    "Employees": "227,000",
+    "Insiders": "0.27%",
+    "Institutions": "80.67%",
+    "P/Sales": "2.88",
+    "P/Book": "1.09",
+    "EV/EBITDA": "-",
+    "EV/R": "0.63",
+    "EV": "47.5B",
+    "Trl P/E": "16.92x",
+    "Fwd P/E": "12.00x",
+    "Trl Yld": "1.98%",
+    "Fwd Yld": "2.05%",
+    "5Y Avg Yld": "3.53",
+    "Payout R": "32.02%",
+    "Ex Div Date": "2025-11-03",
+    "Div Date": "2025-11-26",
+    "Beta": "1.20",
+    "Short": "29.1M",
+    "Short R": "2.35"
+  }
+}

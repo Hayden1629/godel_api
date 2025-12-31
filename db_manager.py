@@ -556,6 +556,191 @@ class DatabaseManager:
             logger.error(f"Error getting portfolio value over time: {e}")
             return []
     
+    def get_all_tickers_from_trades(self) -> List[str]:
+        """
+        Get all unique tickers from the trades table.
+        
+        Returns:
+            List of unique ticker symbols
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute("SELECT DISTINCT ticker FROM trades ORDER BY ticker")
+            results = cursor.fetchall()
+            cursor.close()
+            
+            tickers = [row[0] for row in results if row[0]]
+            return tickers
+        except Error as e:
+            logger.error(f"Error getting tickers from trades: {e}")
+            return []
+    
+    def get_des_data(self, ticker: str) -> Optional[Dict[str, Any]]:
+        """
+        Get DES data for a ticker from the database.
+        
+        Args:
+            ticker: Ticker symbol
+            
+        Returns:
+            Dictionary with DES data or None if not found
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute("""
+                SELECT * FROM des_data WHERE ticker = %s
+            """, (ticker.upper(),))
+            result = cursor.fetchone()
+            cursor.close()
+            
+            if result:
+                # Parse JSON fields
+                import json
+                if result.get('eps_estimates'):
+                    result['eps_estimates'] = json.loads(result['eps_estimates']) if isinstance(result['eps_estimates'], str) else result['eps_estimates']
+                if result.get('snapshot'):
+                    result['snapshot'] = json.loads(result['snapshot']) if isinstance(result['snapshot'], str) else result['snapshot']
+            
+            return result
+        except Error as e:
+            logger.error(f"Error getting DES data for {ticker}: {e}")
+            return None
+    
+    def get_tickers_needing_des_update(self, max_age_days: int = 7) -> List[str]:
+        """
+        Get list of tickers that need DES data or have data older than max_age_days.
+        
+        Args:
+            max_age_days: Maximum age in days before data needs updating
+            
+        Returns:
+            List of ticker symbols that need DES data
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            # Get all unique tickers from trades
+            all_tickers = self.get_all_tickers_from_trades()
+            
+            if not all_tickers:
+                return []
+            
+            # Get tickers that have DES data and check their age
+            cursor = self.connection.cursor()
+            placeholders = ','.join(['%s'] * len(all_tickers))
+            cursor.execute(f"""
+                SELECT ticker, last_updated 
+                FROM des_data 
+                WHERE ticker IN ({placeholders})
+            """, all_tickers)
+            
+            existing_des = {row[0]: row[1] for row in cursor.fetchall()}
+            cursor.close()
+            
+            # Calculate cutoff date
+            from datetime import timedelta
+            cutoff_date = datetime.now() - timedelta(days=max_age_days)
+            
+            # Find tickers that need updating
+            tickers_needing_update = []
+            for ticker in all_tickers:
+                if ticker not in existing_des:
+                    # No DES data exists
+                    tickers_needing_update.append(ticker)
+                elif existing_des[ticker] < cutoff_date:
+                    # DES data is too old
+                    tickers_needing_update.append(ticker)
+            
+            return tickers_needing_update
+        except Error as e:
+            logger.error(f"Error getting tickers needing DES update: {e}")
+            return []
+    
+    def upsert_des_data(self, ticker: str, des_data: Dict[str, Any]) -> bool:
+        """
+        Insert or update DES data for a ticker.
+        Note: Analyst ratings are excluded as per requirements.
+        
+        Args:
+            ticker: Ticker symbol
+            des_data: DES data dictionary from DESCommand.extract_data()
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            import json
+            
+            # Extract company info
+            company_info = des_data.get('company_info', {})
+            
+            # Prepare EPS estimates as JSON
+            eps_estimates = des_data.get('eps_estimates', {})
+            eps_estimates_json = json.dumps(eps_estimates) if eps_estimates else None
+            
+            # Prepare snapshot as JSON
+            snapshot = des_data.get('snapshot', {})
+            snapshot_json = json.dumps(snapshot) if snapshot else None
+            
+            cursor = self.connection.cursor()
+            
+            upsert_query = """
+                INSERT INTO des_data (
+                    ticker, company_name, asset_class, logo_url, website, address, ceo,
+                    description, eps_estimates, snapshot, last_updated
+                ) VALUES (
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, NOW()
+                )
+                ON DUPLICATE KEY UPDATE
+                    company_name = VALUES(company_name),
+                    asset_class = VALUES(asset_class),
+                    logo_url = VALUES(logo_url),
+                    website = VALUES(website),
+                    address = VALUES(address),
+                    ceo = VALUES(ceo),
+                    description = VALUES(description),
+                    eps_estimates = VALUES(eps_estimates),
+                    snapshot = VALUES(snapshot),
+                    last_updated = NOW(),
+                    updated_at = CURRENT_TIMESTAMP
+            """
+            
+            # Extract ticker from des_data if not provided (remove " US" suffix if present)
+            if not ticker:
+                ticker = des_data.get('ticker', '').replace(' US', '').upper()
+            else:
+                ticker = ticker.upper()
+            
+            cursor.execute(upsert_query, (
+                ticker,
+                company_info.get('company_name'),
+                company_info.get('asset_class'),
+                company_info.get('logo_url'),
+                company_info.get('website'),
+                company_info.get('address'),
+                company_info.get('ceo'),
+                des_data.get('description'),
+                eps_estimates_json,
+                snapshot_json
+            ))
+            
+            self.connection.commit()
+            cursor.close()
+            logger.debug(f"DES data upserted for {ticker}")
+            return True
+            
+        except Error as e:
+            logger.error(f"Error upserting DES data for {ticker}: {e}")
+            if self.connection:
+                self.connection.rollback()
+            return False
+    
     def close(self):
         """Close database connection."""
         if self.connection and self.connection.is_connected():

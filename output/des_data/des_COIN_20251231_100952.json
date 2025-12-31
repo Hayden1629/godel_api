@@ -1,0 +1,245 @@
+{
+  "timestamp": "2025-12-31T16:09:49.398514Z",
+  "window_id": "4637-window",
+  "ticker": "COIN US",
+  "company_info": {
+    "company_name": "Coinbase Global Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/coinbase.com",
+    "website": "https://coinbase.com/",
+    "address": "ONE MADISON AVENUE, SUITE 2400, NEW YORK, NY, 10010",
+    "ceo": "CEO: MR. BRIAN ARMSTRONG"
+  },
+  "description": "Coinbase Global, Inc. provides financial infrastructure and technology for the cryptoeconomy in the United States and internationally. The company offers the primary financial account in the cryptoeconomy for retailers; a marketplace with a pool of liquidity for transacting in crypto assets for institutions; and technology and services that enable ecosystem partners to build crypto-based applications and securely accept crypto assets as payment. Coinbase Global, Inc. was founded in 2012 and is based in Wilmington, Delaware.",
+  "eps_estimates": {
+    "Q4, Dec 25": "0.93",
+    "FY25, Dec 25": "7.99",
+    "FY26, Dec 26": "6.81"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "BTIG",
+      "Analyst": "Andrew Harte",
+      "Rating": "Buy",
+      "Old_Target": "$420",
+      "New_Target": "$420",
+      "Date": "12/18/25 11:08"
+    },
+    {
+      "Firm": "Deutsche Bank",
+      "Analyst": "Brian Bedell",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/17/25 13:51"
+    },
+    {
+      "Firm": "Compass Point",
+      "Analyst": "Ed Engel",
+      "Rating": "Sell",
+      "Old_Target": "$266",
+      "New_Target": "$230",
+      "Date": "12/15/25 17:50"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Benjamin Budish",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$357",
+      "New_Target": "$291",
+      "Date": "12/12/25 21:12"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Yaro",
+      "Rating": "Neutral",
+      "Old_Target": "$368",
+      "New_Target": "$314",
+      "Date": "11/21/25 23:42"
+    },
+    {
+      "Firm": "Monness, Crespi, Hardt",
+      "Analyst": "Gus Gala",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "11/11/25 02:16"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Dan Dolev",
+      "Rating": "Neutral",
+      "Old_Target": "$300",
+      "New_Target": "$320",
+      "Date": "11/03/25 23:58"
+    },
+    {
+      "Firm": "HC Wainwright & Co.",
+      "Analyst": "Mike Colonnese",
+      "Rating": "Buy",
+      "Old_Target": "$425",
+      "New_Target": "$425",
+      "Date": "10/31/25 15:04"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Chris Brendler",
+      "Rating": "Buy",
+      "Old_Target": "$450",
+      "New_Target": "$470",
+      "Date": "10/31/25 17:14"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Benjamin Budish",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$361",
+      "New_Target": "$357",
+      "Date": "10/31/25 20:27"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Brett Knoblauch",
+      "Rating": "Overweight",
+      "Old_Target": "$500",
+      "New_Target": "$459",
+      "Date": "10/31/25 18:41"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Kenneth Worthington",
+      "Rating": "Overweight",
+      "Old_Target": "$404",
+      "New_Target": "$399",
+      "Date": "11/01/25 00:05"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Andrew Harte",
+      "Rating": "Buy",
+      "Old_Target": "$410",
+      "New_Target": "$420",
+      "Date": "10/31/25 14:40"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "John Todaro",
+      "Rating": "Buy",
+      "Old_Target": "$400",
+      "New_Target": "$400",
+      "Date": "10/31/25 14:46"
+    },
+    {
+      "Firm": "HC Wainwright & Co.",
+      "Analyst": "Mike Colonnese",
+      "Rating": "Buy",
+      "Old_Target": "$300",
+      "New_Target": "$425",
+      "Date": "10/30/25 16:39"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Chris Brendler",
+      "Rating": "Buy",
+      "Old_Target": "$470",
+      "New_Target": "$450",
+      "Date": "10/29/25 16:30"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Kenneth Worthington",
+      "Rating": "Overweight",
+      "Old_Target": "$342",
+      "New_Target": "$404",
+      "Date": "10/24/25 15:27"
+    },
+    {
+      "Firm": "Compass Point",
+      "Analyst": "Ed Engel",
+      "Rating": "Sell",
+      "Old_Target": "$248",
+      "New_Target": "$277",
+      "Date": "10/20/25 19:23"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Benjamin Budish",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$365",
+      "New_Target": "$361",
+      "Date": "10/08/25 20:17"
+    },
+    {
+      "Firm": "Rothschild & Co",
+      "Analyst": "Nicholas Watts",
+      "Rating": "Buy",
+      "Old_Target": "$325",
+      "New_Target": "$417",
+      "Date": "10/03/25 16:52"
+    },
+    {
+      "Firm": "BTIG",
+      "Analyst": "Andrew Harte",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/01/25 15:28"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Benjamin Budish",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$352",
+      "New_Target": "$365",
+      "Date": "08/15/25 17:51"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "Kyle Voigt",
+      "Rating": "Market Perform",
+      "Old_Target": "$355",
+      "New_Target": "$335",
+      "Date": "08/04/25 21:08"
+    },
+    {
+      "Firm": "Compass Point",
+      "Analyst": "Ed Engel",
+      "Rating": "Sell",
+      "Old_Target": "$330",
+      "New_Target": "$248",
+      "Date": "08/04/25 17:29"
+    },
+    {
+      "Firm": "HC Wainwright & Co.",
+      "Analyst": "Mike Colonnese",
+      "Rating": "Sell",
+      "Old_Target": "$300",
+      "New_Target": "$300",
+      "Date": "08/01/25 15:15"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "225.7M",
+    "Employees": "3,772",
+    "Insiders": "1.07%",
+    "Institutions": "66.57%",
+    "P/Sales": "8.55",
+    "P/Book": "3.92",
+    "EV/EBITDA": "25.80",
+    "EV/R": "8.40",
+    "EV": "61.9B",
+    "Trl P/E": "20.49x",
+    "Fwd P/E": "33.76x",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "3.69",
+    "Short": "16.0M",
+    "Short R": "1.94"
+  }
+}

@@ -1,0 +1,261 @@
+{
+  "timestamp": "2025-12-31T16:11:08.851095Z",
+  "window_id": "4639-window",
+  "ticker": "WFC US",
+  "company_info": {
+    "company_name": "Wells Fargo & Co.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/wellsfargo.com",
+    "website": "https://wellsfargo.com/",
+    "address": "333 MARKET STREET, SAN FRANCISCO, CA, 94105",
+    "ceo": "CEO: MR. CHARLES W. SCHARF"
+  },
+  "description": "Wells Fargo & Company, a diversified financial services company, provides banking, investment, mortgage, and consumer and commercial finance products and services in the United States and internationally. It operates through four segments: Consumer Banking and Lending; Commercial Banking; Corporate and Investment Banking; and Wealth and Investment Management. The Consumer Banking and Lending segment offers diversified financial products and services for consumers and small businesses. Its financial products and services include checking and savings accounts, and credit and debit cards, as well as home, auto, personal, and small business lending services. The Commercial Banking segment provides financial solutions to private, family owned, and certain public companies. Its products and services include banking and credit products across various industry sector_names and municipalities, secured lending and lease products, and treasury management services. The Corporate and Investment Banking segment offers a suite of capital markets, banking, and financial products and services to corporate, commercial real estate, government, and institutional clients. Its products and services comprise corporate banking, investment banking, treasury management, commercial real estate lending and servicing, equity, and fixed income solutions, as well as sales, trading, and research capabilities services. The Wealth and Investment Management segment provides personalized wealth management, brokerage, financial planning, lending, private banking, and trust and fiduciary products and services to affluent, high-net worth, and ultra-high-net worth clients. It also operates through financial advisors. Wells Fargo & Company was founded in 1852 and is headquartered in San Francisco, California.",
+  "eps_estimates": {
+    "Q4, Dec 25": "1.69",
+    "FY25, Dec 25": "6.33",
+    "FY26, Dec 26": "7.06"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$90",
+      "New_Target": "$100",
+      "Date": "12/18/25 17:10"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "David Konrad",
+      "Rating": "Market Perform",
+      "Old_Target": "$92",
+      "New_Target": "$101",
+      "Date": "12/17/25 19:15"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "John Pancari",
+      "Rating": "Outperform",
+      "Old_Target": "$101",
+      "New_Target": "$107",
+      "Date": "12/15/25 16:04"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Steven Alexopoulos",
+      "Rating": "Hold",
+      "Old_Target": "$90",
+      "New_Target": "$93",
+      "Date": "10/15/25 19:18"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "David Konrad",
+      "Rating": "Market Perform",
+      "Old_Target": "$85",
+      "New_Target": "$92",
+      "Date": "10/15/25 17:44"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jason Goldberg",
+      "Rating": "Overweight",
+      "Old_Target": "$87",
+      "New_Target": "$94",
+      "Date": "10/15/25 19:47"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$88",
+      "New_Target": "$90",
+      "Date": "10/15/25 20:08"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$95",
+      "New_Target": "$97",
+      "Date": "10/15/25 18:09"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Ebrahim Poonawala",
+      "Rating": "Buy",
+      "Old_Target": "$92",
+      "New_Target": "$100",
+      "Date": "10/15/25 19:55"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Erika Najarian",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$93",
+      "Date": "10/07/25 21:22"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "John Pancari",
+      "Rating": "Outperform",
+      "Old_Target": "$94",
+      "New_Target": "$98",
+      "Date": "09/30/25 22:37"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$87",
+      "New_Target": "$95",
+      "Date": "09/29/25 23:03"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$86",
+      "New_Target": "$88",
+      "Date": "09/24/25 22:48"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Keith Horowitz",
+      "Rating": "Neutral",
+      "Old_Target": "$85",
+      "New_Target": "$90",
+      "Date": "09/23/25 17:36"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Richard Ramsden",
+      "Rating": "Buy",
+      "Old_Target": "$92",
+      "New_Target": "$91",
+      "Date": "07/16/25 16:54"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$83",
+      "New_Target": "$86",
+      "Date": "07/09/25 19:30"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Keith Horowitz",
+      "Rating": "Neutral",
+      "Old_Target": "$78",
+      "New_Target": "$85",
+      "Date": "07/02/25 21:18"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "David Long",
+      "Rating": "Strong Buy",
+      "Old_Target": "$78",
+      "New_Target": "$84",
+      "Date": "06/18/25 21:12"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Richard Ramsden",
+      "Rating": "Buy",
+      "Old_Target": "$76",
+      "New_Target": "$86",
+      "Date": "06/10/25 22:01"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Erika Najarian",
+      "Rating": "Buy",
+      "Old_Target": "$83",
+      "New_Target": "$90",
+      "Date": "06/04/25 18:18"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Overweight",
+      "Old_Target": "$75",
+      "New_Target": "$85",
+      "Date": "06/04/25 22:32"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$77",
+      "New_Target": "$87",
+      "Date": "06/04/25 20:46"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "John Pancari",
+      "Rating": "Outperform",
+      "Old_Target": "$72",
+      "New_Target": "$88",
+      "Date": "06/04/25 22:17"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$84",
+      "New_Target": "$73",
+      "Date": "04/14/25 18:03"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Overweight",
+      "Old_Target": "$77",
+      "New_Target": "$75",
+      "Date": "04/14/25 16:11"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "David Long",
+      "Rating": "Strong Buy",
+      "Old_Target": "$88",
+      "New_Target": "$78",
+      "Date": "04/14/25 20:35"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jason Goldberg",
+      "Rating": "Overweight",
+      "Old_Target": "$92",
+      "New_Target": "$87",
+      "Date": "04/15/25 00:50"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "3.1B",
+    "Employees": "210,821",
+    "Insiders": "0.09%",
+    "Institutions": "79.16%",
+    "P/Sales": "3.83",
+    "P/Book": "1.81",
+    "EV/EBITDA": "-",
+    "EV/R": "4.10",
+    "EV": "323.9B",
+    "Trl P/E": "15.70x",
+    "Fwd P/E": "13.63x",
+    "Trl Yld": "1.80%",
+    "Fwd Yld": "1.91%",
+    "5Y Avg Yld": "2.18",
+    "Payout R": "27.18%",
+    "Ex Div Date": "2025-11-07",
+    "Div Date": "2025-12-01",
+    "Beta": "1.11",
+    "Short": "41.4M",
+    "Short R": "2.97"
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:14:27.813379Z",
+  "window_id": "4646-window",
+  "ticker": "BAC US",
+  "company_info": {
+    "company_name": "Bank Of America Corp.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/bankofamerica.com",
+    "website": "https://bankofamerica.com/",
+    "address": "BANK OF AMERICA CORPORATE CENTER, 100 N TRYON ST, CHARLOTTE, NC, 28255",
+    "ceo": "CEO: MR. BRIAN THOMAS MOYNIHAN"
+  },
+  "description": "Bank of America Corporation, through its subsidiaries, provides banking and financial products and services for individual consumers, small and middle-market businesses, institutional investors, large corporations, and governments worldwide. Its Consumer Banking segment offers traditional and money market savings accounts, certificates of deposit and IRAs, noninterest-and interest-bearing checking accounts, and investment accounts and products; and credit and debit cards, residential mortgages, and home equity loans, as well as direct and indirect loans, such as automotive, recreational vehicle, and consumer personal loans. The companys Global Wealth & Investment Management segment offers investment management, brokerage, banking, and trust and retirement products and services; and wealth management solutions, as well as customized solutions, including specialty asset management services. Its Global Banking segment provides lending products and services, including commercial loans, leases, commitment facilities, trade finance, and commercial real estate and asset-based lending; treasury solutions, such as treasury management, foreign exchange, and short-term investing options and merchant services; working capital management solutions; and debt and equity underwriting and distribution, and merger-related and other advisory services. The companys Global Markets segment offers market-making, financing, securities clearing, settlement, and custody services, as well as risk management products using interest rate, equity, credit, currency and commodity derivatives, foreign exchange, fixed-income, and mortgage-related products. As of December 31, 2021, it served approximately 67 million consumer and small business clients with approximately 4,200 retail financial centers; approximately 16,000 ATMs; and digital banking platforms with approximately 41 million active users. The company was founded in 1784 and is based in Charlotte, North Carolina.",
+  "eps_estimates": {
+    "Q4, Dec 25": "0.97",
+    "FY25, Dec 25": "3.82",
+    "FY26, Dec 26": "4.35"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$56",
+      "New_Target": "$58",
+      "Date": "12/18/25 15:16"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "Christopher McGratty",
+      "Rating": "Outperform",
+      "Old_Target": "$58",
+      "New_Target": "$64",
+      "Date": "12/17/25 18:51"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$70",
+      "New_Target": "$68",
+      "Date": "12/12/25 17:40"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Neutral",
+      "Old_Target": "$55",
+      "New_Target": "$56",
+      "Date": "12/11/25 17:28"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$57",
+      "New_Target": "$55",
+      "Date": "11/19/25 22:06"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Steven Alexopoulos",
+      "Rating": "Buy",
+      "Old_Target": "$61",
+      "New_Target": "$64",
+      "Date": "11/07/25 00:23"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$67",
+      "New_Target": "$70",
+      "Date": "11/06/25 21:06"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Mike Mayo",
+      "Rating": "Overweight",
+      "Old_Target": "$60",
+      "New_Target": "$62",
+      "Date": "10/27/25 17:47"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Keith Horowitz",
+      "Rating": "Buy",
+      "Old_Target": "$58",
+      "New_Target": "$62",
+      "Date": "10/16/25 17:29"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$66",
+      "New_Target": "$67",
+      "Date": "10/16/25 22:32"
+    },
+    {
+      "Firm": "Keefe, Bruyette & Woods",
+      "Analyst": "Christopher McGratty",
+      "Rating": "Outperform",
+      "Old_Target": "$57",
+      "New_Target": "$58",
+      "Date": "10/16/25 20:05"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jason Goldberg",
+      "Rating": "Overweight",
+      "Old_Target": "$54",
+      "New_Target": "$59",
+      "Date": "10/16/25 15:00"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Glenn Schorr",
+      "Rating": "Outperform",
+      "Old_Target": "$55",
+      "New_Target": "$57",
+      "Date": "10/16/25 19:48"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Scott Siefers",
+      "Rating": "Neutral",
+      "Old_Target": "$50",
+      "New_Target": "$55",
+      "Date": "10/16/25 21:39"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$56",
+      "New_Target": "$57",
+      "Date": "10/16/25 22:00"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Erika Najarian",
+      "Rating": "Buy",
+      "Old_Target": "$55",
+      "New_Target": "$57",
+      "Date": "10/07/25 21:34"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Glenn Schorr",
+      "Rating": "Outperform",
+      "Old_Target": "$49",
+      "New_Target": "$55",
+      "Date": "09/30/25 22:06"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$50",
+      "New_Target": "$66",
+      "Date": "09/29/25 21:45"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$51",
+      "New_Target": "$56",
+      "Date": "09/24/25 22:15"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$57",
+      "New_Target": "$56",
+      "Date": "09/23/25 22:44"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Keith Horowitz",
+      "Rating": "Buy",
+      "Old_Target": "$54",
+      "New_Target": "$58",
+      "Date": "09/19/25 22:22"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Mike Mayo",
+      "Rating": "Overweight",
+      "Old_Target": "$56",
+      "New_Target": "$60",
+      "Date": "09/16/25 18:15"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$55",
+      "New_Target": "$57",
+      "Date": "07/30/25 18:31"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Chris Kotowski",
+      "Rating": "Outperform",
+      "Old_Target": "$57",
+      "New_Target": "$55",
+      "Date": "07/17/25 17:37"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "John McDonald",
+      "Rating": "Buy",
+      "Old_Target": "$51",
+      "New_Target": "$53",
+      "Date": "07/09/25 19:22"
+    },
+    {
+      "Firm": "HSBC",
+      "Analyst": "Saul Martinez",
+      "Rating": "Hold",
+      "Old_Target": "$47",
+      "New_Target": "$51",
+      "Date": "07/08/25 21:31"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Gerard Cassidy",
+      "Rating": "Outperform",
+      "Old_Target": "$45",
+      "New_Target": "$53",
+      "Date": "07/01/25 00:40"
+    },
+    {
+      "Firm": "Baird",
+      "Analyst": "David George",
+      "Rating": "Neutral",
+      "Old_Target": "$52",
+      "New_Target": "$52",
+      "Date": "06/27/25 19:06"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Keith Horowitz",
+      "Rating": "Buy",
+      "Old_Target": "$50",
+      "New_Target": "$54",
+      "Date": "06/26/25 20:20"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Betsy Graseck",
+      "Rating": "Overweight",
+      "Old_Target": "$47",
+      "New_Target": "$49",
+      "Date": "06/23/25 22:48"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "7.3B",
+    "Employees": "213,000",
+    "Insiders": "7.89%",
+    "Institutions": "70.08%",
+    "P/Sales": "4.04",
+    "P/Book": "1.46",
+    "EV/EBITDA": "-",
+    "EV/R": "4.13",
+    "EV": "419.1B",
+    "Trl P/E": "15.10x",
+    "Fwd P/E": "12.67x",
+    "Trl Yld": "1.96%",
+    "Fwd Yld": "2.03%",
+    "5Y Avg Yld": "2.34",
+    "Payout R": "28.96%",
+    "Ex Div Date": "2025-12-05",
+    "Div Date": "2025-12-26",
+    "Beta": "1.30",
+    "Short": "114.9M",
+    "Short R": "2.93"
+  }
+}

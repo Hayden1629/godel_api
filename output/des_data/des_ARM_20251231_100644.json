@@ -1,0 +1,261 @@
+{
+  "timestamp": "2025-12-31T16:06:41.192211Z",
+  "window_id": "4631-window",
+  "ticker": "ARM US",
+  "company_info": {
+    "company_name": "Arm Holdings plc.",
+    "asset_class": "DR",
+    "logo_url": "https://api.twelvedata.com/logo/arm.com",
+    "website": "https://arm.com/",
+    "address": "110 FULBOURN ROAD, CAMBRIDGE, X0, CB1 9NJ",
+    "ceo": "CEO: MR. RENE ANTHONY ANDRADA HAAS"
+  },
+  "description": "Our North Star Building the future of computing, on Arm. Together. For everyone. Arm is defining the future of computing. Semiconductor technology has become one of the world\u2019s most critical resources, as it enables all electronic devices today. At the heart of these devices is the CPU, and Arm is the industry leader of CPUs. We architect, develop, and license high-performance, low-cost, and energy-efficient CPU products and related technology, on which many of the world\u2019s leading semiconductor companies and OEMs rely to develop their products. Our energy-efficient CPUs have enabled advanced computing in greater than 99% of the world\u2019s smartphones, for the year ended December 31, 2022, and more than 250 billion chips, cumulatively, powering everything from the tiniest of sensors to the most powerful supercomputers. Today, Arm CPUs run the vast majority of the world\u2019s software, including the operating systems and applications for smartphones, tablets and personal computers, data centers and networking equipment, and vehicles, as well as the embedded operating systems in devices such as smartwatches, thermostats, drones and industrial robotics. We estimate that approximately 70% of the world\u2019s population uses Arm-based products, and the scale of Arm\u2019s reach continues to expand, with more than 30 billion Arm-based chips reported as shipped in the fiscal year ended March 31, 2023 alone, representing an approximately 70% increase since the fiscal year ended March 31, 2016. Today, any company can make a modern computer chip through the unique combination of our energy-efficient CPU IP and related technologies and our unmatched ecosystem of technology partners, and do it cost effectively due to our flexible business model. Each CPU product can be licensed to multiple companies, leading to economies of scale that allow us to charge each licensee only a fraction of what it would cost them to develop internally, while minimizing their risk and time-to-market. With the complexity of CPU design increasing exponentially, over the past decade no company has successfully designed a modern CPU from scratch. We have been innovating at the forefront of compute technology for decades and have established important relationships with the companies driving the future of computing across multiple industries. More than 260 companies reported that they had shipped Arm-based chips in the fiscal year ended March 31, 2023, including the largest technology companies globally (such as Amazon Web Services, Inc. and Alphabet Inc.), major semiconductor chip vendors (such as Advanced Micro Devices, Inc., Intel Corporation, MediaTek Inc., NVIDIA Corporation, Qualcomm Inc. and Samsung Electronics Co., Ltd.), automotive industry incumbents, leading auto suppliers, IoT innovators, and more. The exponential rise in smart devices in both consumer and enterprise markets has increased the demand for chips that provide more computational capability while optimizing energy efficiency. Thirty years ago, the PC was the only computer with which most people would interact at home, work, or school. Then, mobile phones became computers in our pockets and digital TVs became computers in our living rooms. Now, vehicles are effectively computers on wheels, and servers and networking equipment are the computers that connect all these devices and services together. Additionally, there are billions of tiny low-cost devices\u2014from sensors to electric motor controllers\u2014that are now functionally computers, as well. Each of these computers needs at least one CPU, and in many cases more than one. This trend has driven the dramatic growth of Arm-based chips over the past several years. Our creation of the Arm CPU architecture, the world\u2019s most widely used CPU architecture, has resulted in the proliferation and evolution of computers as people know them today, advancing a paradigm of increasing compute performance coupled with industry-leading power efficiency. We enabled the mobile phone and smartphone revolution, and through our focus on energy efficiency and our history of continuous innovation, we have enabled new categories of \u201csmart\u201d consumer electronics. Today, we are redefining what is possible in industries such as cloud computing, automotive, and IoT. Energy efficiency is not only important for business, but it is also a critical component in achieving sustainability for our planet. This makes Arm CPU technology ideal for current and future computing applications as the demands for compute performance are growing exponentially while the need for low power remains critical. Every CPU has an ISA, which defines the software instructions that can be executed by the CPU, essentially a common language for software developers to use. The ISA sets the foundation for a large library of compatible software which runs on those CPUs. As the Arm CPU is the most popular and pervasive CPU in history, the Arm ISA is also the most popular and pervasive ISA in history. This means that Arm-based chips have a global community of software developers familiar with how to program the CPU. Chip designers utilizing the Arm CPU can add desired functionality (Wi-Fi connectivity, image processing, video processing, etc.) to create an SoC to meet the needs of any end market. Our primary product offerings are leading CPU products that address diverse performance, power, and cost requirements. Complementary products such as GPUs, System IP, and compute platforms are also available and enable high-performance, efficient, reliable, system-level creation for a wide range of increasingly sophisticated devices and applications. Our development tools and robust software ecosystem have further solidified our position as the world\u2019s most widely adopted processor architecture and have created a virtuous cycle of adoption, which means that software developers write software for Arm-based devices because it offers the biggest market for their products, and chip designers choose Arm processors because they have the broadest support of software applications. This combination of pervasiveness and ease of portability has resulted in our CPU designs having the world\u2019s richest software ecosystem, built in partnership with the leading operating systems providers (including Google Android, Microsoft Windows and all major Linux distributions), software tools and game engine vendors (such as Electronic Arts Inc., Unity Software Inc. and Epic Games, Inc.), and application developers. We also support a flourishing ecosystem of third-party tool vendors for embedded software and a vibrant IoT ecosystem. Open-source software plays a vital role in the success of Arm-based chips, and we are committed to contributing to open-source software and tools to ensure our offerings are optimized for the latest technologies. As the world moves increasingly towards AI- and ML-enabled computing, Arm will be central to this transition. Arm CPUs already run AI and ML workloads in billions of devices, including smartphones, cameras, digital TVs, cars and cloud data centers. The CPU is vital in all AI systems, whether it is handling the AI workload entirely or in combination with a co-processor, such as a GPU or an NPU. In the emerging area of large language models, generative AI and autonomous driving, there will be a heightened emphasis on the low power acceleration of these algorithms. In our latest ISA, CPUs, and GPUs, we have added new functionality and instructions to accelerate future AI and ML algorithms. We are working with leading companies such as Alphabet, Cruise LLC, Mercedes-Benz, Meta and NVIDIA to deploy Arm technology to run AI workloads. We are an engineering-first company, with approximately 80% of our global employees, as of March 31, 2023, focused on research, design, and technical innovation, and we have global operations and research and development (\u201cR&D\u201d) centers in the U.K., Europe, North America, India, and Asia-Pacific. Our headquarters are located in Cambridge, U.K. Arm Holdings plc was incorporated as a private limited company with the legal name Arm Holdings Limited under the laws of England and Wales on April 9, 2018, with the company number 11299879. Arm Holdings Limited re-registered as a public limited company under the laws of England and Wales on September 1, 2023 and changed its name to Arm Holdings plc. Arm Limited was incorporated as a private limited company with the legal name Widelogic Limited under the laws of England and Wales on November 12, 1990 with the company number 02557590. On December 3, 1990, Widelogic Limited changed its company name to Advanced RISC Machines Limited, and, on May 21, 1998, it changed its company name to Arm Limited (at which time it was a wholly owned subsidiary of Arm Holdings plc with the company number 02548782). Our business was initially operated through Arm Holdings plc with the company number 02548782, which was previously an independent publicly traded corporation until its acquisition in September 2016 by SoftBank Group. On March 19, 2018, as a part of a reorganization, Arm Holdings plc with the company number 02548782 re-registered as a private limited company and was renamed SVF HoldCo (UK) Limited, which became a subsidiary of SoftBank Vision Fund L.P. (\u201cSoftBank Vision Fund\u201d), which retained an approximate 25% interest in our company with the remainder beneficially held by SoftBank Group. In August 2023, a subsidiary of SoftBank Group acquired substantially all of SoftBank Vision Fund\u2019s interest in Arm Limited at a purchase price of approximately $16.1 billion, with the associated payments to be made in installments over a two-year period. The purchase price was established by reference to the terms of a prior contractual arrangement between the parties. Accordingly, prior to this offering, SoftBank Group beneficially owns substantially all of our outstanding shares. Our registered office is 110 Fulbourn Road, Cambridge, Cambridgeshire, CB1 9NJ, U.K., and the telephone number at that office is +44 (1223) 400 400. The principal office for Arm Inc., our U.S. subsidiary, is located at 120 Rose Orchard Way, San Jose, CA.",
+  "eps_estimates": {
+    "Q3, Dec 25": "0.41",
+    "FY26, Mar 26": "1.72",
+    "FY27, Mar 27": "2.27"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Vivek Arya",
+      "Rating": "Buy",
+      "Old_Target": "$205",
+      "New_Target": "$145",
+      "Date": "12/16/25 17:29"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Schneider",
+      "Rating": "Sell",
+      "Old_Target": "$160",
+      "New_Target": "$120",
+      "Date": "12/15/25 18:42"
+    },
+    {
+      "Firm": "Loop Capital",
+      "Analyst": "Ananda Baruah",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$180",
+      "Date": "11/12/25 23:55"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$200",
+      "New_Target": "$195",
+      "Date": "11/07/25 00:12"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Krish Sankar",
+      "Rating": "Buy",
+      "Old_Target": "$175",
+      "New_Target": "$190",
+      "Date": "11/07/25 00:04"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Harlan Sur",
+      "Rating": "Overweight",
+      "Old_Target": "$175",
+      "New_Target": "$180",
+      "Date": "11/07/25 03:10"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Joe Quatrochi",
+      "Rating": "Overweight",
+      "Old_Target": "$190",
+      "New_Target": "$195",
+      "Date": "11/06/25 22:11"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "John Vinh",
+      "Rating": "Overweight",
+      "Old_Target": "$190",
+      "New_Target": "$200",
+      "Date": "11/06/25 19:57"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$180",
+      "New_Target": "$180",
+      "Date": "11/06/25 18:52"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$180",
+      "New_Target": "$190",
+      "Date": "11/06/25 22:44"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Blayne Curtis",
+      "Rating": "Overweight",
+      "Old_Target": "$115",
+      "New_Target": "$165",
+      "Date": "11/06/25 20:25"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$175",
+      "New_Target": "$200",
+      "Date": "10/27/25 17:27"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Joe Quatrochi",
+      "Rating": "Overweight",
+      "Old_Target": "$175",
+      "New_Target": "$190",
+      "Date": "10/22/25 18:36"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Lee Simpson",
+      "Rating": "Overweight",
+      "Old_Target": "$180",
+      "New_Target": "$171",
+      "Date": "10/09/25 17:19"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Mark Lipacis",
+      "Rating": "Outperform",
+      "Old_Target": "$173",
+      "New_Target": "$178",
+      "Date": "09/11/25 18:51"
+    },
+    {
+      "Firm": "Seaport Global",
+      "Analyst": "Jay Goldberg",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "08/11/25 16:32"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "John Vinh",
+      "Rating": "Overweight",
+      "Old_Target": "$175",
+      "New_Target": "$190",
+      "Date": "07/31/25 18:38"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Lee Simpson",
+      "Rating": "Overweight",
+      "Old_Target": "$194",
+      "New_Target": "$180",
+      "Date": "07/31/25 20:19"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$180",
+      "New_Target": "$180",
+      "Date": "07/31/25 16:19"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Srini Pajjuri",
+      "Rating": "Outperform",
+      "Old_Target": "$140",
+      "New_Target": "$165",
+      "Date": "07/31/25 19:14"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$185",
+      "New_Target": "$175",
+      "Date": "07/31/25 18:54"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Lee Simpson",
+      "Rating": "Overweight",
+      "Old_Target": "$150",
+      "New_Target": "$194",
+      "Date": "07/28/25 18:02"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Joe Quatrochi",
+      "Rating": "Overweight",
+      "Old_Target": "$145",
+      "New_Target": "$175",
+      "Date": "07/21/25 19:29"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$155",
+      "New_Target": "$185",
+      "Date": "07/21/25 18:37"
+    },
+    {
+      "Firm": "Exane BNP Paribas",
+      "Analyst": "David O'Connor",
+      "Rating": "Outperform",
+      "Old_Target": "$110",
+      "New_Target": "$210",
+      "Date": "07/16/25 21:31"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Schneider",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "07/10/25 17:38"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$160",
+      "New_Target": "$180",
+      "Date": "07/03/25 17:52"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "135.8M",
+    "Employees": "8,330",
+    "Insiders": "0.15%",
+    "Institutions": "94.60%",
+    "P/Sales": "26.81",
+    "P/Book": "15.97",
+    "EV/EBITDA": "108.79",
+    "EV/R": "25.93",
+    "EV": "114.4B",
+    "Trl P/E": "142.94x",
+    "Fwd P/E": "49.20x",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "4.25",
+    "Short": "14.0M",
+    "Short R": "4.73"
+  }
+}

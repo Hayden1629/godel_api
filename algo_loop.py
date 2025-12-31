@@ -4,9 +4,12 @@ Strategy logic is handled by PRT_Strategy module.
 https://www.reddit.com/r/Schwab/comments/1c2ioe1/the_unofficial_guide_to_charles_schwabs_trader/
 '''
 from godel_core import GodelTerminalController
+from commands.des_command import DESCommand
 import time
 from config import GODEL_USERNAME, GODEL_PASSWORD, DASHBOARD_SECURITY_HASH
 import requests
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 import pandas
 from loguru import logger
 from PRT_Strategy import run_strategy
@@ -17,6 +20,7 @@ import atexit
 import signal
 import os
 from pathlib import Path
+from typing import Optional
 from db_manager import DatabaseManager
 
 '''
@@ -2225,46 +2229,89 @@ class AccountsTrading:
             logger.error(f"Error checking if market about to close: {e}")
             return False, f"Error checking market close time: {str(e)}"
     
-    def get_quote_full(self, symbol: str) -> dict | None:
+    def get_quote_full(self, symbol: str, max_retries: int = 3) -> dict | None:
         """
         Get full quote data for a symbol from Schwab Market Data API.
+        Includes retry logic for SSL/connection errors.
         
         Args:
             symbol: Stock ticker symbol
+            max_retries: Maximum number of retry attempts for SSL/connection errors
             
         Returns:
             dict: Full quote data including exchange information, or None if unavailable
         """
-        try:
-            self._update_headers()
-            
-            # Schwab Market Data API quote endpoint
-            quote_url = f"{self.market_data_base_url}/quotes"
-            params = {
-                'symbols': symbol,
-                'fields': 'quote'  # Request quote data
-            }
-            
-            response = requests.get(quote_url, headers=self.headers, params=params)
-            
-            if response.status_code == 200:
-                data = response.json()
-                # Parse response structure
-                # Response format: {symbol: {quote: {price data}, ...}}
-                if symbol in data:
-                    symbol_data = data[symbol]
-                    quote_data = symbol_data.get('quote', {})
-                    return quote_data
-                else:
-                    logger.warning(f"Symbol {symbol} not found in quote response: {data}")
-                    return None
-            else:
-                logger.error(f"Failed to get quote for {symbol}: {response.status_code} - {response.text}")
-                return None
+        self._update_headers()
+        
+        # Schwab Market Data API quote endpoint
+        quote_url = f"{self.market_data_base_url}/quotes"
+        params = {
+            'symbols': symbol,
+            'fields': 'quote'  # Request quote data
+        }
+        
+        # Create session with retry strategy for SSL errors
+        session = requests.Session()
+        retry_strategy = Retry(
+            total=max_retries,
+            backoff_factor=1,
+            status_forcelist=[429, 500, 502, 503, 504],
+            allowed_methods=["GET"],
+            raise_on_status=False
+        )
+        adapter = HTTPAdapter(max_retries=retry_strategy)
+        session.mount("https://", adapter)
+        
+        for attempt in range(max_retries):
+            try:
+                response = session.get(quote_url, headers=self.headers, params=params, timeout=10)
                 
-        except Exception as e:
-            logger.error(f"Error getting quote for {symbol}: {e}")
-            return None
+                if response.status_code == 200:
+                    data = response.json()
+                    # Parse response structure
+                    # Response format: {symbol: {quote: {price data}, ...}}
+                    if symbol in data:
+                        symbol_data = data[symbol]
+                        quote_data = symbol_data.get('quote', {})
+                        return quote_data
+                    else:
+                        logger.warning(f"Symbol {symbol} not found in quote response: {data}")
+                        return None
+                elif response.status_code == 429:
+                    # Rate limited - wait and retry
+                    wait_time = 2 ** attempt
+                    logger.warning(f"Rate limited for {symbol}, waiting {wait_time}s before retry {attempt + 1}/{max_retries}")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Failed to get quote for {symbol}: {response.status_code} - {response.text}")
+                    return None
+                    
+            except requests.exceptions.SSLError as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt  # Exponential backoff
+                    logger.warning(f"SSL error getting quote for {symbol} (attempt {attempt + 1}/{max_retries}): {e}")
+                    logger.debug(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"SSL error getting quote for {symbol} after {max_retries} attempts: {e}")
+                    return None
+            except requests.exceptions.ConnectionError as e:
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.warning(f"Connection error getting quote for {symbol} (attempt {attempt + 1}/{max_retries}): {e}")
+                    logger.debug(f"Retrying in {wait_time} seconds...")
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logger.error(f"Connection error getting quote for {symbol} after {max_retries} attempts: {e}")
+                    return None
+            except Exception as e:
+                logger.error(f"Error getting quote for {symbol}: {e}")
+                return None
+        
+        return None
     
     def get_quote(self, symbol: str) -> float | None:
         """
@@ -3047,6 +3094,211 @@ def calculate_portfolio_value_over_time(journal_file: str = TRADE_JOURNAL_FILE, 
     return portfolio_history
 
 
+def collect_tickers_for_des(accounts_trading: AccountsTrading) -> set:
+    """
+    Collect tickers from various sources for DES data collection.
+    
+    Sources:
+    - Active trades
+    - Recent trades (from journal)
+    - Positions
+    
+    Args:
+        accounts_trading: AccountsTrading instance
+        
+    Returns:
+        set: Set of unique ticker symbols
+    """
+    tickers = set()
+    
+    # Get tickers from active trades
+    for trade in accounts_trading.active_trades:
+        if trade.ticker:
+            tickers.add(trade.ticker.upper())
+    
+    # Get tickers from recent trades (journal)
+    script_dir = Path(__file__).parent
+    journal_path = script_dir / TRADE_JOURNAL_FILE
+    if journal_path.exists():
+        try:
+            with open(journal_path, 'r') as f:
+                all_trades = json.load(f)
+                # Get last 100 trades to build up database
+                recent_trades = all_trades[-100:] if len(all_trades) > 100 else all_trades
+                for trade in recent_trades:
+                    ticker = trade.get('ticker')
+                    if ticker:
+                        tickers.add(ticker.upper())
+        except Exception as e:
+            logger.debug(f"Error reading trade journal for DES tickers: {e}")
+    
+    # Get tickers from current positions
+    try:
+        positions = accounts_trading.get_positions()
+        for position in positions:
+            symbol = position.get('symbol')
+            if symbol:
+                # Remove exchange suffix if present (e.g., "AAPL:NASDAQ" -> "AAPL")
+                ticker = symbol.split(':')[0].upper()
+                tickers.add(ticker)
+    except Exception as e:
+        logger.debug(f"Error getting positions for DES tickers: {e}")
+    
+    return tickers
+
+
+def save_des_data_to_json(des_data: dict, ticker: str, output_dir: Path = None) -> Path:
+    """
+    Save DES data to a JSON file.
+    
+    Args:
+        des_data: DES command result data
+        ticker: Ticker symbol
+        output_dir: Optional output directory (defaults to output/des_data/)
+        
+    Returns:
+        Path: Path to saved file
+    """
+    if output_dir is None:
+        script_dir = Path(__file__).parent
+        output_dir = script_dir / "output" / "des_data"
+    
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    # Create filename with ticker and timestamp
+    timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
+    filename = f"des_{ticker}_{timestamp}.json"
+    output_file = output_dir / filename
+    
+    # Save data
+    with open(output_file, 'w') as f:
+        json.dump(des_data, f, indent=2)
+    
+    logger.debug(f"Saved DES data for {ticker} to {output_file}")
+    return output_file
+
+
+def get_des_data_from_db(ticker: str) -> Optional[dict]:
+    """
+    Get DES data for a ticker from the database.
+    This is useful for checking if DES data exists before calculating portfolio beta.
+    
+    Args:
+        ticker: Ticker symbol
+        
+    Returns:
+        DES data dictionary or None if not found
+    """
+    try:
+        db = get_db_manager()
+        if not db:
+            return None
+        return db.get_des_data(ticker)
+    except Exception as e:
+        logger.debug(f"Error getting DES data from database for {ticker}: {e}")
+        return None
+
+
+def collect_des_data_for_ticker(controller: GodelTerminalController, ticker: str) -> bool:
+    """
+    Collect DES data for a single ticker and save to JSON.
+    
+    Args:
+        controller: GodelTerminalController instance
+        ticker: Ticker symbol
+        
+    Returns:
+        bool: True if successful, False otherwise
+    """
+    try:
+        # Execute DES command
+        result, des_command = controller.execute_command('DES', ticker, 'EQ')
+        
+        if not result.get('success'):
+            logger.debug(f"DES command failed for {ticker}: {result.get('error')}")
+            return False
+        
+        # Extract data
+        des_data = result.get('data', {})
+        if not des_data:
+            logger.debug(f"No data returned from DES for {ticker}")
+            if des_command:
+                des_command.close()
+            return False
+        
+        # Save to JSON
+        save_des_data_to_json(des_data, ticker)
+        
+        # Close the DES window
+        if des_command:
+            des_command.close()
+        
+        logger.info(f"✅ Collected DES data for {ticker}")
+        return True
+        
+    except Exception as e:
+        logger.warning(f"Error collecting DES data for {ticker}: {e}")
+        return False
+
+
+def collect_des_data_during_idle(controller: GodelTerminalController, accounts_trading: AccountsTrading, 
+                                   max_tickers_per_cycle: int = 5) -> None:
+    """
+    Collect DES data for tickers during idle time (when monitoring trades).
+    This builds up a database of stock information over time.
+    
+    Args:
+        controller: GodelTerminalController instance
+        accounts_trading: AccountsTrading instance
+        max_tickers_per_cycle: Maximum number of tickers to process per call
+    """
+    try:
+        # Get list of tickers to process
+        tickers = collect_tickers_for_des(accounts_trading)
+        
+        if not tickers:
+            logger.debug("No tickers found for DES data collection")
+            return
+        
+        # Check which tickers we've already collected (to avoid duplicates)
+        script_dir = Path(__file__).parent
+        des_data_dir = script_dir / "output" / "des_data"
+        des_data_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Get list of already collected tickers from existing files
+        collected_tickers = set()
+        if des_data_dir.exists():
+            for file in des_data_dir.glob("des_*.json"):
+                # Extract ticker from filename: des_TICKER_timestamp.json
+                parts = file.stem.split('_')
+                if len(parts) >= 2:
+                    collected_tickers.add(parts[1].upper())
+        
+        # Filter to only uncollected tickers
+        uncollected_tickers = tickers - collected_tickers
+        
+        if not uncollected_tickers:
+            logger.debug(f"All {len(tickers)} tickers already have DES data collected")
+            return
+        
+        # Process up to max_tickers_per_cycle
+        tickers_to_process = list(uncollected_tickers)[:max_tickers_per_cycle]
+        
+        logger.info(f"📊 Collecting DES data for {len(tickers_to_process)} tickers: {tickers_to_process}")
+        
+        for ticker in tickers_to_process:
+            success = collect_des_data_for_ticker(controller, ticker)
+            if success:
+                # Small delay between DES calls to avoid overwhelming the terminal
+                time.sleep(2)
+            else:
+                # Longer delay on failure
+                time.sleep(5)
+                
+    except Exception as e:
+        logger.warning(f"Error in DES data collection: {e}")
+
+
 def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
     """
     Collect all dashboard data including stats, trades, and account information.
@@ -3673,6 +3925,13 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                         except Exception as e:
                             logger.debug(f"Could not send dashboard data update: {e}")
                         last_check_time = current_time
+                        
+                        # Collect DES data during idle time (when not using Godel controller for trading)
+                        # This builds up a database of stock information over time
+                        try:
+                            collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=3)
+                        except Exception as e:
+                            logger.debug(f"Error collecting DES data during idle: {e}")
                     
                     # Sleep for a short interval then check again
                     # Use 30 second intervals to balance responsiveness vs CPU usage
@@ -3718,6 +3977,12 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     accounts_trading.verify_and_force_close_all_positions(force_market=True, reason="end of day")
                     print_win_rate_stats(send_webhook=False, accounts_trading=accounts_trading)  # Webhook disabled
                     break
+                
+                # Collect DES data during idle time when no trades to execute
+                try:
+                    collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=5)
+                except Exception as e:
+                    logger.debug(f"Error collecting DES data during idle: {e}")
                 
                 # Wait a short time before checking again
                 logger.info("No trades available - waiting 10 seconds before checking again...")
@@ -3831,6 +4096,8 @@ def main():
                     controller.connect()
                     controller.login(GODEL_USERNAME, GODEL_PASSWORD)
                     controller.load_layout("dev")
+                    # Register DES command for stock data collection
+                    controller.register_command('DES', DESCommand)
                     logger.info("✅ Godel controller initialized successfully")
                 except Exception as e:
                     logger.error(f"❌ Failed to initialize Godel controller: {e}")

@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:18:53.305913Z",
+  "window_id": "4655-window",
+  "ticker": "XOM US",
+  "company_info": {
+    "company_name": "Exxon Mobil Corp.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/corporate.exxonmobil.com",
+    "website": "https://corporate.exxonmobil.com/",
+    "address": "22777 SPRINGWOODS VILLAGE PARKWAY, SPRING, TX, 77389-1425",
+    "ceo": "CEO: MR. DARREN W. WOODS"
+  },
+  "description": "Exxon Mobil Corporation explores for and produces crude oil and natural gas in the United States and internationally. It operates through Upstream, Downstream, and Chemical segments. The company is also involved in the manufacture, trade, transport, and sale of crude oil, natural gas, petroleum products, petrochemicals, and other specialty products; manufactures and sells petrochemicals, including olefins, polyolefins, aromatics, and various other petrochemicals; and captures and stores carbon, hydrogen, and biofuels. As of December 31, 2021, it had approximately 20,528 net operated wells with proved reserves. The company was founded in 1870 and is headquartered in Irving, Texas.",
+  "eps_estimates": {
+    "Q4, Dec 25": "1.69",
+    "FY25, Dec 25": "6.98",
+    "FY26, Dec 26": "7.19"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Nitin Kumar",
+      "Rating": "Neutral",
+      "Old_Target": "$129",
+      "New_Target": "$132",
+      "Date": "12/12/25 13:43"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Jason Gabelman",
+      "Rating": "Buy",
+      "Old_Target": "$128",
+      "New_Target": "$135",
+      "Date": "12/12/25 17:41"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Sam Margolin",
+      "Rating": "Overweight",
+      "Old_Target": "$156",
+      "New_Target": "$158",
+      "Date": "12/11/25 18:05"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Jean Ann Salisbury",
+      "Rating": "Neutral",
+      "Old_Target": "$119",
+      "New_Target": "$118",
+      "Date": "12/11/25 12:58"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Alastair Syme",
+      "Rating": "Neutral",
+      "Old_Target": "$115",
+      "New_Target": "$118",
+      "Date": "12/10/25 20:26"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Lloyd Byrne",
+      "Rating": "Buy",
+      "Old_Target": "$146",
+      "New_Target": "$148",
+      "Date": "12/10/25 19:49"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Devin McDermott",
+      "Rating": "Overweight",
+      "Old_Target": "$135",
+      "New_Target": "$137",
+      "Date": "12/10/25 14:51"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Manav Gupta",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/01/25 15:43"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Ryan Todd",
+      "Rating": "Overweight",
+      "Old_Target": "$141",
+      "New_Target": "$144",
+      "Date": "11/10/25 19:06"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Paul Cheng",
+      "Rating": "Sector Outperform",
+      "Old_Target": "$128",
+      "New_Target": "$155",
+      "Date": "11/03/25 22:40"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Sam Margolin",
+      "Rating": "Overweight",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/17/25 17:16"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Josh Silverstein",
+      "Rating": "Buy",
+      "Old_Target": "$143",
+      "New_Target": "$145",
+      "Date": "10/13/25 19:20"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Paul Cheng",
+      "Rating": "Sector Outperform",
+      "Old_Target": "$125",
+      "New_Target": "$128",
+      "Date": "10/09/25 19:50"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Betty Jiang",
+      "Rating": "Overweight",
+      "Old_Target": "$127",
+      "New_Target": "$126",
+      "Date": "10/07/25 20:29"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Nitin Kumar",
+      "Rating": "Neutral",
+      "Old_Target": "$124",
+      "New_Target": "$123",
+      "Date": "09/15/25 20:00"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Jean Ann Salisbury",
+      "Rating": "Neutral",
+      "Old_Target": "$113",
+      "New_Target": "$120",
+      "Date": "09/10/25 19:20"
+    },
+    {
+      "Firm": "Melius Research",
+      "Analyst": "James West",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "08/20/25 18:28"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Josh Silverstein",
+      "Rating": "Buy",
+      "Old_Target": "$130",
+      "New_Target": "$143",
+      "Date": "08/20/25 23:30"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Ryan Todd",
+      "Rating": "Overweight",
+      "Old_Target": "$134",
+      "New_Target": "$145",
+      "Date": "08/18/25 19:59"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Neil Mehta",
+      "Rating": "Neutral",
+      "Old_Target": "$117",
+      "New_Target": "$117",
+      "Date": "08/08/25 15:15"
+    },
+    {
+      "Firm": "HSBC",
+      "Analyst": "Gordon Gray",
+      "Rating": "Hold",
+      "Old_Target": "$119",
+      "New_Target": "$120",
+      "Date": "08/05/25 15:18"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Devin McDermott",
+      "Rating": "Overweight",
+      "Old_Target": "$134",
+      "New_Target": "$135",
+      "Date": "08/04/25 19:39"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "John Royall",
+      "Rating": "Overweight",
+      "Old_Target": "$125",
+      "New_Target": "$124",
+      "Date": "08/01/25 15:24"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Paul Cheng",
+      "Rating": "Sector Outperform",
+      "Old_Target": "$115",
+      "New_Target": "$125",
+      "Date": "07/11/25 20:27"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Ryan Todd",
+      "Rating": "Overweight",
+      "Old_Target": "$131",
+      "New_Target": "$134",
+      "Date": "07/08/25 20:53"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Ryan Todd",
+      "Rating": "Overweight",
+      "Old_Target": "$125",
+      "New_Target": "$131",
+      "Date": "07/02/25 21:58"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Roger Read",
+      "Rating": "Overweight",
+      "Old_Target": "$126",
+      "New_Target": "$127",
+      "Date": "06/26/25 19:25"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Nitin Kumar",
+      "Rating": "Neutral",
+      "Old_Target": "$129",
+      "New_Target": "$124",
+      "Date": "05/13/25 19:13"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Ryan Todd",
+      "Rating": "Overweight",
+      "Old_Target": "$127",
+      "New_Target": "$125",
+      "Date": "05/13/25 21:08"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Biraj Borkhataria",
+      "Rating": "Sector Perform",
+      "Old_Target": "$115",
+      "New_Target": "$105",
+      "Date": "05/05/25 20:32"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "4.2B",
+    "Employees": "61,000",
+    "Insiders": "0.08%",
+    "Institutions": "66.57%",
+    "P/Sales": "1.58",
+    "P/Book": "1.96",
+    "EV/EBITDA": "8.82",
+    "EV/R": "1.67",
+    "EV": "544.2B",
+    "Trl P/E": "17.59x",
+    "Fwd P/E": "16.84x",
+    "Trl Yld": "3.33%",
+    "Fwd Yld": "3.43%",
+    "5Y Avg Yld": "4.10",
+    "Payout R": "57.56%",
+    "Ex Div Date": "2025-11-14",
+    "Div Date": "2025-12-10",
+    "Beta": "0.38",
+    "Short": "46.7M",
+    "Short R": "2.95"
+  }
+}

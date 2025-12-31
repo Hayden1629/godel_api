@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:03:26.670147Z",
+  "window_id": "4626-window",
+  "ticker": "GM US",
+  "company_info": {
+    "company_name": "General Motors Company",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/gm.com",
+    "website": "https://gm.com/",
+    "address": "300 RENAISSANCE CENTER, DETROIT, MI, 48265-3000",
+    "ceo": "CEO: MS. MARY T. BARRA"
+  },
+  "description": "General Motors Company designs, builds, and sells trucks, crossovers, cars, and automobile parts and accessories in North America, the Asia Pacific, the Middle East, Africa, South America, the United States, and China. The company operates through GM North America, GM International, Cruise, and GM Financial segments. It markets its vehicles primarily under the Buick, Cadillac, Chevrolet, GMC, Holden, Baojun, and Wuling brand names. The company also sells trucks, crossovers, cars, and purpose-built vehicles to dealers for consumer retail sales, as well as to fleet customers, including daily rental car companies, commercial fleet customers, leasing companies, and governments. In addition, it offers safety and security services for retail and fleet customers, including automatic crash response, emergency services, roadside assistance, crisis assist, stolen vehicle assistance, and turn-by-turn navigation; and connected services comprising mobile applications for owners to remotely control their vehicles and electric vehicle owners to locate charging stations, on-demand vehicle diagnostics, smart driver, marketplace in-vehicle commerce, in-vehicle voice, voice assistant, navigation and app ecosystem, connected navigation, SiriusXM with 360L, and 4G LTE wireless connectivity, as well as develops and commercializes autonomous vehicle technology. Further, the company provides automotive financing and insurance services; and software-enabled services and subscriptions. General Motors Company was founded in 1908 and is headquartered in Detroit, Michigan.",
+  "eps_estimates": {
+    "Q4, Dec 25": "2.23",
+    "FY25, Dec 25": "10.30",
+    "FY26, Dec 26": "11.65"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Dan Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$75",
+      "New_Target": "$95",
+      "Date": "12/18/25 15:06"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Joseph Spak",
+      "Rating": "Buy",
+      "Old_Target": "$85",
+      "New_Target": "$97",
+      "Date": "12/15/25 19:51"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Colin Langan",
+      "Rating": "Underweight",
+      "Old_Target": "$46",
+      "New_Target": "$48",
+      "Date": "12/10/25 00:29"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Mark Delaney",
+      "Rating": "Buy",
+      "Old_Target": "$81",
+      "New_Target": "$93",
+      "Date": "12/09/25 23:07"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Andrew Percoco",
+      "Rating": "Overweight",
+      "Old_Target": "$54",
+      "New_Target": "$90",
+      "Date": "12/08/25 23:30"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "George Galliers",
+      "Rating": "Outperform",
+      "Old_Target": "$68",
+      "New_Target": "$74",
+      "Date": "11/24/25 21:31"
+    },
+    {
+      "Firm": "Tigress Financial",
+      "Analyst": "Ivan Feinseth",
+      "Rating": "Strong Buy",
+      "Old_Target": "$88",
+      "New_Target": "$92",
+      "Date": "10/25/25 02:27"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Michael Ward",
+      "Rating": "Buy",
+      "Old_Target": "$75",
+      "New_Target": "$86",
+      "Date": "10/23/25 16:04"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Colin Langan",
+      "Rating": "Underweight",
+      "Old_Target": "$40",
+      "New_Target": "$46",
+      "Date": "10/22/25 18:29"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Joseph Spak",
+      "Rating": "Buy",
+      "Old_Target": "$81",
+      "New_Target": "$85",
+      "Date": "10/23/25 02:10"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Tom Narayan",
+      "Rating": "Outperform",
+      "Old_Target": "$77",
+      "New_Target": "$86",
+      "Date": "10/22/25 19:17"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Itay Michaeli",
+      "Rating": "Buy",
+      "Old_Target": "$92",
+      "New_Target": "$100",
+      "Date": "10/22/25 20:02"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Dan Levy",
+      "Rating": "Overweight",
+      "Old_Target": "$77",
+      "New_Target": "$85",
+      "Date": "10/22/25 21:50"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$65",
+      "New_Target": "$75",
+      "Date": "10/21/25 21:41"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$65",
+      "New_Target": "$65",
+      "Date": "10/16/25 18:07"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "George Galliers",
+      "Rating": "Outperform",
+      "Old_Target": "$55",
+      "New_Target": "$68",
+      "Date": "10/13/25 17:35"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Dan Levy",
+      "Rating": "Overweight",
+      "Old_Target": "$73",
+      "New_Target": "$77",
+      "Date": "10/10/25 18:46"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Philippe Houchois",
+      "Rating": "Hold",
+      "Old_Target": "$50",
+      "New_Target": "$55",
+      "Date": "10/06/25 17:25"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Colin Langan",
+      "Rating": "Underweight",
+      "Old_Target": "$38",
+      "New_Target": "$40",
+      "Date": "10/03/25 19:32"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Ryan Brinkman",
+      "Rating": "Overweight",
+      "Old_Target": "$60",
+      "New_Target": "$80",
+      "Date": "09/30/25 17:14"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Mark Delaney",
+      "Rating": "Buy",
+      "Old_Target": "$70",
+      "New_Target": "$74",
+      "Date": "09/29/25 16:09"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Joseph Spak",
+      "Rating": "Buy",
+      "Old_Target": "$56",
+      "New_Target": "$81",
+      "Date": "09/24/25 16:22"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$58",
+      "New_Target": "$67",
+      "Date": "09/23/25 18:12"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Michael Ward",
+      "Rating": "Buy",
+      "Old_Target": "$61",
+      "New_Target": "$75",
+      "Date": "09/22/25 18:26"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Dan Levy",
+      "Rating": "Overweight",
+      "Old_Target": "$55",
+      "New_Target": "$73",
+      "Date": "09/12/25 15:57"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$55",
+      "New_Target": "$65",
+      "Date": "08/19/25 18:33"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Colin Langan",
+      "Rating": "Underweight",
+      "Old_Target": "$34",
+      "New_Target": "$38",
+      "Date": "07/23/25 18:42"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "John Murphy",
+      "Rating": "Buy",
+      "Old_Target": "$65",
+      "New_Target": "$62",
+      "Date": "07/23/25 16:14"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$55",
+      "New_Target": "$55",
+      "Date": "07/23/25 17:32"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Michael Ward",
+      "Rating": "Buy",
+      "Old_Target": "$59",
+      "New_Target": "$61",
+      "Date": "07/23/25 22:04"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "930.0M",
+    "Employees": "162,000",
+    "Insiders": "0.18%",
+    "Institutions": "87.13%",
+    "P/Sales": "0.42",
+    "P/Book": "1.17",
+    "EV/EBITDA": "12.18",
+    "EV/R": "1.02",
+    "EV": "191.3B",
+    "Trl P/E": "15.85x",
+    "Fwd P/E": "7.13x",
+    "Trl Yld": "0.69%",
+    "Fwd Yld": "0.73%",
+    "5Y Avg Yld": "4.06",
+    "Payout R": "10.31%",
+    "Ex Div Date": "2025-12-05",
+    "Div Date": "2025-12-18",
+    "Beta": "1.30",
+    "Short": "20.7M",
+    "Short R": "1.98"
+  }
+}

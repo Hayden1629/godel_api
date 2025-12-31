@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:20:29.138066Z",
+  "window_id": "4659-window",
+  "ticker": "APH US",
+  "company_info": {
+    "company_name": "Amphenol Corp.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/amphenol.com",
+    "website": "https://amphenol.com/",
+    "address": "358 HALL AVE, WALLINGFORD, CT, 06492",
+    "ceo": "CEO: MR. RICHARD ADAM NORWITT J.D."
+  },
+  "description": "Amphenol Corporation, together with its subsidiaries, primarily designs, manufactures, and markets electrical, electronic, and fiber optic connectors in the United States, China, and internationally. It operates through three segments: Harsh Environment Solutions, Communications Solutions, and Interconnect and Sensor Systems. The company offers connectors and connector systems, including harsh environment data, power, high-speed, fiber optic, and radio frequency interconnect products; busbars and power distribution systems; and other connectors. It also provides value-add products, such as backplane interconnect systems, cable assemblies and harnesses, and cable management products; other products comprising flexible and rigid printed circuit boards, hinges, other mechanical, and production related products. In addition, the company offers consumer device, network infrastructure, and other antennas; coaxial, power, and specialty cables; and sensors and sensor-based products. It sells its products through its sales force, independent representatives, and a network of electronics distributors to original equipment manufacturers, electronic manufacturing services companies, original design manufacturers, and service providers in the automotive, broadband communication, commercial aerospace, industrial, information technology and data communication, military, mobile device, and mobile network markets. Amphenol Corporation was founded in 1932 and is headquartered in Wallingford, Connecticut.",
+  "eps_estimates": {
+    "Q4, Dec 25": "0.94",
+    "FY25, Dec 25": "3.31",
+    "FY26, Dec 26": "4.01"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "William Stein",
+      "Rating": "Buy",
+      "Old_Target": "$147",
+      "New_Target": "$180",
+      "Date": "12/19/25 14:19"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Guy Hardwick",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$120",
+      "New_Target": "$143",
+      "Date": "11/14/25 02:16"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$145",
+      "New_Target": "$160",
+      "Date": "10/23/25 20:45"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Joseph Spak",
+      "Rating": "Buy",
+      "Old_Target": "$145",
+      "New_Target": "$152",
+      "Date": "10/24/25 02:17"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$145",
+      "New_Target": "$160",
+      "Date": "10/23/25 16:07"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "William Stein",
+      "Rating": "Buy",
+      "Old_Target": "$126",
+      "New_Target": "$147",
+      "Date": "10/23/25 19:28"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Mark Delaney",
+      "Rating": "Buy",
+      "Old_Target": "$139",
+      "New_Target": "$154",
+      "Date": "10/23/25 22:24"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$125",
+      "New_Target": "$145",
+      "Date": "10/16/25 16:49"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Buy",
+      "Old_Target": "$120",
+      "New_Target": "$150",
+      "Date": "10/15/25 15:43"
+    },
+    {
+      "Firm": "Baird",
+      "Analyst": "Luke Junk",
+      "Rating": "Outperform",
+      "Old_Target": "$127",
+      "New_Target": "$139",
+      "Date": "10/10/25 16:19"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Guy Hardwick",
+      "Rating": "Equal-Weight",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/08/25 17:17"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Amit Daryanani",
+      "Rating": "Outperform",
+      "Old_Target": "$120",
+      "New_Target": "$150",
+      "Date": "10/07/25 21:09"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Chris Snyder",
+      "Rating": "Buy",
+      "Old_Target": "$120",
+      "New_Target": "$145",
+      "Date": "10/06/25 21:19"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Mark Delaney",
+      "Rating": "Buy",
+      "Old_Target": "$124",
+      "New_Target": "$139",
+      "Date": "09/29/25 23:08"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$125",
+      "New_Target": "$145",
+      "Date": "09/24/25 19:09"
+    },
+    {
+      "Firm": "Baird",
+      "Analyst": "Luke Junk",
+      "Rating": "Outperform",
+      "Old_Target": "$118",
+      "New_Target": "$127",
+      "Date": "08/19/25 21:11"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Wamsi Mohan",
+      "Rating": "Neutral",
+      "Old_Target": "$110",
+      "New_Target": "$120",
+      "Date": "08/05/25 19:00"
+    },
+    {
+      "Firm": "Baird",
+      "Analyst": "Luke Junk",
+      "Rating": "Outperform",
+      "Old_Target": "$113",
+      "New_Target": "$118",
+      "Date": "07/24/25 16:55"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Chris Snyder",
+      "Rating": "Buy",
+      "Old_Target": "$115",
+      "New_Target": "$120",
+      "Date": "07/24/25 23:28"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$115",
+      "New_Target": "$125",
+      "Date": "07/24/25 20:14"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$120",
+      "New_Target": "$125",
+      "Date": "07/24/25 19:11"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "William Stein",
+      "Rating": "Buy",
+      "Old_Target": "$102",
+      "New_Target": "$126",
+      "Date": "07/24/25 18:05"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Amit Daryanani",
+      "Rating": "Outperform",
+      "Old_Target": "$105",
+      "New_Target": "$110",
+      "Date": "07/18/25 16:18"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Samik Chatterjee",
+      "Rating": "Overweight",
+      "Old_Target": "$91",
+      "New_Target": "$120",
+      "Date": "07/18/25 00:09"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Chris Snyder",
+      "Rating": "Buy",
+      "Old_Target": "$106",
+      "New_Target": "$115",
+      "Date": "07/14/25 18:15"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$100",
+      "New_Target": "$115",
+      "Date": "07/11/25 23:28"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Mark Delaney",
+      "Rating": "Buy",
+      "Old_Target": "$90",
+      "New_Target": "$102",
+      "Date": "06/10/25 21:43"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Amit Daryanani",
+      "Rating": "Outperform",
+      "Old_Target": "$88",
+      "New_Target": "$105",
+      "Date": "06/05/25 19:33"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Chris Snyder",
+      "Rating": "Buy",
+      "Old_Target": "$85",
+      "New_Target": "$106",
+      "Date": "05/30/25 18:48"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Asiya Merchant",
+      "Rating": "Buy",
+      "Old_Target": "$85",
+      "New_Target": "$100",
+      "Date": "05/27/25 21:46"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "1.2B",
+    "Employees": "125,000",
+    "Insiders": "0.54%",
+    "Institutions": "98.03%",
+    "P/Sales": "7.99",
+    "P/Book": "13.38",
+    "EV/EBITDA": "28.34",
+    "EV/R": "8.19",
+    "EV": "171.8B",
+    "Trl P/E": "45.63x",
+    "Fwd P/E": "34.13x",
+    "Trl Yld": "0.55%",
+    "Fwd Yld": "0.74%",
+    "5Y Avg Yld": "0.87",
+    "Payout R": "22.00%",
+    "Ex Div Date": "2025-12-16",
+    "Div Date": "2026-01-07",
+    "Beta": "1.19",
+    "Short": "11.7M",
+    "Short R": "1.49"
+  }
+}

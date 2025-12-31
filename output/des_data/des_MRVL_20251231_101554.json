@@ -1,0 +1,277 @@
+{
+  "timestamp": "2025-12-31T16:15:50.912485Z",
+  "window_id": "4648-window",
+  "ticker": "MRVL US",
+  "company_info": {
+    "company_name": "Marvell Technology Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/marvell.com",
+    "website": "https://marvell.com/",
+    "address": "1000 N. WEST STREET, SUITE 1200, WILMINGTON, DE, 19801",
+    "ceo": "CEO: MR. MATTHEW J. MURPHY"
+  },
+  "description": "Marvell Technology, Inc., together with its subsidiaries, designs, develops, and sells analog, mixed-signal, digital signal processing, and embedded and standalone integrated circuits. It offers a portfolio of Ethernet solutions, including controllers, network adapters, physical transceivers, and switches; single or multiple core processors; ASIC; and printer System-on-a-Chip products and application processors. The company also provides a range of storage products comprising storage controllers for hard disk drives (HDD) and solid-state drives that support various host system interfaces consisting of serial attached SCSI (SAS), serial advanced technology attachment (SATA), peripheral component interconnect express, non-volatile memory express (NVMe), and NVMe over fabrics; and fiber channel products, including host bus adapters, and controllers for server and storage system connectivity. It has operations in the United States, China, Malaysia, the Philippines, Thailand, Singapore, India, Israel, Japan, South Korea, Taiwan, and Vietnam. Marvell Technology, Inc. was incorporated in 1995 and is headquartered in Wilmington, Delaware.",
+  "eps_estimates": {
+    "Q4, Jan 26": "0.79",
+    "FY26, Jan 26": "2.83",
+    "FY27, Jan 27": "3.59"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Atif Malik",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/05/25 15:56"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Harlan Sur",
+      "Rating": "Overweight",
+      "Old_Target": "$120",
+      "New_Target": "$130",
+      "Date": "12/03/25 16:51"
+    },
+    {
+      "Firm": "Roth Capital",
+      "Analyst": "Suji Desilva",
+      "Rating": "Buy",
+      "Old_Target": "$105",
+      "New_Target": "$135",
+      "Date": "12/03/25 18:53"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "N. Quinn Bolton",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$120",
+      "Date": "12/03/25 11:29"
+    },
+    {
+      "Firm": "B. Riley Securities",
+      "Analyst": "Craig Ellis",
+      "Rating": "Buy",
+      "Old_Target": "$100",
+      "New_Target": "$130",
+      "Date": "12/03/25 18:58"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Christopher Rolland",
+      "Rating": "Positive",
+      "Old_Target": "$100",
+      "New_Target": "$120",
+      "Date": "12/03/25 17:17"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "John Vinh",
+      "Rating": "Overweight",
+      "Old_Target": "$90",
+      "New_Target": "$130",
+      "Date": "12/03/25 16:38"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Harsh Kumar",
+      "Rating": "Overweight",
+      "Old_Target": "$85",
+      "New_Target": "$135",
+      "Date": "12/03/25 18:42"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Rick Schafer",
+      "Rating": "Outperform",
+      "Old_Target": "$115",
+      "New_Target": "$150",
+      "Date": "12/03/25 17:45"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Blayne Curtis",
+      "Rating": "Buy",
+      "Old_Target": "$80",
+      "New_Target": "$120",
+      "Date": "12/03/25 19:00"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Aaron Rakers",
+      "Rating": "Overweight",
+      "Old_Target": "$90",
+      "New_Target": "$135",
+      "Date": "12/03/25 15:45"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Mark Lipacis",
+      "Rating": "Outperform",
+      "Old_Target": "$122",
+      "New_Target": "$156",
+      "Date": "12/03/25 18:00"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Tore Svanberg",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$114",
+      "Date": "12/03/25 17:23"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Thomas O'Malley",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$80",
+      "New_Target": "$105",
+      "Date": "12/03/25 19:54"
+    },
+    {
+      "Firm": "Deutsche Bank",
+      "Analyst": "Ross Seymore",
+      "Rating": "Buy",
+      "Old_Target": "$90",
+      "New_Target": "$125",
+      "Date": "12/03/25 16:04"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Schneider",
+      "Rating": "Neutral",
+      "Old_Target": "$80",
+      "New_Target": "$90",
+      "Date": "12/03/25 19:04"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$120",
+      "Date": "12/03/25 14:11"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Cody Acree",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$130",
+      "Date": "12/03/25 13:13"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$95",
+      "Date": "12/01/25 13:02"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Joseph Moore",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$76",
+      "New_Target": "$86",
+      "Date": "12/01/25 19:06"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Christopher Rolland",
+      "Rating": "Positive",
+      "Old_Target": "$80",
+      "New_Target": "$100",
+      "Date": "11/25/25 20:01"
+    },
+    {
+      "Firm": "HSBC",
+      "Analyst": "Frank Lee",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "11/24/25 17:02"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$105",
+      "New_Target": "$110",
+      "Date": "11/24/25 15:56"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Schneider",
+      "Rating": "Neutral",
+      "Old_Target": "$72",
+      "New_Target": "$80",
+      "Date": "11/18/25 23:47"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Thomas O'Malley",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$80",
+      "New_Target": "$80",
+      "Date": "10/20/25 16:07"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$95",
+      "New_Target": "$105",
+      "Date": "10/13/25 19:16"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Rick Schafer",
+      "Rating": "Outperform",
+      "Old_Target": "$95",
+      "New_Target": "$115",
+      "Date": "10/10/25 17:28"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Joshua Buchalter",
+      "Rating": "Hold",
+      "Old_Target": "$90",
+      "New_Target": "$85",
+      "Date": "10/01/25 22:45"
+    },
+    {
+      "Firm": "Deutsche Bank",
+      "Analyst": "Ross Seymore",
+      "Rating": "Buy",
+      "Old_Target": "$80",
+      "New_Target": "$90",
+      "Date": "09/25/25 18:21"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "845.1M",
+    "Employees": "7,042",
+    "Insiders": "0.35%",
+    "Institutions": "85.81%",
+    "P/Sales": "9.49",
+    "P/Book": "5.18",
+    "EV/EBITDA": "30.75",
+    "EV/R": "9.66",
+    "EV": "75.3B",
+    "Trl P/E": "30.41x",
+    "Fwd P/E": "23.92x",
+    "Trl Yld": "0.28%",
+    "Fwd Yld": "0.28%",
+    "5Y Avg Yld": "0.40",
+    "Payout R": "8.45%",
+    "Ex Div Date": "2026-01-09",
+    "Div Date": "2026-01-29",
+    "Beta": "1.93",
+    "Short": "36.9M",
+    "Short R": "1.42"
+  }
+}

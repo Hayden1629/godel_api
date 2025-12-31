@@ -1,0 +1,265 @@
+{
+  "timestamp": "2025-12-31T16:08:18.004805Z",
+  "window_id": "4634-window",
+  "ticker": "TSLA US",
+  "company_info": {
+    "company_name": "Tesla Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/tesla.com",
+    "website": "https://tesla.com/",
+    "address": "3500 DEER CREEK RD, PALO ALTO, CA, 94304",
+    "ceo": "CEO: MR. ELON R. MUSK"
+  },
+  "description": "Tesla designs and manufactures electric vehicles and energy systems. The auto lineup spans Model 3, Model Y, Model S, Model X, Cybertruck, and Semi; the Energy segment sells Powerwall, Megapack, and solar. Tesla develops an end\u2011to\u2011end autonomy stack (Autopilot and Full Self\u2011Driving), operates the Supercharger network based on the NACS standard, and is building the Dojo training supercomputer; longer\u2011term initiatives include a robotaxi platform and the Optimus humanoid robot, alongside manufacturing innovations such as 4680 cells and gigacasting. Customers include consumers, commercial fleets, and utilities; competitors include BYD and global automakers (Volkswagen, Toyota, GM, Ford, Hyundai\u2011Kia), EV peers like Rivian and Lucid, autonomy players Waymo and Cruise (and ride\u2011hailing networks Uber and Lyft), and energy\u2011storage providers such as BYD and Fluence. Key suppliers include CATL, Panasonic, and LG Energy Solution (battery cells), NVIDIA (AI accelerators), and TSMC (foundry for custom chips).",
+  "eps_estimates": {},
+  "analyst_ratings": [
+    {
+      "Firm": "Canaccord Genuity",
+      "Analyst": "George Gianarikas",
+      "Rating": "Buy",
+      "Old_Target": "$482",
+      "New_Target": "$551",
+      "Date": "12/23/25 16:30"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "William Stein",
+      "Rating": "Hold",
+      "Old_Target": "$406",
+      "New_Target": "$444",
+      "Date": "12/19/25 14:07"
+    },
+    {
+      "Firm": "Deutsche Bank",
+      "Analyst": "Edison Yu",
+      "Rating": "Buy",
+      "Old_Target": "$470",
+      "New_Target": "$500",
+      "Date": "12/19/25 18:31"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Dan Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$600",
+      "New_Target": "$600",
+      "Date": "12/15/25 19:39"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Alexander Potter",
+      "Rating": "Overweight",
+      "Old_Target": "$500",
+      "New_Target": "$500",
+      "Date": "12/10/25 00:11"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Andrew Percoco",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$410",
+      "New_Target": "$425",
+      "Date": "12/08/25 21:42"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$485",
+      "New_Target": "$475",
+      "Date": "11/25/25 23:56"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Stephen Gengaro",
+      "Rating": "Buy",
+      "Old_Target": "$483",
+      "New_Target": "$508",
+      "Date": "11/17/25 17:47"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$600",
+      "New_Target": "$600",
+      "Date": "11/07/25 21:13"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$600",
+      "New_Target": "$600",
+      "Date": "11/05/25 20:35"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "John Murphy",
+      "Rating": "Neutral",
+      "Old_Target": "$341",
+      "New_Target": "$471",
+      "Date": "10/29/25 16:31"
+    },
+    {
+      "Firm": "Freedom Capital Markets",
+      "Analyst": "Dmitriy Pozdnyakov",
+      "Rating": "Hold",
+      "Old_Target": "$338",
+      "New_Target": "$406",
+      "Date": "10/25/25 01:25"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Tom Narayan",
+      "Rating": "Outperform",
+      "Old_Target": "$500",
+      "New_Target": "$500",
+      "Date": "10/23/25 18:41"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "William Stein",
+      "Rating": "Hold",
+      "Old_Target": "$280",
+      "New_Target": "$406",
+      "Date": "10/23/25 18:34"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Andres Sheppard",
+      "Rating": "Overweight",
+      "Old_Target": "$355",
+      "New_Target": "$510",
+      "Date": "10/23/25 17:13"
+    },
+    {
+      "Firm": "Canaccord Genuity",
+      "Analyst": "George Gianarikas",
+      "Rating": "Buy",
+      "Old_Target": "$490",
+      "New_Target": "$482",
+      "Date": "10/23/25 16:39"
+    },
+    {
+      "Firm": "GLJ Research",
+      "Analyst": "Gordon Johnson",
+      "Rating": "Sell",
+      "Old_Target": "$19.05",
+      "New_Target": "$19.05",
+      "Date": "10/22/25 19:49"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Andres Sheppard",
+      "Rating": "Overweight",
+      "Old_Target": "$355",
+      "New_Target": "$355",
+      "Date": "10/21/25 18:18"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Daniel Ives",
+      "Rating": "Outperform",
+      "Old_Target": "$600",
+      "New_Target": "$600",
+      "Date": "10/20/25 18:19"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Dan Levy",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$275",
+      "New_Target": "$350",
+      "Date": "10/17/25 18:26"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Dan Levy",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$275",
+      "New_Target": "$350",
+      "Date": "10/16/25 20:45"
+    },
+    {
+      "Firm": "Melius Research",
+      "Analyst": "Rob Wertheimer",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/13/25 23:03"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Chris McNally",
+      "Rating": "In-Line",
+      "Old_Target": "$235",
+      "New_Target": "$300",
+      "Date": "10/13/25 17:48"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Stephen Gengaro",
+      "Rating": "Buy",
+      "Old_Target": "$440",
+      "New_Target": "$483",
+      "Date": "10/08/25 22:26"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Joseph Spak",
+      "Rating": "Sell",
+      "Old_Target": "$215",
+      "New_Target": "$247",
+      "Date": "10/06/25 21:49"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Andres Sheppard",
+      "Rating": "Overweight",
+      "Old_Target": "$355",
+      "New_Target": "$355",
+      "Date": "10/03/25 18:15"
+    },
+    {
+      "Firm": "Canaccord Genuity",
+      "Analyst": "George Gianarikas",
+      "Rating": "Buy",
+      "Old_Target": "$490",
+      "New_Target": "$490",
+      "Date": "10/03/25 19:04"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Adam Jonas",
+      "Rating": "Overweight",
+      "Old_Target": "$410",
+      "New_Target": "$410",
+      "Date": "10/02/25 23:28"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "2.4B",
+    "Employees": "140,473",
+    "Insiders": "12.56%",
+    "Institutions": "49.74%",
+    "P/Sales": "15.98",
+    "P/Book": "19.11",
+    "EV/EBITDA": "139.45",
+    "EV/R": "15.70",
+    "EV": "1.5T",
+    "Trl P/E": "312.68x",
+    "Fwd P/E": "207.31x",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "1.88",
+    "Short": "74.7M",
+    "Short R": "1.03"
+  }
+}

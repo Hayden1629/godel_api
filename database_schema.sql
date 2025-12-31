@@ -112,3 +112,24 @@ CREATE TABLE IF NOT EXISTS portfolio_value_history (
     INDEX idx_timestamp (timestamp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- DES (Description) data table (stock information from Godel Terminal)
+CREATE TABLE IF NOT EXISTS des_data (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticker VARCHAR(10) NOT NULL,
+    company_name VARCHAR(255) NULL,
+    asset_class VARCHAR(10) NULL,
+    logo_url VARCHAR(500) NULL,
+    website VARCHAR(500) NULL,
+    address TEXT NULL,
+    ceo VARCHAR(255) NULL,
+    description TEXT NULL,
+    eps_estimates JSON NULL,  -- Store EPS estimates as JSON: {"Q4, Dec 25": "0.72", ...}
+    snapshot JSON NULL,  -- Store snapshot data as JSON: {"Exchange": "XNYS", "Beta": "0.64", ...}
+    last_updated DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    UNIQUE KEY unique_ticker (ticker),
+    INDEX idx_ticker (ticker),
+    INDEX idx_last_updated (last_updated)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

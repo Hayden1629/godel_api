@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T16:18:42.664461Z",
+  "window_id": "4654-window",
+  "ticker": "UNH US",
+  "company_info": {
+    "company_name": "Unitedhealth Group Inc",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/unitedhealthgroup.com",
+    "website": "https://unitedhealthgroup.com/",
+    "address": "1 HEALTH DRIVE, EDEN PRAIRIE, MN, 55344",
+    "ceo": "CEO: MR. STEPHEN J. HEMSLEY"
+  },
+  "description": "UnitedHealth Group Incorporated operates as a diversified health care company in the United States. It operates through four segments: UnitedHealthcare, Optum Health, Optum Insight, and Optum Rx. The UnitedHealthcare segment offers consumer-oriented health benefit plans and services for national employers, public sector_name employers, mid-sized employers, small businesses, and individuals; health care coverage and well-being services to individuals age 50 and older addressing their needs for preventive and acute health care services, as well as services dealing with chronic disease and other specialized issues for older individuals; Medicaid plans, childrens health insurance and health care programs; health and dental benefits; and hospital and clinical services. The OptumHealth segment provides access to networks of care provider specialists, health management services, care delivery, consumer engagement, and financial services. This segment serves individuals directly through care delivery systems, employers, payers, and government entities. The OptumInsight segment offers software and information products, advisory consulting arrangements, and managed services outsourcing contracts to hospital systems, physicians, health plans, governments, life sciences companies, and other organizations. The OptumRx segment provides pharmacy care services and programs, including retail network contracting, home delivery, specialty and compounding pharmacy, and purchasing and clinical capabilities, as well as develops programs in the areas of step therapy, formulary management, drug adherence, and disease/drug therapy management. UnitedHealth Group Incorporated was incorporated in 1977 and is based in Minnetonka, Minnesota.",
+  "eps_estimates": {
+    "Q4, Dec 25": "2.11",
+    "FY25, Dec 25": "16.33",
+    "FY26, Dec 26": "17.77"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Lance Wilkes",
+      "Rating": "Outperform",
+      "Old_Target": "$433",
+      "New_Target": "$440",
+      "Date": "10/30/25 22:16"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Ryan Langston",
+      "Rating": "Hold",
+      "Old_Target": "$335",
+      "New_Target": "$338",
+      "Date": "10/31/25 01:10"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Jessica Tassan",
+      "Rating": "Overweight",
+      "Old_Target": "$423",
+      "New_Target": "$417",
+      "Date": "10/29/25 18:36"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Ben Hendrix",
+      "Rating": "Outperform",
+      "Old_Target": "$286",
+      "New_Target": "$408",
+      "Date": "10/29/25 21:58"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Kevin Caliendo",
+      "Rating": "Buy",
+      "Old_Target": "$378",
+      "New_Target": "$430",
+      "Date": "10/29/25 22:59"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "David Windley",
+      "Rating": "Buy",
+      "Old_Target": "$317",
+      "New_Target": "$409",
+      "Date": "10/18/25 00:13"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Scott Fidel",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "10/14/25 17:29"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Andrew Mok",
+      "Rating": "Overweight",
+      "Old_Target": "$352",
+      "New_Target": "$386",
+      "Date": "10/09/25 17:25"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Ann Hynes",
+      "Rating": "Outperform",
+      "Old_Target": "$300",
+      "New_Target": "$430",
+      "Date": "10/09/25 18:04"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Lisa Gill",
+      "Rating": "Overweight",
+      "Old_Target": "$310",
+      "New_Target": "$425",
+      "Date": "10/09/25 18:32"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Lance Wilkes",
+      "Rating": "Outperform",
+      "Old_Target": "$379",
+      "New_Target": "$433",
+      "Date": "10/08/25 19:24"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "Matthew Gillmor",
+      "Rating": "Overweight",
+      "Old_Target": "$350",
+      "New_Target": "$400",
+      "Date": "10/08/25 18:20"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Kevin Fischbeck",
+      "Rating": "Neutral",
+      "Old_Target": "$350",
+      "New_Target": "$390",
+      "Date": "10/08/25 22:45"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Stephen Baxter",
+      "Rating": "Overweight",
+      "Old_Target": "$267",
+      "New_Target": "$400",
+      "Date": "10/07/25 19:08"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Ricky Goldwasser",
+      "Rating": "Overweight",
+      "Old_Target": "$325",
+      "New_Target": "$395",
+      "Date": "09/12/25 20:38"
+    },
+    {
+      "Firm": "Truist Securities",
+      "Analyst": "David Macdonald",
+      "Rating": "Buy",
+      "Old_Target": "$310",
+      "New_Target": "$365",
+      "Date": "09/09/25 20:57"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Lance Wilkes",
+      "Rating": "Outperform",
+      "Old_Target": "$337",
+      "New_Target": "$379",
+      "Date": "09/05/25 20:24"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Andrew Mok",
+      "Rating": "Overweight",
+      "Old_Target": "$337",
+      "New_Target": "$352",
+      "Date": "09/04/25 19:49"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "Sarah James",
+      "Rating": "Overweight",
+      "Old_Target": "$440",
+      "New_Target": "$440",
+      "Date": "08/26/25 18:24"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Ricky Goldwasser",
+      "Rating": "Overweight",
+      "Old_Target": "$342",
+      "New_Target": "$325",
+      "Date": "08/20/25 20:08"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Kevin Fischbeck",
+      "Rating": "Neutral",
+      "Old_Target": "$290",
+      "New_Target": "$325",
+      "Date": "08/18/25 17:43"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Ann Hynes",
+      "Rating": "Outperform",
+      "Old_Target": "$350",
+      "New_Target": "$300",
+      "Date": "08/07/25 20:35"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Lisa Gill",
+      "Rating": "Overweight",
+      "Old_Target": "$418",
+      "New_Target": "$310",
+      "Date": "08/07/25 04:13"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Stephen Baxter",
+      "Rating": "Overweight",
+      "Old_Target": "$306",
+      "New_Target": "$267",
+      "Date": "08/04/25 19:00"
+    },
+    {
+      "Firm": "Baird",
+      "Analyst": "Michael Ha",
+      "Rating": "Underperform",
+      "Old_Target": "$312",
+      "New_Target": "$198",
+      "Date": "07/31/25 16:19"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Kevin Fischbeck",
+      "Rating": "Neutral",
+      "Old_Target": "$300",
+      "New_Target": "$290",
+      "Date": "07/30/25 16:08"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "Matthew Gillmor",
+      "Rating": "Overweight",
+      "Old_Target": "$400",
+      "New_Target": "$350",
+      "Date": "07/30/25 18:24"
+    },
+    {
+      "Firm": "Oppenheimer",
+      "Analyst": "Michael Wiederhorn",
+      "Rating": "Outperform",
+      "Old_Target": "$400",
+      "New_Target": "$325",
+      "Date": "07/30/25 18:44"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Jessica Tassan",
+      "Rating": "Overweight",
+      "Old_Target": "$353",
+      "New_Target": "$317",
+      "Date": "07/30/25 17:42"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Ben Hendrix",
+      "Rating": "Outperform",
+      "Old_Target": "$355",
+      "New_Target": "$286",
+      "Date": "07/30/25 19:46"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "898.0M",
+    "Employees": "400,000",
+    "Insiders": "0.82%",
+    "Institutions": "83.84%",
+    "P/Sales": "0.69",
+    "P/Book": "3.14",
+    "EV/EBITDA": "12.23",
+    "EV/R": "0.82",
+    "EV": "357.5B",
+    "Trl P/E": "17.32x",
+    "Fwd P/E": "18.69x",
+    "Trl Yld": "2.63%",
+    "Fwd Yld": "2.66%",
+    "5Y Avg Yld": "1.51",
+    "Payout R": "44.92%",
+    "Ex Div Date": "2025-12-08",
+    "Div Date": "2025-12-16",
+    "Beta": "0.43",
+    "Short": "14.8M",
+    "Short R": "2.17"
+  }
+}

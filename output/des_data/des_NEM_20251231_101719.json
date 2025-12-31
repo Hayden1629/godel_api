@@ -1,0 +1,253 @@
+{
+  "timestamp": "2025-12-31T16:17:16.427984Z",
+  "window_id": "4651-window",
+  "ticker": "NEM US",
+  "company_info": {
+    "company_name": "Newmont Corp",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/newmont.com",
+    "website": "https://newmont.com/",
+    "address": "6900 E LAYTON AVE, SUITE 700, DENVER, CO, 80237",
+    "ceo": "CEO: MR. THOMAS RONALD PALMER"
+  },
+  "description": "Newmont Corporation engages in the production and exploration of gold. It also explores for copper, silver, zinc, and lead. The company has operations and/or assets in the United States, Canada, Mexico, Dominican Republic, Peru, Suriname, Argentina, Chile, Australia, and Ghana. As of December 31, 2021, it had proven and probable gold reserves of 92.8 million ounces and land position of 62,800 square kilometers. The company was founded in 1916 and is headquartered in Denver, Colorado.",
+  "eps_estimates": {
+    "Q4, Dec 25": "1.87",
+    "FY25, Dec 25": "6.32",
+    "FY26, Dec 26": "7.76"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$105.5",
+      "New_Target": "$125",
+      "Date": "12/01/25 16:26"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$92",
+      "New_Target": "$105.5",
+      "Date": "10/16/25 23:06"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Alexander Hacking",
+      "Rating": "Buy",
+      "Old_Target": "$74",
+      "New_Target": "$104",
+      "Date": "10/15/25 20:09"
+    },
+    {
+      "Firm": "CIBC",
+      "Analyst": "Anita Soni",
+      "Rating": "Outperformer",
+      "Old_Target": "$78",
+      "New_Target": "$112",
+      "Date": "10/10/25 16:03"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Brian MacArthur",
+      "Rating": "Outperform",
+      "Old_Target": "$77",
+      "New_Target": "$84",
+      "Date": "09/23/25 22:56"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$70",
+      "New_Target": "$92",
+      "Date": "09/19/25 20:22"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Josh Wolfson",
+      "Rating": "Outperform",
+      "Old_Target": "$66",
+      "New_Target": "$95",
+      "Date": "09/10/25 15:58"
+    },
+    {
+      "Firm": "Macquarie",
+      "Analyst": "Andrew Bowler",
+      "Rating": "Neutral",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "09/02/25 16:58"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Tanya Jakusconek",
+      "Rating": "Sector Perform",
+      "Old_Target": "$69",
+      "New_Target": "$72",
+      "Date": "07/29/25 02:42"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Brian MacArthur",
+      "Rating": "Outperform",
+      "Old_Target": "$67",
+      "New_Target": "$69",
+      "Date": "07/28/25 20:07"
+    },
+    {
+      "Firm": "CIBC",
+      "Analyst": "Anita Soni",
+      "Rating": "Neutral",
+      "Old_Target": "$60",
+      "New_Target": "$74",
+      "Date": "07/15/25 23:40"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Ralph Profiti",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "07/09/25 19:32"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$60",
+      "New_Target": "$68",
+      "Date": "07/03/25 18:57"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$50",
+      "New_Target": "$60",
+      "Date": "04/11/25 17:57"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Brian MacArthur",
+      "Rating": "Outperform",
+      "Old_Target": "$54",
+      "New_Target": "$63",
+      "Date": "04/04/25 22:25"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Josh Wolfson",
+      "Rating": "Sector Perform",
+      "Old_Target": "$51",
+      "New_Target": "$52",
+      "Date": "04/04/25 18:50"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Tanya Jakusconek",
+      "Rating": "Sector Perform",
+      "Old_Target": "$52",
+      "New_Target": "$50",
+      "Date": "01/22/25 00:33"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Brian MacArthur",
+      "Rating": "Outperform",
+      "Old_Target": "$62",
+      "New_Target": "$59",
+      "Date": "11/25/24 22:01"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Neutral",
+      "Old_Target": "$67",
+      "New_Target": "$54",
+      "Date": "10/30/24 16:33"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Brian MacArthur",
+      "Rating": "Outperform",
+      "Old_Target": "$65",
+      "New_Target": "$66",
+      "Date": "10/25/24 22:52"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Tanya Jakusconek",
+      "Rating": "Sector Perform",
+      "Old_Target": "$59",
+      "New_Target": "$55",
+      "Date": "10/25/24 17:35"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Josh Wolfson",
+      "Rating": "Sector Perform",
+      "Old_Target": "$54",
+      "New_Target": "$53",
+      "Date": "10/24/24 19:58"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$65",
+      "New_Target": "$67",
+      "Date": "10/15/24 19:18"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Matthew Murphy",
+      "Rating": "Buy",
+      "Old_Target": "$54",
+      "New_Target": "$63",
+      "Date": "10/04/24 22:16"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Daniel Major",
+      "Rating": "Buy",
+      "Old_Target": "$50",
+      "New_Target": "$65",
+      "Date": "09/17/24 20:36"
+    },
+    {
+      "Firm": "Argus Research",
+      "Analyst": "David Coleman",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "08/29/24 20:49"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "1.1B",
+    "Employees": "22,200",
+    "Insiders": "0.24%",
+    "Institutions": "80.40%",
+    "P/Sales": "5.10",
+    "P/Book": "3.28",
+    "EV/EBITDA": "9.41",
+    "EV/R": "5.36",
+    "EV": "115.3B",
+    "Trl P/E": "16.44x",
+    "Fwd P/E": "12.87x",
+    "Trl Yld": "0.98%",
+    "Fwd Yld": "0.98%",
+    "5Y Avg Yld": "3.27",
+    "Payout R": "15.55%",
+    "Ex Div Date": "2025-11-26",
+    "Div Date": "2025-12-22",
+    "Beta": "0.43",
+    "Short": "19.8M",
+    "Short R": "2.19"
+  }
+}
