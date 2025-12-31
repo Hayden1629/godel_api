@@ -1,0 +1,245 @@
+{
+  "timestamp": "2025-12-31T17:30:46.149016Z",
+  "window_id": "4690-window",
+  "ticker": "PDD US",
+  "company_info": {
+    "company_name": "PDD Holdings Inc",
+    "asset_class": "DR",
+    "logo_url": "https://api.twelvedata.com/logo/pddholdings.com",
+    "website": "https://pinduoduo.com/",
+    "address": "FIRST FLOOR, 25 ST STEPHENS GREEN, DUBLIN 2, L2, D02 XF99",
+    "ceo": "CEO: MR. LEI CHEN"
+  },
+  "description": "PDD Holdings Inc., a multinational commerce group, owns and operates a portfolio of businesses. It operates Pinduoduo, an e-commerce platform that offers products in various categories, including agricultural produce, apparel, shoes, bags, mother and childcare products, food and beverage, electronic appliances, furniture and household goods, cosmetics and other personal care, sports and fitness items and auto accessories; and Temu, an online marketplace. It focuses on bringing businesses and people into the digital economy. The company was formerly known as Pinduoduo Inc. and changed its name to PDD Holdings Inc. in February 2023. PDD Holdings Inc. was incorporated in 2015 and is based in Dublin, Ireland.",
+  "eps_estimates": {
+    "Q4, Dec 25": "20.90",
+    "FY25, Dec 25": "75.51",
+    "FY26, Dec 26": "87.21"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Joyce Ju",
+      "Rating": "Neutral",
+      "Old_Target": "$141",
+      "New_Target": "$140",
+      "Date": "11/19/25 18:33"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jiong Shao",
+      "Rating": "Overweight",
+      "Old_Target": "$158",
+      "New_Target": "$165",
+      "Date": "08/26/25 17:20"
+    },
+    {
+      "Firm": "New Street Research",
+      "Analyst": "Jin Yoon",
+      "Rating": "Neutral",
+      "Old_Target": "$120",
+      "New_Target": "$120",
+      "Date": "08/26/25 22:44"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Fawne Jiang",
+      "Rating": "Buy",
+      "Old_Target": "$128",
+      "New_Target": "$160",
+      "Date": "08/26/25 18:02"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Joyce Ju",
+      "Rating": "Neutral",
+      "Old_Target": "$120",
+      "New_Target": "$141",
+      "Date": "08/26/25 20:32"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Ellie Jiang",
+      "Rating": "Neutral",
+      "Old_Target": "$125",
+      "New_Target": "$105",
+      "Date": "05/28/25 19:39"
+    },
+    {
+      "Firm": "China Renaissance",
+      "Analyst": "Charlie Chan",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "05/28/25 17:55"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Fawne Jiang",
+      "Rating": "Buy",
+      "Old_Target": "$160",
+      "New_Target": "$128",
+      "Date": "05/28/25 18:40"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Thomas Chong",
+      "Rating": "Buy",
+      "Old_Target": "$156",
+      "New_Target": "$121",
+      "Date": "05/27/25 21:08"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Alicia Yap",
+      "Rating": "Buy",
+      "Old_Target": "$127",
+      "New_Target": "$165",
+      "Date": "05/12/25 23:25"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Fawne Jiang",
+      "Rating": "Buy",
+      "Old_Target": "$160",
+      "New_Target": "$160",
+      "Date": "03/21/25 18:37"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Ellie Jiang",
+      "Rating": "Neutral",
+      "Old_Target": "$105",
+      "New_Target": "$125",
+      "Date": "03/21/25 21:13"
+    },
+    {
+      "Firm": "US Tiger Securities, Inc",
+      "Analyst": "Bo Pei",
+      "Rating": "Hold",
+      "Old_Target": "$130",
+      "New_Target": "$130",
+      "Date": "03/20/25 22:58"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Thomas Chong",
+      "Rating": "Buy",
+      "Old_Target": "$171",
+      "New_Target": "$156",
+      "Date": "03/20/25 23:20"
+    },
+    {
+      "Firm": "Nomura",
+      "Analyst": "Jialong Shi",
+      "Rating": "Neutral",
+      "Old_Target": "$137",
+      "New_Target": "$130",
+      "Date": "03/20/25 15:12"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Fawne Jiang",
+      "Rating": "Buy",
+      "Old_Target": "$185",
+      "New_Target": "$160",
+      "Date": "11/22/24 20:58"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Andre Chang",
+      "Rating": "Neutral",
+      "Old_Target": "$170",
+      "New_Target": "$105",
+      "Date": "11/22/24 23:31"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Thomas Chong",
+      "Rating": "Buy",
+      "Old_Target": "$181",
+      "New_Target": "$171",
+      "Date": "11/22/24 04:11"
+    },
+    {
+      "Firm": "Macquarie",
+      "Analyst": "Ellie Jiang",
+      "Rating": "Outperform",
+      "Old_Target": "$126",
+      "New_Target": "$224",
+      "Date": "10/07/24 16:29"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Joyce Ju",
+      "Rating": "Buy",
+      "Old_Target": "$206",
+      "New_Target": "$170",
+      "Date": "08/27/24 16:44"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Robin Zhu",
+      "Rating": "Outperform",
+      "Old_Target": "$235",
+      "New_Target": "$170",
+      "Date": "08/27/24 15:48"
+    },
+    {
+      "Firm": "Benchmark",
+      "Analyst": "Fawne Jiang",
+      "Rating": "Buy",
+      "Old_Target": "$230",
+      "New_Target": "$185",
+      "Date": "08/27/24 18:07"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Alicia Yap",
+      "Rating": "Neutral",
+      "Old_Target": "$194",
+      "New_Target": "$120",
+      "Date": "08/27/24 17:36"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Jiong Shao",
+      "Rating": "Overweight",
+      "Old_Target": "$224",
+      "New_Target": "$158",
+      "Date": "08/27/24 19:16"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Thomas Chong",
+      "Rating": "Buy",
+      "Old_Target": "$193",
+      "New_Target": "$151",
+      "Date": "08/27/24 01:47"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "3.1B",
+    "Employees": "23,465",
+    "Insiders": "-",
+    "Institutions": "32.57%",
+    "P/Sales": "0.39",
+    "P/Book": "2.85",
+    "EV/EBITDA": "2.40",
+    "EV/R": "0.54",
+    "EV": "32.1B",
+    "Trl P/E": "11.62x",
+    "Fwd P/E": "9.14x",
+    "Trl Yld": "-",
+    "Fwd Yld": "-",
+    "5Y Avg Yld": "-",
+    "Payout R": "-",
+    "Ex Div Date": "-",
+    "Div Date": "-",
+    "Beta": "0.07",
+    "Short": "28.6M",
+    "Short R": "4.34"
+  }
+}

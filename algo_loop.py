@@ -3135,12 +3135,14 @@ def collect_tickers_for_des(accounts_trading: AccountsTrading) -> set:
     # Get tickers from current positions
     try:
         positions = accounts_trading.get_positions()
-        for position in positions:
-            symbol = position.get('symbol')
-            if symbol:
-                # Remove exchange suffix if present (e.g., "AAPL:NASDAQ" -> "AAPL")
-                ticker = symbol.split(':')[0].upper()
-                tickers.add(ticker)
+        # Handle case where get_positions returns None on error
+        if positions is not None:
+            for position in positions:
+                symbol = position.get('symbol')
+                if symbol:
+                    # Remove exchange suffix if present (e.g., "AAPL:NASDAQ" -> "AAPL")
+                    ticker = symbol.split(':')[0].upper()
+                    tickers.add(ticker)
     except Exception as e:
         logger.debug(f"Error getting positions for DES tickers: {e}")
     
