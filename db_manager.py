@@ -591,6 +591,104 @@ class DatabaseManager:
             logger.error(f"Error getting portfolio value over time: {e}")
             return []
     
+    def insert_beta_over_time(self, portfolio_beta: float, timestamp: Optional[datetime] = None) -> bool:
+        """
+        Insert a portfolio beta snapshot into the beta_over_time table.
+        
+        Args:
+            portfolio_beta: Current portfolio beta value
+            timestamp: Timestamp for this snapshot (defaults to now)
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            cursor = self.connection.cursor()
+            
+            # Convert timestamp to UTC for storage
+            if timestamp is None:
+                timestamp = datetime.now(pytz.UTC)
+            elif isinstance(timestamp, str):
+                timestamp = datetime.fromisoformat(timestamp.replace('Z', '+00:00'))
+                # Ensure timezone-aware UTC
+                if timestamp.tzinfo is None:
+                    timestamp = pytz.UTC.localize(timestamp)
+                else:
+                    timestamp = timestamp.astimezone(pytz.UTC)
+            elif hasattr(timestamp, 'tzinfo') and timestamp.tzinfo is not None:
+                # If timestamp is timezone-aware, convert to UTC
+                timestamp = timestamp.astimezone(pytz.UTC)
+            else:
+                # If timestamp is naive, assume it's UTC and localize
+                timestamp = pytz.UTC.localize(timestamp)
+            
+            insert_query = """
+                INSERT INTO beta_over_time (timestamp, portfolio_beta)
+                VALUES (%s, %s)
+            """
+            
+            cursor.execute(insert_query, (
+                timestamp,
+                portfolio_beta
+            ))
+            
+            self.connection.commit()
+            cursor.close()
+            logger.debug(f"Portfolio beta snapshot inserted: {portfolio_beta:.6f}")
+            return True
+            
+        except Error as e:
+            logger.error(f"Error inserting portfolio beta: {e}")
+            if self.connection:
+                self.connection.rollback()
+            return False
+    
+    def get_beta_over_time(self, limit: int = 1000) -> List[Dict[str, Any]]:
+        """
+        Get portfolio beta history from the beta_over_time table.
+        
+        Args:
+            limit: Maximum number of records to retrieve (default 1000)
+            
+        Returns:
+            List of dicts with 'timestamp' and 'portfolio_beta' keys, sorted by timestamp
+        """
+        self._reconnect_if_needed()
+        
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            
+            query = """
+                SELECT timestamp, portfolio_beta
+                FROM beta_over_time
+                ORDER BY timestamp ASC
+                LIMIT %s
+            """
+            
+            cursor.execute(query, (limit,))
+            results = cursor.fetchall()
+            cursor.close()
+            
+            # Convert to expected format
+            beta_history = []
+            for row in results:
+                timestamp = row['timestamp']
+                if isinstance(timestamp, datetime):
+                    timestamp = timestamp.isoformat()
+                
+                beta_history.append({
+                    'timestamp': timestamp,
+                    'portfolio_beta': float(row['portfolio_beta'])
+                })
+            
+            return beta_history
+            
+        except Error as e:
+            logger.error(f"Error getting beta over time: {e}")
+            return []
+    
     def get_all_tickers_from_trades(self) -> List[str]:
         """
         Get all unique tickers from the trades table.
@@ -626,11 +724,17 @@ class DatabaseManager:
         
         try:
             cursor = self.connection.cursor(dictionary=True)
+            query_ticker = ticker.upper()
             cursor.execute("""
                 SELECT * FROM des_data WHERE ticker = %s
-            """, (ticker.upper(),))
+            """, (query_ticker,))
             result = cursor.fetchone()
             cursor.close()
+            
+            if result:
+                logger.debug(f"Database query for {query_ticker}: Found record, beta field = {result.get('beta')}")
+            else:
+                logger.debug(f"Database query for {query_ticker}: No record found")
             
             if result:
                 # Parse JSON fields

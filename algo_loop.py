@@ -3232,10 +3232,18 @@ def get_des_data_from_db(ticker: str) -> Optional[dict]:
     try:
         db = get_db_manager()
         if not db:
+            logger.debug(f"Database manager not available for {ticker}")
             return None
-        return db.get_des_data(ticker)
+        result = db.get_des_data(ticker)
+        if result:
+            logger.debug(f"Found DES data for {ticker} in database")
+        else:
+            logger.debug(f"No DES data found for {ticker} in database")
+        return result
     except Exception as e:
         logger.debug(f"Error getting DES data from database for {ticker}: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
         return None
 
 
@@ -3308,12 +3316,18 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
                         try:
                             # Remove any non-numeric characters (like "x" suffix)
                             beta = float(beta_str.replace('x', '').strip())
-                        except (ValueError, AttributeError):
-                            pass
+                            logger.debug(f"Found beta for {ticker}: {beta}")
+                        except (ValueError, AttributeError) as e:
+                            logger.debug(f"Error parsing beta '{beta_str}' for {ticker}: {e}")
+                    else:
+                        logger.debug(f"Beta field exists in snapshot but is empty/None for {ticker}")
+                else:
+                    logger.debug(f"DES data found for {ticker} but snapshot is empty")
+            else:
+                logger.debug(f"No DES data found in database for {ticker}")
             
             if beta is None:
                 missing_betas.append(ticker)
-                logger.debug(f"No beta found in database for {ticker}")
                 continue
             
             # Calculate weighted contribution
@@ -3332,7 +3346,10 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
             })
         
         if total_abs_market_value == 0:
-            logger.warning("No valid positions with market value found for beta calculation")
+            if missing_betas:
+                logger.warning(f"No positions with beta data found for beta calculation. Found {len(positions)} positions but none have beta data in database. Missing betas for: {', '.join(missing_betas[:10])}{'...' if len(missing_betas) > 10 else ''}")
+            else:
+                logger.warning(f"No valid positions with market value found for beta calculation (found {len(positions)} positions)")
             return None
         
         # Calculate portfolio beta
@@ -3353,6 +3370,14 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
         
         # Save to trade journal
         save_portfolio_beta_to_journal(portfolio_beta, position_details, missing_betas)
+        
+        # Save beta to database for over-time tracking
+        db = get_db_manager()
+        if db:
+            try:
+                db.insert_beta_over_time(portfolio_beta)
+            except Exception as e:
+                logger.debug(f"Could not save portfolio beta snapshot: {e}")
         
         return portfolio_beta
         
@@ -3600,12 +3625,17 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
     
     # Get portfolio value over time from database (stored in portfolio_value_history table)
     portfolio_value_over_time = []
+    beta_over_time = []
     db = get_db_manager()
     if db:
         try:
             portfolio_value_over_time = db.get_portfolio_value_over_time()
         except Exception as e:
             logger.debug(f"Could not get portfolio value from database: {e}")
+        try:
+            beta_over_time = db.get_beta_over_time()
+        except Exception as e:
+            logger.debug(f"Could not get beta over time from database: {e}")
     
     # Save current portfolio value snapshot to database
     current_value = account_metrics.get('account_value')
@@ -3632,7 +3662,8 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
         'account_metrics': account_metrics,
         'positions': positions,
         'account_info': account_info,  # Include full account info for debugging
-        'portfolio_value_over_time': portfolio_value_over_time
+        'portfolio_value_over_time': portfolio_value_over_time,
+        'beta_over_time': beta_over_time
     }
     
     return dashboard_data
@@ -4098,6 +4129,12 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 
                 logger.info(f"=== Monitoring {len(accounts_trading.active_trades)} active trades ===")
                 
+                # Calculate and report portfolio beta when starting to monitor trades
+                try:
+                    calculate_portfolio_beta(accounts_trading)
+                except Exception as e:
+                    logger.debug(f"Error calculating portfolio beta: {e}")
+                
                 # Loop until all trades are closed or old enough to close
                 while accounts_trading.active_trades:
                     # Get current oldest trade age (recalculate each iteration)
@@ -4135,6 +4172,11 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                         logger.debug(f"Checking stop losses and profit targets...")
                         accounts_trading.check_stop_loss_orders()
                         accounts_trading.check_profit_targets()
+                        # Calculate and report portfolio beta periodically
+                        try:
+                            calculate_portfolio_beta(accounts_trading)
+                        except Exception as e:
+                            logger.debug(f"Error calculating portfolio beta: {e}")
                         # Send dashboard data update during periodic checks
                         try:
                             dashboard_data = collect_dashboard_data(accounts_trading)
@@ -4184,6 +4226,13 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                 # Execute trades via Schwab API
                 send_trades(processed_trades, accounts_trading)
                 logger.info(f"Placed {len(processed_trades)} new trades - will wait {TRADE_HOLD_MINUTES} minutes before closing")
+                
+                # Calculate and report portfolio beta after placing new trades
+                try:
+                    calculate_portfolio_beta(accounts_trading)
+                except Exception as e:
+                    logger.debug(f"Error calculating portfolio beta: {e}")
+                
                 # Continue to next iteration to wait for trades to close
                 continue
             else:

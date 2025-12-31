@@ -112,6 +112,15 @@ CREATE TABLE IF NOT EXISTS portfolio_value_history (
     INDEX idx_timestamp (timestamp)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- Portfolio beta history (for portfolio beta over time chart)
+CREATE TABLE IF NOT EXISTS beta_over_time (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    timestamp DATETIME NOT NULL,
+    portfolio_beta DECIMAL(10, 6) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_timestamp (timestamp)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- DES (Description) data table (stock information from Godel Terminal)
 CREATE TABLE IF NOT EXISTS des_data (
     id INT AUTO_INCREMENT PRIMARY KEY,
