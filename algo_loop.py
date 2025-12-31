@@ -3279,9 +3279,11 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
         missing_betas = []
         
         for position in positions:
-            # Extract ticker symbol (remove exchange suffix if present)
-            symbol = position.get('symbol', '')
+            # Extract ticker symbol (handle both nested and direct symbol fields)
+            # Positions may have symbol in 'instrument.symbol' or directly as 'symbol'
+            symbol = position.get('instrument', {}).get('symbol') or position.get('symbol', '')
             if not symbol:
+                logger.debug(f"Skipping position with no symbol. Position keys: {list(position.keys())}")
                 continue
             ticker = symbol.split(':')[0].upper()
             
@@ -3291,17 +3293,38 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
             short_quantity = position.get('shortQuantity', 0) or 0
             avg_price = position.get('averagePrice', 0) or 0
             current_price = position.get('currentPrice', 0) or 0
+            market_value_from_api = position.get('marketValue', 0) or 0
             
-            # Use current price if available, otherwise use average price
-            price = current_price if current_price > 0 else avg_price
+            logger.debug(f"Processing position {ticker}: longQty={long_quantity}, shortQty={short_quantity}, avgPrice={avg_price}, currentPrice={current_price}, marketValue={market_value_from_api}")
             
-            # Market value: positive for longs, negative for shorts
+            # Calculate quantity: positive for longs, negative for shorts
             quantity = long_quantity - short_quantity
-            market_value = quantity * price
-            abs_market_value = abs(market_value)
+            
+            # Use marketValue directly from API if available (most reliable)
+            # If not available, calculate from quantity * price
+            if market_value_from_api != 0:
+                # API provides absolute market value, but we need to preserve sign for long/short
+                # Long positions should have positive market value, shorts should have negative
+                if quantity > 0:  # Long position
+                    market_value = abs(market_value_from_api)
+                elif quantity < 0:  # Short position
+                    market_value = -abs(market_value_from_api)
+                else:
+                    market_value = market_value_from_api  # Use as-is if quantity is zero (shouldn't happen)
+                abs_market_value = abs(market_value)
+                logger.debug(f"Using marketValue from API for {ticker}: ${market_value:.2f} (abs: ${abs_market_value:.2f}, quantity: {quantity})")
+            else:
+                # Fallback: calculate from price * quantity
+                price = current_price if current_price > 0 else avg_price
+                market_value = quantity * price
+                abs_market_value = abs(market_value)
+                logger.debug(f"Calculated market value for {ticker}: ${market_value:.2f} (qty={quantity}, price={price})")
             
             if abs_market_value == 0:
+                logger.debug(f"Skipping position {ticker}: market value is zero (qty={quantity}, API marketValue={market_value_from_api})")
                 continue
+            
+            logger.debug(f"Position {ticker} has market value: ${market_value:.2f} (abs: ${abs_market_value:.2f})")
             
             # Get beta from database
             des_data = get_des_data_from_db(ticker)

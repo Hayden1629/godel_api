@@ -5,6 +5,7 @@ Flow:
 1. Get all open positions
 2. For each position, fetch market data (including PE ratio and beta)
 3. Calculate portfolio-level statistics including exposure, PE ratios, and beta
+4. Beta is retrieved from database (DES data) first, then Schwab API, then Yahoo Finance
 """
 import time
 import requests
@@ -13,6 +14,7 @@ from typing import Dict, List, Optional
 
 # Import the same class algo_loop uses
 from algo_loop import AccountsTrading
+from db_manager import get_db_manager
 
 try:
     import yfinance as yf
@@ -35,6 +37,42 @@ def get_positions(client: AccountsTrading) -> list:
     return []
 
 
+def get_beta_from_database(ticker: str) -> Optional[float]:
+    """
+    Get beta from the database DES data.
+    
+    Args:
+        ticker: Stock ticker symbol (without exchange suffix)
+        
+    Returns:
+        float: Beta value, or None if unavailable
+    """
+    try:
+        db = get_db_manager()
+        if not db:
+            return None
+        
+        des_data = db.get_des_data(ticker)
+        if des_data:
+            # Beta is stored in the snapshot dict (reconstructed by get_des_data)
+            snapshot = des_data.get('snapshot', {})
+            if snapshot:
+                beta_str = snapshot.get('Beta')
+                if beta_str:
+                    try:
+                        # Remove any non-numeric characters (like "x" suffix)
+                        beta = float(beta_str.replace('x', '').strip())
+                        logger.debug(f"Retrieved beta {beta:.2f} for {ticker} from database")
+                        return beta
+                    except (ValueError, AttributeError):
+                        pass
+        
+        return None
+    except Exception as e:
+        logger.debug(f"Error getting beta from database for {ticker}: {e}")
+        return None
+
+
 def get_beta_from_yfinance(symbol: str) -> Optional[float]:
     """
     Get beta from Yahoo Finance using yfinance library.
@@ -51,7 +89,6 @@ def get_beta_from_yfinance(symbol: str) -> Optional[float]:
     try:
         ticker = yf.Ticker(symbol)
         info = ticker.info
-        print(info)
         # Check if info is None or empty (Yahoo Finance sometimes blocks requests)
         if not info or not isinstance(info, dict):
             logger.debug(f"Yahoo Finance returned no data for {symbol}")
@@ -183,18 +220,39 @@ def calculate_portfolio_statistics(client: AccountsTrading) -> Dict:
         # Get market data including PE ratio
         market_data = get_market_data(client, symbol)
         
-        # Extract PE ratio and beta from fundamental data
+        # Extract PE ratio from fundamental data
         pe_ratio = None
-        beta = None
         if market_data and 'fundamental' in market_data:
             fundamental = market_data['fundamental']
             pe_ratio = fundamental.get('peRatio')
-            beta = fundamental.get('beta')  # Try to get beta from Schwab API
         
-        # If beta not available from Schwab, try Yahoo Finance
+        # Get beta: Try database first, then Schwab API, then Yahoo Finance
+        beta = None
+        beta_source = None
+        ticker = symbol.split(':')[0].upper()  # Remove exchange suffix if present
+        
+        # Try database first (most reliable)
+        beta = get_beta_from_database(ticker)
+        if beta is not None:
+            beta_source = "database"
+        
+        # If not in database, try Schwab API
+        if beta is None and market_data and 'fundamental' in market_data:
+            fundamental = market_data['fundamental']
+            beta = fundamental.get('beta')
+            if beta is not None:
+                beta_source = "Schwab API"
+                logger.debug(f"Retrieved beta {beta:.2f} for {symbol} from Schwab API")
+        
+        # If still not available, try Yahoo Finance as last resort
         if beta is None:
-            logger.debug(f"Beta not found in Schwab data for {symbol}, trying Yahoo Finance...")
+            logger.debug(f"Beta not found in database or Schwab data for {symbol}, trying Yahoo Finance...")
             beta = get_beta_from_yfinance(symbol)
+            if beta is not None:
+                beta_source = "Yahoo Finance"
+        
+        if beta is None:
+            logger.debug(f"Beta not available for {symbol} from any source")
         
         # Extract additional quote data
         quote_data = {}
@@ -250,6 +308,7 @@ def calculate_portfolio_statistics(client: AccountsTrading) -> Dict:
             'unrealized_pl_percent': unrealized_pl_percent,
             'pe_ratio': pe_ratio,
             'beta': beta,
+            'beta_source': beta_source if beta is not None else None,
             **quote_data
         }
         
