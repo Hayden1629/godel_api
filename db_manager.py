@@ -51,12 +51,24 @@ class DatabaseManager:
             trade_data: Dictionary containing trade information matching trade_journal.json structure
             
         Returns:
-            Trade ID if successful, None otherwise
+            Trade ID if successful, None otherwise (returns existing trade_id if trade already exists)
         """
         self._reconnect_if_needed()
         
         try:
             cursor = self.connection.cursor()
+            
+            # Check if trade with this order_id already exists
+            order_id = trade_data.get('order_id')
+            if order_id:
+                cursor.execute("SELECT id FROM trades WHERE order_id = %s", (order_id,))
+                existing = cursor.fetchone()
+                if existing:
+                    # Trade already exists, return existing ID
+                    trade_id = existing[0]
+                    logger.debug(f"Trade with order_id {order_id} already exists (ID: {trade_id}), skipping insert")
+                    cursor.close()
+                    return trade_id
             
             # Insert main trade record
             trade_insert = """
@@ -194,9 +206,9 @@ class DatabaseManager:
             values = []
             
             for key, value in update_data.items():
-                if key in ['exit_price', 'profit_loss', 'profit_loss_percent', 'close_time',
+                if key in ['entry_price', 'exit_price', 'profit_loss', 'profit_loss_percent', 'close_time',
                           'hold_time_minutes', 'close_order_id', 'is_winner', 'is_closed',
-                          'exit_order_type', 'exit_spread']:
+                          'exit_order_type', 'exit_spread', 'entry_order_type', 'entry_spread']:
                     update_fields.append(f"{key} = %s")
                     if key == 'close_time' and isinstance(value, str):
                         value = datetime.fromisoformat(value.replace('Z', '+00:00'))
@@ -686,7 +698,11 @@ class DatabaseManager:
             return beta_history
             
         except Error as e:
-            logger.error(f"Error getting beta over time: {e}")
+            # Handle missing table gracefully (table will be created by init_database.py or Node.js backend)
+            if "doesn't exist" in str(e).lower() or "1146" in str(e):
+                logger.warning(f"beta_over_time table doesn't exist yet. Run init_database.py to create it, or restart the Node.js backend.")
+            else:
+                logger.error(f"Error getting beta over time: {e}")
             return []
     
     def get_all_tickers_from_trades(self) -> List[str]:

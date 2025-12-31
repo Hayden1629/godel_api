@@ -1376,7 +1376,7 @@ class AccountsTrading:
         
         return {'error': f'Failed after {max_retries} attempts'}
     
-    def get_fill_price_from_order(self, order_id: str, max_retries: int = 5, retry_delay: float = 0.1, update_headers: bool = True) -> float | None:
+    def get_fill_price_from_order(self, order_id: str, max_retries: int = 15, retry_delay: float = 0.5, update_headers: bool = True) -> float | None:
         """
         Get the actual fill/execution price from an order by checking its status.
         Retries until order is filled or max retries reached.
@@ -3578,7 +3578,8 @@ def collect_dashboard_data(accounts_trading: AccountsTrading) -> dict:
                 'entry_price': trade.entry_price,
                 'time_placed': trade.time_placed.isoformat() if trade.time_placed else None,
                 'age_minutes': trade.get_age_minutes(),
-                'stop_loss_price': trade.stop_loss_price
+                'stop_loss_price': trade.stop_loss_price,
+                'order_id': trade.order_id  # Include order_id for proper matching
             })
     
     # Get account information
@@ -3690,12 +3691,22 @@ def send_dashboard_data_to_website(dashboard_data: dict, local_port: int = 4131,
     if db and 'active_trades' in dashboard_data and accounts_trading:
         try:
             for active_trade in dashboard_data.get('active_trades', []):
-                # Find corresponding trade object to get order_id
-                order_id = None
-                for trade in accounts_trading.active_trades:
-                    if trade.ticker == active_trade.get('ticker') and trade.entry_price == active_trade.get('entry_price'):
-                        order_id = trade.order_id
-                        break
+                # Use order_id if already in active_trade dict, otherwise try to find it
+                order_id = active_trade.get('order_id')
+                if not order_id:
+                    # Fallback: Find corresponding trade object by ticker and time_placed (more reliable than entry_price)
+                    active_time_str = active_trade.get('time_placed')
+                    if active_time_str:
+                        try:
+                            active_time = datetime.fromisoformat(active_time_str.replace('Z', '+00:00'))
+                            for trade in accounts_trading.active_trades:
+                                if (trade.ticker == active_trade.get('ticker') and 
+                                    trade.time_placed and
+                                    abs((trade.time_placed - active_time).total_seconds()) < 60):
+                                    order_id = trade.order_id
+                                    break
+                        except (ValueError, AttributeError):
+                            pass
                 
                 if order_id:
                     active_trade['order_id'] = order_id
@@ -3835,13 +3846,13 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
                 attempts = api_response.get('attempts', 1)
                 logger.info(f"Entry price from {order_type} order: ${trade.entry_price:.4f} (attempts: {attempts})")
             elif trade.order_id:
-                # Fallback to getting fill price from order details
-                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id)
+                # Wait for order to fill and get actual execution price (increased retries/delay for reliability)
+                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id, max_retries=15, retry_delay=0.5)
                 if fill_price is not None:
                     trade.entry_price = fill_price
                     logger.info(f"Set entry price from order execution: ${trade.entry_price:.4f}")
                 else:
-                    logger.warning(f"Could not get fill price for order {trade.order_id}")
+                    logger.warning(f"Could not get fill price for order {trade.order_id} after waiting - will update later")
         else:
             # Use traditional market order
             order_payload = {
@@ -3865,21 +3876,23 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
             # Update trade with API response
             trade.update_from_api_response(api_response)
             
-            # Get actual execution/fill price from order details
+            # Get actual execution/fill price from order details (increased retries/delay for reliability)
             if trade.order_id:
-                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id)
+                fill_price = accounts_trading.get_fill_price_from_order(trade.order_id, max_retries=15, retry_delay=0.5)
                 if fill_price is not None:
                     trade.entry_price = fill_price
                     logger.info(f"Set entry price from order execution: ${trade.entry_price:.4f}")
                 else:
-                    logger.warning(f"Could not get fill price for order {trade.order_id}, entry_price may be inaccurate")
+                    logger.warning(f"Could not get fill price for order {trade.order_id} after waiting - will update later")
         
-        # Fallback: If we still don't have entry price, use quote (less accurate)
+        # Fallback: If we still don't have entry price, use quote (less accurate, but we'll update it later)
         if trade.entry_price is None:
             entry_price = accounts_trading.get_quote(ticker)
             if entry_price is not None:
                 trade.entry_price = entry_price
-                logger.warning(f"Using quote price as fallback for {ticker}: ${entry_price:.4f} (may not match execution price)")
+                logger.warning(f"Using quote price as temporary fallback for {ticker}: ${entry_price:.4f} (will update with actual fill price)")
+            else:
+                logger.error(f"Could not get quote price for {ticker} - entry_price will be None")
         else:
             trade.entry_order_type = 'MARKET'
         
@@ -3939,6 +3952,33 @@ def send_trades(list_of_trades, accounts_trading: AccountsTrading):
                     }
                     db.upsert_active_trade(active_trade_data)
                     logger.debug(f"Trade {trade.ticker} inserted into database")
+                    
+                    # If we used a quote price as fallback, try to get actual fill price one more time after a delay
+                    # and update the database entry_price
+                    if trade.order_id and trade.entry_price is not None:
+                        # Schedule an async update attempt after a short delay
+                        import threading
+                        def update_entry_price_later():
+                            time.sleep(2.0)  # Wait 2 seconds for order to fill
+                            fill_price = accounts_trading.get_fill_price_from_order(trade.order_id, max_retries=10, retry_delay=0.5)
+                            if fill_price is not None and fill_price != trade.entry_price:
+                                # Update the trade object
+                                trade.entry_price = fill_price
+                                # Update database
+                                try:
+                                    update_data = {'entry_price': fill_price}
+                                    db.update_trade(trade.order_id, update_data)
+                                    # Also update active_trades
+                                    active_trade_data['entry_price'] = fill_price
+                                    db.upsert_active_trade(active_trade_data)
+                                    logger.info(f"Updated entry price for {trade.ticker} to actual fill price: ${fill_price:.4f}")
+                                except Exception as e:
+                                    logger.debug(f"Could not update entry price in database: {e}")
+                        
+                        # Only start update thread if we might have used a quote price
+                        # (if fill_price wasn't found initially, this will try again)
+                        thread = threading.Thread(target=update_entry_price_later, daemon=True)
+                        thread.start()
             except Exception as e:
                 logger.warning(f"Could not insert trade into database: {e}")
         
