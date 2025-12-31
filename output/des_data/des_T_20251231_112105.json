@@ -1,0 +1,265 @@
+{
+  "timestamp": "2025-12-31T17:21:01.959895Z",
+  "window_id": "4678-window",
+  "ticker": "T US",
+  "company_info": {
+    "company_name": "AT&T, Inc.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/att.com",
+    "website": "https://att.com/",
+    "address": "208 S. AKARD ST, DALLAS, TX, 75202",
+    "ceo": "CEO: MR. JOHN T. STANKEY"
+  },
+  "description": "AT&T Inc. provides telecommunications, media, and technology services worldwide. Its Communications segment offers wireless voice and data communications services; and sells handsets, wireless data cards, wireless computing devices, and carrying cases and hands-free devices through its own company-owned stores, agents, and third-party retail stores. It also provides data, voice, security, cloud solutions, outsourcing, and managed and professional services, as well as customer premises equipment for multinational corporations, small and mid-sized businesses, governmental, and wholesale customers. In addition, this segment offers broadband fiber and legacy telephony voice communication services to residential customers. It markets its communications services and products under the AT&T, Cricket, AT&T PREPAID, and AT&T Fiber brand names. The companys Latin America segment provides wireless services in Mexico; and video services in Latin America. This segment markets its services and products under the AT&T and Unefon brand names. The company was formerly known as SBC Communications Inc. and changed its name to AT&T Inc. in 2005. AT&T Inc. was incorporated in 1983 and is headquartered in Dallas, Texas.",
+  "eps_estimates": {},
+  "analyst_ratings": [
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Michael Rollins",
+      "Rating": "Buy",
+      "Old_Target": "$32",
+      "New_Target": "$29",
+      "Date": "12/22/25 14:41"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Michael Ng",
+      "Rating": "Buy",
+      "Old_Target": "$33",
+      "New_Target": "$29",
+      "Date": "12/19/25 17:43"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Simon Flannery",
+      "Rating": "Overweight",
+      "Old_Target": "$32",
+      "New_Target": "$30",
+      "Date": "12/10/25 20:24"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "Brandon Nispel",
+      "Rating": "Overweight",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "11/12/25 18:43"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Jonathan Atkin",
+      "Rating": "Outperform",
+      "Old_Target": "$31",
+      "New_Target": "$30",
+      "Date": "10/23/25 18:17"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Kannan Venkateshwar",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$30",
+      "New_Target": "$28",
+      "Date": "10/23/25 17:14"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Gregory Williams",
+      "Rating": "Hold",
+      "Old_Target": "$32",
+      "New_Target": "$33",
+      "Date": "10/23/25 19:41"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Eric Luebchow",
+      "Rating": "Overweight",
+      "Old_Target": "$31",
+      "New_Target": "$29",
+      "Date": "10/16/25 17:54"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Kannan Venkateshwar",
+      "Rating": "Equal-Weight",
+      "Old_Target": "$30",
+      "New_Target": "$30",
+      "Date": "10/01/25 16:09"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Frank Louthan",
+      "Rating": "Strong Buy",
+      "Old_Target": "$31",
+      "New_Target": "$33",
+      "Date": "09/18/25 20:02"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Laurent Yoon",
+      "Rating": "Outperform",
+      "Old_Target": "$31",
+      "New_Target": "$32",
+      "Date": "09/04/25 21:51"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "Michael Ng",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "09/02/25 12:52"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Sebastiano Petti",
+      "Rating": "Overweight",
+      "Old_Target": "$31",
+      "New_Target": "$33",
+      "Date": "07/24/25 19:14"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Frank Louthan",
+      "Rating": "Strong Buy",
+      "Old_Target": "$30",
+      "New_Target": "$31",
+      "Date": "07/24/25 22:40"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Simon Flannery",
+      "Rating": "Overweight",
+      "Old_Target": "$31",
+      "New_Target": "$32",
+      "Date": "07/16/25 17:43"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Kevin Fisk",
+      "Rating": "Sector Outperform",
+      "Old_Target": "$29.5",
+      "New_Target": "$30",
+      "Date": "07/11/25 19:57"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Eric Luebchow",
+      "Rating": "Overweight",
+      "Old_Target": "$30",
+      "New_Target": "$31",
+      "Date": "07/10/25 20:52"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Michael Funk",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "07/07/25 13:40"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "John Hodulik",
+      "Rating": "Buy",
+      "Old_Target": "$30",
+      "New_Target": "$31",
+      "Date": "06/18/25 17:37"
+    },
+    {
+      "Firm": "Tigress Financial",
+      "Analyst": "Ivan Feinseth",
+      "Rating": "Buy",
+      "Old_Target": "$32",
+      "New_Target": "$34",
+      "Date": "04/29/25 18:55"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Kannan Venkateshwar",
+      "Rating": "Overweight",
+      "Old_Target": "$27",
+      "New_Target": "$30",
+      "Date": "04/25/25 17:07"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Eric Luebchow",
+      "Rating": "Overweight",
+      "Old_Target": "$27",
+      "New_Target": "$30",
+      "Date": "04/24/25 18:16"
+    },
+    {
+      "Firm": "TD Securities",
+      "Analyst": "Gregory Williams",
+      "Rating": "Hold",
+      "Old_Target": "$29",
+      "New_Target": "$30",
+      "Date": "04/24/25 19:58"
+    },
+    {
+      "Firm": "Scotiabank",
+      "Analyst": "Maher Yaghi",
+      "Rating": "Sector Outperform",
+      "Old_Target": "$29",
+      "New_Target": "$29.5",
+      "Date": "04/24/25 18:50"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Richard Choe",
+      "Rating": "Overweight",
+      "Old_Target": "$28",
+      "New_Target": "$31",
+      "Date": "04/24/25 20:02"
+    },
+    {
+      "Firm": "RBC Capital",
+      "Analyst": "Jonathan Atkin",
+      "Rating": "Outperform",
+      "Old_Target": "$28",
+      "New_Target": "$30",
+      "Date": "04/24/25 22:57"
+    },
+    {
+      "Firm": "Evercore ISI Group",
+      "Analyst": "Vijay Jayant",
+      "Rating": "In-Line",
+      "Old_Target": "$25",
+      "New_Target": "$27",
+      "Date": "04/24/25 18:19"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Simon Flannery",
+      "Rating": "Overweight",
+      "Old_Target": "$30",
+      "New_Target": "$31",
+      "Date": "04/24/25 21:39"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "7.1B",
+    "Employees": "135,670",
+    "Insiders": "0.08%",
+    "Institutions": "67.24%",
+    "P/Sales": "1.43",
+    "P/Book": "1.59",
+    "EV/EBITDA": "7.52",
+    "EV/R": "2.68",
+    "EV": "333.5B",
+    "Trl P/E": "8.08x",
+    "Fwd P/E": "11.12x",
+    "Trl Yld": "4.47%",
+    "Fwd Yld": "4.47%",
+    "5Y Avg Yld": "6.58",
+    "Payout R": "36.16%",
+    "Ex Div Date": "2026-01-12",
+    "Div Date": "2026-02-02",
+    "Beta": "0.59",
+    "Short": "115.8M",
+    "Short R": "3.20"
+  }
+}

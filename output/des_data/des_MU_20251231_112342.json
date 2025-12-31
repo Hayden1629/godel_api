@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T17:23:39.607525Z",
+  "window_id": "4685-window",
+  "ticker": "MU US",
+  "company_info": {
+    "company_name": "Micron Technology Inc.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/micron.com",
+    "website": "https://micron.com/",
+    "address": "8000 S FEDERAL WAY, PO BOX 6, BOISE, ID, 83716-9632",
+    "ceo": "CEO: MR. SANJAY MEHROTRA"
+  },
+  "description": "Micron Technology, Inc. designs, manufactures, and sells memory and storage products worldwide. The company operates through four segments: Compute and Networking Business Unit, Mobile Business Unit, Storage Business Unit, and Embedded Business Unit. It provides memory and storage technologies comprises DRAM products, which are dynamic random access memory semiconductor devices with low latency that provide high-speed data retrieval; NAND products that are non-volatile and re-writeable semiconductor storage devices; and NOR memory products, which are non-volatile re-writable semiconductor memory devices that provide fast read speeds under the Micron and Crucial brands, as well as through private labels. The company offers memory products for the cloud server, enterprise, client, graphics, and networking markets, as well as for smartphone and other mobile-device markets; SSDs and component-level solutions for the enterprise and cloud, client, and consumer storage markets; other discrete storage products in component and wafers; and memory and storage products for the automotive, industrial, and consumer markets. It markets its products through its direct sales force, independent sales representatives, distributors, and retailers; and web-based customer direct sales channel, as well as through channel and distribution partners. Micron Technology, Inc. was founded in 1978 and is headquartered in Boise, Idaho.",
+  "eps_estimates": {
+    "Q2, Feb 26": "8.06",
+    "FY26, Aug 26": "32.14",
+    "FY27, Aug 27": "38.48"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Harsh Kumar",
+      "Rating": "Overweight",
+      "Old_Target": "$200",
+      "New_Target": "$275",
+      "Date": "12/18/25 13:33"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Harlan Sur",
+      "Rating": "Overweight",
+      "Old_Target": "$220",
+      "New_Target": "$350",
+      "Date": "12/18/25 17:37"
+    },
+    {
+      "Firm": "Wolfe Research",
+      "Analyst": "Chris Caso",
+      "Rating": "Outperform",
+      "Old_Target": "$300",
+      "New_Target": "$350",
+      "Date": "12/18/25 18:38"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "N. Quinn Bolton",
+      "Rating": "Buy",
+      "Old_Target": "$300",
+      "New_Target": "$300",
+      "Date": "12/18/25 12:52"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$295",
+      "New_Target": "$300",
+      "Date": "12/18/25 16:24"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Christopher Danely",
+      "Rating": "Buy",
+      "Old_Target": "$300",
+      "New_Target": "$330",
+      "Date": "12/18/25 20:37"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "Tom O'Malley",
+      "Rating": "Overweight",
+      "Old_Target": "$240",
+      "New_Target": "$275",
+      "Date": "12/18/25 16:56"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Sheehan",
+      "Rating": "Neutral",
+      "Old_Target": "$205",
+      "New_Target": "$235",
+      "Date": "12/18/25 18:33"
+    },
+    {
+      "Firm": "Keybanc",
+      "Analyst": "John Vinh",
+      "Rating": "Overweight",
+      "Old_Target": "$215",
+      "New_Target": "$325",
+      "Date": "12/18/25 14:21"
+    },
+    {
+      "Firm": "Cantor Fitzgerald",
+      "Analyst": "C.J. Muse",
+      "Rating": "Overweight",
+      "Old_Target": "$300",
+      "New_Target": "$350",
+      "Date": "12/18/25 14:52"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$270",
+      "New_Target": "$290",
+      "Date": "12/18/25 13:00"
+    },
+    {
+      "Firm": "B of A Securities",
+      "Analyst": "Vivek Arya",
+      "Rating": "Buy",
+      "Old_Target": "$250",
+      "New_Target": "$300",
+      "Date": "12/18/25 12:41"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$300",
+      "New_Target": "$500",
+      "Date": "12/18/25 12:58"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Aaron Rakers",
+      "Rating": "Overweight",
+      "Old_Target": "$300",
+      "New_Target": "$335",
+      "Date": "12/18/25 16:14"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Joseph Moore",
+      "Rating": "Overweight",
+      "Old_Target": "$338",
+      "New_Target": "$350",
+      "Date": "12/18/25 13:59"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Matt Bryson",
+      "Rating": "Outperform",
+      "Old_Target": "$300",
+      "New_Target": "$320",
+      "Date": "12/18/25 15:08"
+    },
+    {
+      "Firm": "Raymond James",
+      "Analyst": "Melissa Fairbanks",
+      "Rating": "Outperform",
+      "Old_Target": "$190",
+      "New_Target": "$310",
+      "Date": "12/18/25 13:34"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Krish Sankar",
+      "Rating": "Buy",
+      "Old_Target": "$275",
+      "New_Target": "$300",
+      "Date": "12/18/25 18:44"
+    },
+    {
+      "Firm": "Needham",
+      "Analyst": "N. Quinn Bolton",
+      "Rating": "Buy",
+      "Old_Target": "$200",
+      "New_Target": "$300",
+      "Date": "12/16/25 12:38"
+    },
+    {
+      "Firm": "Wedbush",
+      "Analyst": "Matt Bryson",
+      "Rating": "Outperform",
+      "Old_Target": "$220",
+      "New_Target": "$300",
+      "Date": "12/15/25 13:15"
+    },
+    {
+      "Firm": "Rosenblatt",
+      "Analyst": "Kevin Cassidy",
+      "Rating": "Buy",
+      "Old_Target": "$300",
+      "New_Target": "$300",
+      "Date": "12/15/25 13:54"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Brian Chin",
+      "Rating": "Buy",
+      "Old_Target": "$195",
+      "New_Target": "$300",
+      "Date": "12/12/25 16:53"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Christopher Danely",
+      "Rating": "Buy",
+      "Old_Target": "$275",
+      "New_Target": "$300",
+      "Date": "12/11/25 01:20"
+    },
+    {
+      "Firm": "HSBC",
+      "Analyst": "Ricky Seo",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "12/09/25 18:07"
+    },
+    {
+      "Firm": "Deutsche Bank",
+      "Analyst": "Melissa Weathers",
+      "Rating": "Buy",
+      "Old_Target": "$200",
+      "New_Target": "$280",
+      "Date": "12/09/25 22:58"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Mehdi Hosseini",
+      "Rating": "Positive",
+      "Old_Target": "$200",
+      "New_Target": "$300",
+      "Date": "12/08/25 20:03"
+    },
+    {
+      "Firm": "Mizuho",
+      "Analyst": "Vijay Rakesh",
+      "Rating": "Outperform",
+      "Old_Target": "$265",
+      "New_Target": "$270",
+      "Date": "12/04/25 21:30"
+    },
+    {
+      "Firm": "Goldman Sachs",
+      "Analyst": "James Sheehan",
+      "Rating": "Neutral",
+      "Old_Target": "$180",
+      "New_Target": "$205",
+      "Date": "12/04/25 00:05"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Joseph Moore",
+      "Rating": "Overweight",
+      "Old_Target": "$325",
+      "New_Target": "$338",
+      "Date": "11/24/25 22:30"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Timothy Arcuri",
+      "Rating": "Buy",
+      "Old_Target": "$245",
+      "New_Target": "$275",
+      "Date": "11/21/25 02:35"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NASDAQ/NGS (GLOBAL SELECT MARKET)",
+    "Currency": "USD",
+    "Float": "1.1B",
+    "Employees": "48,000",
+    "Insiders": "0.25%",
+    "Institutions": "82.93%",
+    "P/Sales": "7.78",
+    "P/Book": "5.60",
+    "EV/EBITDA": "15.00",
+    "EV/R": "7.88",
+    "EV": "333.5B",
+    "Trl P/E": "27.84x",
+    "Fwd P/E": "7.60x",
+    "Trl Yld": "0.16%",
+    "Fwd Yld": "0.16%",
+    "5Y Avg Yld": "0.33",
+    "Payout R": "4.37%",
+    "Ex Div Date": "2025-12-29",
+    "Div Date": "2026-01-14",
+    "Beta": "1.55",
+    "Short": "25.2M",
+    "Short R": "1.21"
+  }
+}

@@ -1,0 +1,285 @@
+{
+  "timestamp": "2025-12-31T17:22:25.424753Z",
+  "window_id": "4682-window",
+  "ticker": "SLB US",
+  "company_info": {
+    "company_name": "SLB Ltd.",
+    "asset_class": "EQ",
+    "logo_url": "https://api.twelvedata.com/logo/slb.com",
+    "website": "https://slb.com/",
+    "address": "5599 SAN FELIPE, 17TH FLOOR, HOUSTON, TX, 77056",
+    "ceo": "CEO: MR. OLIVIER LE PEUCH"
+  },
+  "description": "Schlumberger Limited provides technology for the energy industry worldwide. The company operates through four divisions: Digital & Integration, Reservoir Performance, Well Construction, and Production Systems. It offers software, information management, and IT infrastructure services; consulting services for reservoir characterization, field development planning, and production enhancement; petro technical data services and training solutions; reservoir interpretation and data processing services; asset performance solutions; open and cased-hole services; exploration and production pressure and flow-rate measurement services; pressure pumping, well stimulation, and coiled tubing equipment for downhole mechanical well intervention, reservoir monitoring, and downhole data acquisition; and integrated production systems. The company also provides mud logging and engineering support services; drilling equipment and services for shipyards, drilling contractors, energy companies, and rental tool companies; land drilling rigs and related services; drilling tools; well cementing products and services; and well planning and drilling, engineering, supervision, logistics, procurement, contracting, and drilling rig management services, as well as supplies engineered drilling fluid systems; and designs, manufactures, and markets roller cone and fixed cutter drill bits. In addition, it offers well completion services and equipment; artificial lift production equipment and optimization services; valves; process systems; and integrated subsea production systems comprising wellheads, subsea trees, manifolds and flowline connectors, control systems, connectors, and services, as well as designs and manufactures onshore and offshore platform wellhead systems and processing solutions. The company was formerly known as Socie\u00b4te\u00b4 de Prospection E\u00b4lectrique. Schlumberger Limited was founded in 1926 and is based in Houston, Texas.",
+  "eps_estimates": {
+    "Q4, Dec 25": "0.74",
+    "FY25, Dec 25": "2.89",
+    "FY26, Dec 26": "2.95"
+  },
+  "analyst_ratings": [
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Derek Podhaizer",
+      "Rating": "Overweight",
+      "Old_Target": "$42",
+      "New_Target": "$45",
+      "Date": "12/18/25 13:25"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "David Anderson",
+      "Rating": "Overweight",
+      "Old_Target": "$48",
+      "New_Target": "$47",
+      "Date": "12/17/25 18:56"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Josh Silverstein",
+      "Rating": "Buy",
+      "Old_Target": "$44",
+      "New_Target": "$50",
+      "Date": "12/12/25 22:48"
+    },
+    {
+      "Firm": "TD Cowen",
+      "Analyst": "Marc Bianchi",
+      "Rating": "Buy",
+      "Old_Target": "$56",
+      "New_Target": "$57",
+      "Date": "12/11/25 17:52"
+    },
+    {
+      "Firm": "Bernstein",
+      "Analyst": "Guillaume Delaby",
+      "Rating": "Outperform",
+      "Old_Target": "$47.6",
+      "New_Target": "$52.3",
+      "Date": "12/11/25 14:21"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Scott Gruber",
+      "Rating": "Buy",
+      "Old_Target": "$47",
+      "New_Target": "$53",
+      "Date": "12/11/25 22:31"
+    },
+    {
+      "Firm": "Rothschild & Co",
+      "Analyst": "Sebastian Erskine",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "11/03/25 22:14"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "David Anderson",
+      "Rating": "Overweight",
+      "Old_Target": "$46",
+      "New_Target": "$48",
+      "Date": "10/21/25 17:47"
+    },
+    {
+      "Firm": "Citigroup",
+      "Analyst": "Scott Gruber",
+      "Rating": "Buy",
+      "Old_Target": "$46",
+      "New_Target": "$47",
+      "Date": "10/21/25 20:54"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Arun Jayaram",
+      "Rating": "Overweight",
+      "Old_Target": "$44",
+      "New_Target": "$43",
+      "Date": "10/21/25 02:18"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Derek Podhaizer",
+      "Rating": "Neutral",
+      "Old_Target": "$42",
+      "New_Target": "$41",
+      "Date": "10/16/25 21:26"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Josh Silverstein",
+      "Rating": "Buy",
+      "Old_Target": "$45",
+      "New_Target": "$44",
+      "Date": "08/20/25 22:42"
+    },
+    {
+      "Firm": "Melius Research",
+      "Analyst": "James West",
+      "Rating": "Buy",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "08/20/25 19:41"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Bascome Majors",
+      "Rating": "Positive",
+      "Old_Target": "$44",
+      "New_Target": "$42",
+      "Date": "07/21/25 19:37"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "David Anderson",
+      "Rating": "Overweight",
+      "Old_Target": "$47",
+      "New_Target": "$46",
+      "Date": "07/21/25 18:15"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Derek Podhaizer",
+      "Rating": "Neutral",
+      "Old_Target": "$44",
+      "New_Target": "$42",
+      "Date": "07/18/25 17:17"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Stephen Gengaro",
+      "Rating": "Buy",
+      "Old_Target": "$54",
+      "New_Target": "$52",
+      "Date": "07/16/25 20:24"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "David Anderson",
+      "Rating": "Overweight",
+      "Old_Target": "$48",
+      "New_Target": "$47",
+      "Date": "07/10/25 21:53"
+    },
+    {
+      "Firm": "UBS",
+      "Analyst": "Josh Silverstein",
+      "Rating": "Buy",
+      "Old_Target": "$44",
+      "New_Target": "$45",
+      "Date": "07/02/25 22:54"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Bascome Majors",
+      "Rating": "Positive",
+      "Old_Target": "$46",
+      "New_Target": "$44",
+      "Date": "07/01/25 20:59"
+    },
+    {
+      "Firm": "JP Morgan",
+      "Analyst": "Arun Jayaram",
+      "Rating": "Overweight",
+      "Old_Target": "$46",
+      "New_Target": "$44",
+      "Date": "06/30/25 20:10"
+    },
+    {
+      "Firm": "Jefferies",
+      "Analyst": "Lloyd Byrne",
+      "Rating": "Buy",
+      "Old_Target": "$54",
+      "New_Target": "$53",
+      "Date": "06/26/25 17:28"
+    },
+    {
+      "Firm": "Wells Fargo",
+      "Analyst": "Roger Read",
+      "Rating": "Overweight",
+      "Old_Target": "$46",
+      "New_Target": "$43",
+      "Date": "06/05/25 17:42"
+    },
+    {
+      "Firm": "Morgan Stanley",
+      "Analyst": "Connor Lynagh",
+      "Rating": "Overweight",
+      "Old_Target": "$50",
+      "New_Target": "$45",
+      "Date": "05/16/25 21:03"
+    },
+    {
+      "Firm": "Piper Sandler",
+      "Analyst": "Derek Podhaizer",
+      "Rating": "Neutral",
+      "Old_Target": "$46",
+      "New_Target": "$44",
+      "Date": "04/29/25 19:31"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Charles Minervino",
+      "Rating": "Positive",
+      "Old_Target": "$48",
+      "New_Target": "$46",
+      "Date": "04/28/25 18:27"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Stephen Gengaro",
+      "Rating": "Buy",
+      "Old_Target": "$58",
+      "New_Target": "$54",
+      "Date": "04/28/25 20:14"
+    },
+    {
+      "Firm": "Barclays",
+      "Analyst": "David Anderson",
+      "Rating": "Overweight",
+      "Old_Target": "$53",
+      "New_Target": "$48",
+      "Date": "04/26/25 02:23"
+    },
+    {
+      "Firm": "Stifel",
+      "Analyst": "Stephen Gengaro",
+      "Rating": "Buy",
+      "Old_Target": "$59",
+      "New_Target": "$58",
+      "Date": "04/15/25 20:26"
+    },
+    {
+      "Firm": "Susquehanna",
+      "Analyst": "Charles Minervino",
+      "Rating": "Positive",
+      "Old_Target": "$55",
+      "New_Target": "$48",
+      "Date": "04/14/25 20:20"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "1.5B",
+    "Employees": "110,000",
+    "Insiders": "0.19%",
+    "Institutions": "85.73%",
+    "P/Sales": "1.63",
+    "P/Book": "2.25",
+    "EV/EBITDA": "8.74",
+    "EV/R": "1.90",
+    "EV": "67.1B",
+    "Trl P/E": "15.00x",
+    "Fwd P/E": "13.06x",
+    "Trl Yld": "2.96%",
+    "Fwd Yld": "2.96%",
+    "5Y Avg Yld": "2.06",
+    "Payout R": "43.97%",
+    "Ex Div Date": "2025-12-03",
+    "Div Date": "2026-01-08",
+    "Beta": "0.73",
+    "Short": "41.3M",
+    "Short R": "2.57"
+  }
+}

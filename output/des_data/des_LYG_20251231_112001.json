@@ -1,0 +1,49 @@
+{
+  "timestamp": "2025-12-31T17:19:59.670270Z",
+  "window_id": "4676-window",
+  "ticker": "LYG US",
+  "company_info": {
+    "company_name": "Lloyds Banking Group plc",
+    "asset_class": "DR",
+    "logo_url": "https://api.twelvedata.com/logo/lloydsbankinggroup.com",
+    "website": "https://lloydsbankinggroup.com/",
+    "address": "25 GRESHAM STREET, LONDON, X0, EC2V 7HN",
+    "ceo": null
+  },
+  "description": "Lloyds Banking Group plc, together with its subsidiaries, provides a range of banking and financial services in the United Kingdom. It operates through three segments: Retail; Commercial Banking; and Insurance and Wealth. The Retail segment offers a range of financial service products, including current accounts, savings, mortgages, motor finance, unsecured loans, leasing solutions, and credit cards to personal and small business customers. The Commercial Banking segment provides lending, transactional banking, working capital management, risk management, debt financing, and debt capital market services to small and medium-sized entities, corporates, and financial institutions. The Insurance and Wealth segment offers insurance, investment and wealth management products and services. It also provides digital banking services. The company offers its products and services under the Lloyds Bank, Halifax, Bank of Scotland, and Scottish Widows brands. Lloyds Banking Group plc was founded in 1695 and is based in London, the United Kingdom.",
+  "eps_estimates": {},
+  "analyst_ratings": [
+    {
+      "Firm": "Berenberg",
+      "Analyst": "Peter Richardson",
+      "Rating": "Hold",
+      "Old_Target": "",
+      "New_Target": "",
+      "Date": "04/25/24 14:57"
+    }
+  ],
+  "snapshot": {
+    "Exchange": "NEW YORK STOCK EXCHANGE, INC.",
+    "Currency": "USD",
+    "Float": "56.2B",
+    "Employees": "61,228",
+    "Insiders": "-",
+    "Institutions": "3.64%",
+    "P/Sales": "4.37",
+    "P/Book": "5.10",
+    "EV/EBITDA": "-",
+    "EV/R": "8.14",
+    "EV": "196.9B",
+    "Trl P/E": "17.13x",
+    "Fwd P/E": "10.24x",
+    "Trl Yld": "3.20%",
+    "Fwd Yld": "2.49%",
+    "5Y Avg Yld": "4.67",
+    "Payout R": "58.56%",
+    "Ex Div Date": "2025-08-04",
+    "Div Date": "2025-09-19",
+    "Beta": "0.99",
+    "Short": "6.2M",
+    "Short R": "0.85"
+  }
+}

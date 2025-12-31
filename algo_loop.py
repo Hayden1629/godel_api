@@ -3926,12 +3926,14 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                             logger.debug(f"Could not send dashboard data update: {e}")
                         last_check_time = current_time
                         
+                        # DES data collection DISABLED - using separate collection program
+                        # To re-enable: uncomment the code below
                         # Collect DES data during idle time (when not using Godel controller for trading)
                         # This builds up a database of stock information over time
-                        try:
-                            collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=3)
-                        except Exception as e:
-                            logger.debug(f"Error collecting DES data during idle: {e}")
+                        # try:
+                        #     collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=3)
+                        # except Exception as e:
+                        #     logger.debug(f"Error collecting DES data during idle: {e}")
                     
                     # Sleep for a short interval then check again
                     # Use 30 second intervals to balance responsiveness vs CPU usage
@@ -3978,11 +3980,13 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                     print_win_rate_stats(send_webhook=False, accounts_trading=accounts_trading)  # Webhook disabled
                     break
                 
+                # DES data collection DISABLED - using separate collection program
+                # To re-enable: uncomment the code below
                 # Collect DES data during idle time when no trades to execute
-                try:
-                    collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=5)
-                except Exception as e:
-                    logger.debug(f"Error collecting DES data during idle: {e}")
+                # try:
+                #     collect_des_data_during_idle(controller, accounts_trading, max_tickers_per_cycle=5)
+                # except Exception as e:
+                #     logger.debug(f"Error collecting DES data during idle: {e}")
                 
                 # Wait a short time before checking again
                 logger.info("No trades available - waiting 10 seconds before checking again...")
