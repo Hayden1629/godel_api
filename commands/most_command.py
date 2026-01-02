@@ -165,29 +165,59 @@ class MOSTCommand(BaseCommand):
             headers = [cell.text.strip() for cell in header_cells]
             print(f"Table headers: {headers}")
             
-            # Extract rows from tbody
+            # Extract rows from tbody - re-query the tbody each time to avoid stale elements
             tbody = table.find_element(By.TAG_NAME, "tbody")
             rows = tbody.find_elements(By.TAG_NAME, "tr")
             
             print(f"Found {len(rows)} rows in table")
             
             data = []
-            for row in rows:
-                cells = row.find_elements(By.TAG_NAME, "td")
-                row_data = []
-                
-                for cell in cells:
-                    # Try to get the span text first (for nested elements)
-                    try:
-                        span = cell.find_element(By.TAG_NAME, "span")
-                        text = span.text.strip()
-                    except NoSuchElementException:
-                        text = cell.text.strip()
+            # Iterate by index to avoid stale element references
+            # Re-query rows each time through the loop to handle table updates
+            num_rows = len(rows)
+            for i in range(num_rows):
+                try:
+                    # Re-find table, tbody and rows fresh to avoid stale element references
+                    # This ensures we have the latest DOM state after any table updates
+                    table = self.window.find_element(By.TAG_NAME, "table")
+                    tbody = table.find_element(By.TAG_NAME, "tbody")
+                    rows = tbody.find_elements(By.TAG_NAME, "tr")
                     
-                    row_data.append(text)
-                
-                if row_data:  # Only add non-empty rows
-                    data.append(row_data)
+                    # Make sure we still have enough rows (table might have changed)
+                    if i >= len(rows):
+                        print(f"Row index {i} out of bounds (table has {len(rows)} rows), stopping extraction")
+                        break
+                    
+                    row = rows[i]
+                    cells = row.find_elements(By.TAG_NAME, "td")
+                    row_data = []
+                    
+                    for cell in cells:
+                        # Try to get the span text first (for nested elements)
+                        try:
+                            span = cell.find_element(By.TAG_NAME, "span")
+                            text = span.text.strip()
+                        except NoSuchElementException:
+                            text = cell.text.strip()
+                        
+                        row_data.append(text)
+                    
+                    if row_data:  # Only add non-empty rows
+                        data.append(row_data)
+                        
+                except Exception as row_error:
+                    # If we get a stale element or other error on a specific row, log and continue
+                    # Re-query table and try to continue from next row
+                    print(f"Error extracting row {i}: {row_error}")
+                    try:
+                        # Try to refresh table reference
+                        table = self.window.find_element(By.TAG_NAME, "table")
+                        tbody = table.find_element(By.TAG_NAME, "tbody")
+                        rows = tbody.find_elements(By.TAG_NAME, "tr")
+                        num_rows = len(rows)  # Update row count in case it changed
+                    except:
+                        pass  # If we can't refresh, continue anyway
+                    continue
             
             # Create DataFrame
             if data:
@@ -310,8 +340,9 @@ class MOSTCommand(BaseCommand):
         if not self.set_min_market_cap("FIFTY_BILLION"):
             print("Warning: Could not set minimum market cap to 5b, using default")
         
-        # Wait for table to populate
-        time.sleep(2)
+        # Wait for table to populate and stabilize after filters are set
+        # The table may update/refresh after setting filters, so wait longer to ensure stability
+        time.sleep(3)
         
         # Extract data using the base extract_data method
         try:

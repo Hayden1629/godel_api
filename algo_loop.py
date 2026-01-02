@@ -33,7 +33,7 @@ make abort button
 '''
 
 # Global constants
-TRADE_HOLD_MINUTES = 20  # How long to hold trades before automatically closing them
+TRADE_HOLD_MINUTES = 15  # How long to hold trades before automatically closing them
 MARKET_OPEN_DELAY_MINUTES = 1  # How many minutes after market opens before starting to trade
 MARKET_CLOSE_BUFFER_MINUTES = 5  # Stop trading this many minutes before market close
 TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results
@@ -4079,6 +4079,7 @@ def supervisor_loop(accounts_trading: AccountsTrading) -> str:
                 return 'trade'
             
             # Check if market is open today
+            wait_time = check_interval  # Default wait time
             try:
                 market_start, market_end, equity_data = accounts_trading.get_market_hours_today()
                 
@@ -4109,12 +4110,30 @@ def supervisor_loop(accounts_trading: AccountsTrading) -> str:
                         continue
                     else:
                         logger.info(f"💤 Market opens in {minutes_until_open} minutes at {market_start.strftime('%H:%M')} ET")
+                        wait_time = check_interval
                 else:
                     # Market is open but we haven't reached MARKET_OPEN_DELAY_MINUTES
                     logger.info(f"⏳ Waiting for market to settle: {message}")
+                    
+                    # Calculate how long the market has been open
+                    time_diff = now - market_start
+                    minutes_open = time_diff.total_seconds() / 60
+                    
+                    # Calculate remaining wait time until market has been open for MARKET_OPEN_DELAY_MINUTES
+                    remaining_minutes = MARKET_OPEN_DELAY_MINUTES - minutes_open
+                    
+                    if remaining_minutes > 0:
+                        # Add a small buffer (10 seconds) to ensure we're past the threshold
+                        wait_seconds = int((remaining_minutes * 60) + 10)
+                        wait_time = min(wait_seconds, check_interval)  # Don't wait longer than normal check interval
+                        logger.info(f"⏱️  Waiting {wait_seconds} seconds until market has been open for {MARKET_OPEN_DELAY_MINUTES} minutes...")
+                    else:
+                        # Shouldn't happen, but use normal interval if calculation goes wrong
+                        wait_time = check_interval
             
             except Exception as e:
                 logger.error(f"Error checking market hours: {e}")
+                wait_time = check_interval
             
             # Check if we have active trades that need attention
             if accounts_trading.active_trades:
@@ -4123,8 +4142,9 @@ def supervisor_loop(accounts_trading: AccountsTrading) -> str:
                 accounts_trading.check_profit_targets()
             
             # Sleep until next check
-            logger.info(f"💤 Next check in {SUPERVISOR_CHECK_INTERVAL_MINUTES} minutes...")
-            time.sleep(check_interval)
+            wait_minutes = wait_time / 60
+            logger.info(f"💤 Next check in {wait_minutes:.1f} minutes...")
+            time.sleep(wait_time)
             
         except KeyboardInterrupt:
             logger.info("\nSupervisor loop interrupted...")
