@@ -2927,3 +2927,298 @@
 2025-12-31 15:08:58 | INFO     | 
 🛑 Script interrupted by user
 2025-12-31 15:08:58 | INFO     | 🧹 Cleaning up Godel controller...
+2026-01-02 08:24:44 | INFO     | ============================================================
+2026-01-02 08:24:44 | INFO     | DES Data Collection Script - Continuous Mode
+2026-01-02 08:24:44 | INFO     | ============================================================
+2026-01-02 08:24:44 | INFO     | Checking every 10 minutes for tickers needing updates
+2026-01-02 08:24:44 | INFO     | Update threshold: 7 days
+2026-01-02 08:24:44 | INFO     | ============================================================
+2026-01-02 08:24:44 | INFO     | 🔌 Initializing Godel Terminal controller...
+2026-01-02 08:24:56 | INFO     | ✅ Godel controller initialized successfully
+2026-01-02 08:24:56 | INFO     | 
+============================================================
+2026-01-02 08:24:56 | INFO     | 🔄 Starting cycle #1
+2026-01-02 08:24:56 | INFO     | ============================================================
+2026-01-02 08:24:56 | INFO     | 📦 Connecting to database...
+2026-01-02 08:24:57 | DEBUG    | Database connection established
+2026-01-02 08:24:57 | INFO     | ✅ Database connection established
+2026-01-02 08:24:57 | INFO     | 🔍 Finding tickers that need DES data (max age: 7 days)...
+2026-01-02 08:24:57 | INFO     | ✅ All database tickers have up-to-date DES data!
+2026-01-02 08:24:57 | INFO     | 
+============================================================
+2026-01-02 08:24:57 | INFO     | 📊 Database Tickers Collection Summary
+2026-01-02 08:24:57 | INFO     | ============================================================
+2026-01-02 08:24:57 | INFO     | Total tickers processed: 0
+2026-01-02 08:24:57 | INFO     | ✅ Successful: 0
+2026-01-02 08:24:57 | INFO     | ❌ Failed: 0
+2026-01-02 08:24:57 | INFO     | 📈 Success rate: 0.0%
+2026-01-02 08:24:57 | INFO     | ============================================================
+2026-01-02 08:24:57 | INFO     | 
+============================================================
+2026-01-02 08:24:57 | INFO     | 📊 Processing MOST Tickers (50B+ Market Cap)
+2026-01-02 08:24:57 | INFO     | ============================================================
+2026-01-02 08:24:57 | INFO     | 📊 Fetching tickers from MOST (50B+ market cap)...
+2026-01-02 08:25:18 | INFO     | ✅ Found 100 tickers from MOST: ['TSLA', 'NVDA', 'ORCL', 'INTC', 'AMD', 'MU', 'MDT', 'AVGO', 'BABA', 'PLTR']...
+2026-01-02 08:25:18 | INFO     | 🔍 Checking which MOST tickers are already in database...
+2026-01-02 08:25:18 | INFO     | 📋 Found 49 new tickers from MOST not in database: ['MDT', 'NVO', 'MA', 'BX', 'VALE', 'GOOG', 'STX', 'CVS', 'GILD', 'MSFT']...
+2026-01-02 08:25:18 | INFO     | 
+📦 Processing MOST batch 1 (5 tickers)...
+2026-01-02 08:25:18 | INFO     | 📊 Collecting DES data for MDT...
+2026-01-02 08:25:24 | INFO     | ✅ Successfully collected DES data for MDT
+2026-01-02 08:25:25 | DEBUG    | DES data upserted for MDT
+2026-01-02 08:25:25 | INFO     | 💾 Saved DES data for MDT to database
+2026-01-02 08:25:28 | INFO     | 📊 Collecting DES data for NVO...
+2026-01-02 08:25:35 | INFO     | ✅ Successfully collected DES data for NVO
+2026-01-02 08:25:35 | DEBUG    | DES data upserted for NVO
+2026-01-02 08:25:35 | INFO     | 💾 Saved DES data for NVO to database
+2026-01-02 08:25:38 | INFO     | 📊 Collecting DES data for MA...
+2026-01-02 08:25:44 | INFO     | ✅ Successfully collected DES data for MA
+2026-01-02 08:25:44 | DEBUG    | DES data upserted for MA
+2026-01-02 08:25:44 | INFO     | 💾 Saved DES data for MA to database
+2026-01-02 08:25:47 | INFO     | 📊 Collecting DES data for BX...
+2026-01-02 08:25:54 | INFO     | ✅ Successfully collected DES data for BX
+2026-01-02 08:25:54 | DEBUG    | DES data upserted for BX
+2026-01-02 08:25:54 | INFO     | 💾 Saved DES data for BX to database
+2026-01-02 08:25:57 | INFO     | 📊 Collecting DES data for VALE...
+2026-01-02 08:26:04 | INFO     | ✅ Successfully collected DES data for VALE
+2026-01-02 08:26:04 | DEBUG    | DES data upserted for VALE
+2026-01-02 08:26:04 | INFO     | 💾 Saved DES data for VALE to database
+2026-01-02 08:26:04 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:26:14 | INFO     | 
+📦 Processing MOST batch 2 (5 tickers)...
+2026-01-02 08:26:14 | INFO     | 📊 Collecting DES data for GOOG...
+2026-01-02 08:26:20 | INFO     | ✅ Successfully collected DES data for GOOG
+2026-01-02 08:26:20 | DEBUG    | DES data upserted for GOOG
+2026-01-02 08:26:20 | INFO     | 💾 Saved DES data for GOOG to database
+2026-01-02 08:26:23 | INFO     | 📊 Collecting DES data for STX...
+2026-01-02 08:26:30 | INFO     | ✅ Successfully collected DES data for STX
+2026-01-02 08:26:30 | DEBUG    | DES data upserted for STX
+2026-01-02 08:26:30 | INFO     | 💾 Saved DES data for STX to database
+2026-01-02 08:26:33 | INFO     | 📊 Collecting DES data for CVS...
+2026-01-02 08:26:40 | INFO     | ✅ Successfully collected DES data for CVS
+2026-01-02 08:26:40 | DEBUG    | DES data upserted for CVS
+2026-01-02 08:26:40 | INFO     | 💾 Saved DES data for CVS to database
+2026-01-02 08:26:43 | INFO     | 📊 Collecting DES data for GILD...
+2026-01-02 08:26:50 | INFO     | ✅ Successfully collected DES data for GILD
+2026-01-02 08:26:50 | DEBUG    | DES data upserted for GILD
+2026-01-02 08:26:50 | INFO     | 💾 Saved DES data for GILD to database
+2026-01-02 08:26:53 | INFO     | 📊 Collecting DES data for MSFT...
+2026-01-02 08:27:00 | INFO     | ✅ Successfully collected DES data for MSFT
+2026-01-02 08:27:00 | DEBUG    | DES data upserted for MSFT
+2026-01-02 08:27:00 | INFO     | 💾 Saved DES data for MSFT to database
+2026-01-02 08:27:00 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:27:10 | INFO     | 
+📦 Processing MOST batch 3 (5 tickers)...
+2026-01-02 08:27:10 | INFO     | 📊 Collecting DES data for META...
+2026-01-02 08:27:16 | INFO     | ✅ Successfully collected DES data for META
+2026-01-02 08:27:16 | DEBUG    | DES data upserted for META
+2026-01-02 08:27:16 | INFO     | 💾 Saved DES data for META to database
+2026-01-02 08:27:19 | INFO     | 📊 Collecting DES data for ICE...
+2026-01-02 08:27:26 | INFO     | ✅ Successfully collected DES data for ICE
+2026-01-02 08:27:26 | DEBUG    | DES data upserted for ICE
+2026-01-02 08:27:26 | INFO     | 💾 Saved DES data for ICE to database
+2026-01-02 08:27:29 | INFO     | 📊 Collecting DES data for ROST...
+2026-01-02 08:27:36 | INFO     | ✅ Successfully collected DES data for ROST
+2026-01-02 08:27:36 | DEBUG    | DES data upserted for ROST
+2026-01-02 08:27:36 | INFO     | 💾 Saved DES data for ROST to database
+2026-01-02 08:27:39 | INFO     | 📊 Collecting DES data for ASML...
+2026-01-02 08:27:45 | INFO     | ✅ Successfully collected DES data for ASML
+2026-01-02 08:27:45 | DEBUG    | DES data upserted for ASML
+2026-01-02 08:27:45 | INFO     | 💾 Saved DES data for ASML to database
+2026-01-02 08:27:48 | INFO     | 📊 Collecting DES data for TMUS...
+2026-01-02 08:27:56 | INFO     | ✅ Successfully collected DES data for TMUS
+2026-01-02 08:27:56 | DEBUG    | DES data upserted for TMUS
+2026-01-02 08:27:56 | INFO     | 💾 Saved DES data for TMUS to database
+2026-01-02 08:27:56 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:28:06 | INFO     | 
+📦 Processing MOST batch 4 (5 tickers)...
+2026-01-02 08:28:06 | INFO     | 📊 Collecting DES data for KKR...
+2026-01-02 08:28:12 | INFO     | ✅ Successfully collected DES data for KKR
+2026-01-02 08:28:12 | DEBUG    | DES data upserted for KKR
+2026-01-02 08:28:12 | INFO     | 💾 Saved DES data for KKR to database
+2026-01-02 08:28:15 | INFO     | 📊 Collecting DES data for O...
+2026-01-02 08:28:21 | INFO     | ✅ Successfully collected DES data for O
+2026-01-02 08:28:22 | DEBUG    | DES data upserted for O
+2026-01-02 08:28:22 | INFO     | 💾 Saved DES data for O to database
+2026-01-02 08:28:25 | INFO     | 📊 Collecting DES data for AMAT...
+2026-01-02 08:28:32 | INFO     | ✅ Successfully collected DES data for AMAT
+2026-01-02 08:28:32 | DEBUG    | DES data upserted for AMAT
+2026-01-02 08:28:32 | INFO     | 💾 Saved DES data for AMAT to database
+2026-01-02 08:28:35 | INFO     | 📊 Collecting DES data for APH...
+2026-01-02 08:28:43 | INFO     | ✅ Successfully collected DES data for APH
+2026-01-02 08:28:43 | DEBUG    | DES data upserted for APH
+2026-01-02 08:28:43 | INFO     | 💾 Saved DES data for APH to database
+2026-01-02 08:28:46 | INFO     | 📊 Collecting DES data for EQNR...
+2026-01-02 08:28:51 | INFO     | ✅ Successfully collected DES data for EQNR
+2026-01-02 08:28:51 | DEBUG    | DES data upserted for EQNR
+2026-01-02 08:28:51 | INFO     | 💾 Saved DES data for EQNR to database
+2026-01-02 08:28:51 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:29:01 | INFO     | 
+📦 Processing MOST batch 5 (5 tickers)...
+2026-01-02 08:29:01 | INFO     | 📊 Collecting DES data for VZ...
+2026-01-02 08:29:07 | INFO     | ✅ Successfully collected DES data for VZ
+2026-01-02 08:29:07 | DEBUG    | DES data upserted for VZ
+2026-01-02 08:29:07 | INFO     | 💾 Saved DES data for VZ to database
+2026-01-02 08:29:10 | INFO     | 📊 Collecting DES data for GSK...
+2026-01-02 08:29:15 | INFO     | ✅ Successfully collected DES data for GSK
+2026-01-02 08:29:15 | DEBUG    | DES data upserted for GSK
+2026-01-02 08:29:15 | INFO     | 💾 Saved DES data for GSK to database
+2026-01-02 08:29:18 | INFO     | 📊 Collecting DES data for JNJ...
+2026-01-02 08:29:25 | INFO     | ✅ Successfully collected DES data for JNJ
+2026-01-02 08:29:25 | DEBUG    | DES data upserted for JNJ
+2026-01-02 08:29:25 | INFO     | 💾 Saved DES data for JNJ to database
+2026-01-02 08:29:28 | INFO     | 📊 Collecting DES data for MMC...
+2026-01-02 08:29:34 | INFO     | ✅ Successfully collected DES data for MMC
+2026-01-02 08:29:34 | DEBUG    | DES data upserted for MMC
+2026-01-02 08:29:34 | INFO     | 💾 Saved DES data for MMC to database
+2026-01-02 08:29:37 | INFO     | 📊 Collecting DES data for SHW...
+2026-01-02 08:29:44 | INFO     | ✅ Successfully collected DES data for SHW
+2026-01-02 08:29:44 | DEBUG    | DES data upserted for SHW
+2026-01-02 08:29:44 | INFO     | 💾 Saved DES data for SHW to database
+2026-01-02 08:29:44 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:29:54 | INFO     | 
+📦 Processing MOST batch 6 (5 tickers)...
+2026-01-02 08:29:54 | INFO     | 📊 Collecting DES data for SHEL...
+2026-01-02 08:30:00 | INFO     | ✅ Successfully collected DES data for SHEL
+2026-01-02 08:30:01 | DEBUG    | DES data upserted for SHEL
+2026-01-02 08:30:01 | INFO     | 💾 Saved DES data for SHEL to database
+2026-01-02 08:30:04 | INFO     | 📊 Collecting DES data for AMT...
+2026-01-02 08:30:12 | INFO     | ✅ Successfully collected DES data for AMT
+2026-01-02 08:30:12 | DEBUG    | DES data upserted for AMT
+2026-01-02 08:30:12 | INFO     | 💾 Saved DES data for AMT to database
+2026-01-02 08:30:15 | INFO     | 📊 Collecting DES data for AZN...
+2026-01-02 08:30:21 | INFO     | ✅ Successfully collected DES data for AZN
+2026-01-02 08:30:21 | DEBUG    | DES data upserted for AZN
+2026-01-02 08:30:21 | INFO     | 💾 Saved DES data for AZN to database
+2026-01-02 08:30:24 | INFO     | 📊 Collecting DES data for BTQ...
+2026-01-02 08:30:28 | INFO     | ✅ Successfully collected DES data for BTQ
+2026-01-02 08:30:28 | DEBUG    | DES data upserted for BTQ
+2026-01-02 08:30:29 | INFO     | 💾 Saved DES data for BTQ to database
+2026-01-02 08:30:32 | INFO     | 📊 Collecting DES data for SE...
+2026-01-02 08:30:38 | INFO     | ✅ Successfully collected DES data for SE
+2026-01-02 08:30:38 | DEBUG    | DES data upserted for SE
+2026-01-02 08:30:38 | INFO     | 💾 Saved DES data for SE to database
+2026-01-02 08:30:38 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:30:48 | INFO     | 
+📦 Processing MOST batch 7 (5 tickers)...
+2026-01-02 08:30:48 | INFO     | 📊 Collecting DES data for INTU...
+2026-01-02 08:30:54 | INFO     | ✅ Successfully collected DES data for INTU
+2026-01-02 08:30:55 | DEBUG    | DES data upserted for INTU
+2026-01-02 08:30:55 | INFO     | 💾 Saved DES data for INTU to database
+2026-01-02 08:30:58 | INFO     | 📊 Collecting DES data for CRM...
+2026-01-02 08:31:05 | INFO     | ✅ Successfully collected DES data for CRM
+2026-01-02 08:31:05 | DEBUG    | DES data upserted for CRM
+2026-01-02 08:31:05 | INFO     | 💾 Saved DES data for CRM to database
+2026-01-02 08:31:08 | INFO     | 📊 Collecting DES data for CI...
+2026-01-02 08:31:15 | INFO     | ✅ Successfully collected DES data for CI
+2026-01-02 08:31:15 | DEBUG    | DES data upserted for CI
+2026-01-02 08:31:15 | INFO     | 💾 Saved DES data for CI to database
+2026-01-02 08:31:18 | INFO     | 📊 Collecting DES data for MO...
+2026-01-02 08:31:25 | INFO     | ✅ Successfully collected DES data for MO
+2026-01-02 08:31:26 | DEBUG    | DES data upserted for MO
+2026-01-02 08:31:26 | INFO     | 💾 Saved DES data for MO to database
+2026-01-02 08:31:29 | INFO     | 📊 Collecting DES data for RIO...
+2026-01-02 08:31:34 | INFO     | ✅ Successfully collected DES data for RIO
+2026-01-02 08:31:34 | DEBUG    | DES data upserted for RIO
+2026-01-02 08:31:34 | INFO     | 💾 Saved DES data for RIO to database
+2026-01-02 08:31:34 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:31:44 | INFO     | 
+📦 Processing MOST batch 8 (5 tickers)...
+2026-01-02 08:31:44 | INFO     | 📊 Collecting DES data for NEE...
+2026-01-02 08:31:51 | INFO     | ✅ Successfully collected DES data for NEE
+2026-01-02 08:31:51 | DEBUG    | DES data upserted for NEE
+2026-01-02 08:31:51 | INFO     | 💾 Saved DES data for NEE to database
+2026-01-02 08:31:54 | INFO     | 📊 Collecting DES data for GE...
+2026-01-02 08:32:00 | INFO     | ✅ Successfully collected DES data for GE
+2026-01-02 08:32:01 | DEBUG    | DES data upserted for GE
+2026-01-02 08:32:01 | INFO     | 💾 Saved DES data for GE to database
+2026-01-02 08:32:04 | INFO     | 📊 Collecting DES data for UL...
+2026-01-02 08:32:09 | INFO     | ✅ Successfully collected DES data for UL
+2026-01-02 08:32:09 | DEBUG    | DES data upserted for UL
+2026-01-02 08:32:09 | INFO     | 💾 Saved DES data for UL to database
+2026-01-02 08:32:12 | INFO     | 📊 Collecting DES data for HSBC...
+2026-01-02 08:32:16 | INFO     | ✅ Successfully collected DES data for HSBC
+2026-01-02 08:32:17 | DEBUG    | DES data upserted for HSBC
+2026-01-02 08:32:17 | INFO     | 💾 Saved DES data for HSBC to database
+2026-01-02 08:32:20 | INFO     | 📊 Collecting DES data for ANET...
+2026-01-02 08:32:27 | INFO     | ✅ Successfully collected DES data for ANET
+2026-01-02 08:32:27 | DEBUG    | DES data upserted for ANET
+2026-01-02 08:32:27 | INFO     | 💾 Saved DES data for ANET to database
+2026-01-02 08:32:27 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:32:37 | INFO     | 
+📦 Processing MOST batch 9 (5 tickers)...
+2026-01-02 08:32:37 | INFO     | 📊 Collecting DES data for JCI...
+2026-01-02 08:32:44 | INFO     | ✅ Successfully collected DES data for JCI
+2026-01-02 08:32:44 | DEBUG    | DES data upserted for JCI
+2026-01-02 08:32:44 | INFO     | 💾 Saved DES data for JCI to database
+2026-01-02 08:32:47 | INFO     | 📊 Collecting DES data for QCOM...
+2026-01-02 08:32:54 | INFO     | ✅ Successfully collected DES data for QCOM
+2026-01-02 08:32:54 | DEBUG    | DES data upserted for QCOM
+2026-01-02 08:32:54 | INFO     | 💾 Saved DES data for QCOM to database
+2026-01-02 08:32:57 | INFO     | 📊 Collecting DES data for BTI...
+2026-01-02 08:33:01 | INFO     | ✅ Successfully collected DES data for BTI
+2026-01-02 08:33:02 | DEBUG    | DES data upserted for BTI
+2026-01-02 08:33:02 | INFO     | 💾 Saved DES data for BTI to database
+2026-01-02 08:33:05 | INFO     | 📊 Collecting DES data for APP...
+2026-01-02 08:33:11 | INFO     | ✅ Successfully collected DES data for APP
+2026-01-02 08:33:11 | DEBUG    | DES data upserted for APP
+2026-01-02 08:33:11 | INFO     | 💾 Saved DES data for APP to database
+2026-01-02 08:33:14 | INFO     | 📊 Collecting DES data for JPM...
+2026-01-02 08:33:23 | INFO     | ✅ Successfully collected DES data for JPM
+2026-01-02 08:33:23 | DEBUG    | DES data upserted for JPM
+2026-01-02 08:33:23 | INFO     | 💾 Saved DES data for JPM to database
+2026-01-02 08:33:23 | INFO     | ⏸️  Waiting 10 seconds before next batch...
+2026-01-02 08:33:33 | INFO     | 
+📦 Processing MOST batch 10 (4 tickers)...
+2026-01-02 08:33:33 | INFO     | 📊 Collecting DES data for SAN...
+2026-01-02 08:33:37 | INFO     | ✅ Successfully collected DES data for SAN
+2026-01-02 08:33:38 | DEBUG    | DES data upserted for SAN
+2026-01-02 08:33:38 | INFO     | 💾 Saved DES data for SAN to database
+2026-01-02 08:33:41 | INFO     | 📊 Collecting DES data for PANW...
+2026-01-02 08:33:47 | INFO     | ✅ Successfully collected DES data for PANW
+2026-01-02 08:33:48 | DEBUG    | DES data upserted for PANW
+2026-01-02 08:33:48 | INFO     | 💾 Saved DES data for PANW to database
+2026-01-02 08:33:51 | INFO     | 📊 Collecting DES data for VST...
+2026-01-02 08:33:57 | INFO     | ✅ Successfully collected DES data for VST
+2026-01-02 08:33:57 | DEBUG    | DES data upserted for VST
+2026-01-02 08:33:57 | INFO     | 💾 Saved DES data for VST to database
+2026-01-02 08:34:00 | INFO     | 📊 Collecting DES data for DB...
+2026-01-02 08:34:15 | INFO     | ✅ Successfully collected DES data for DB
+2026-01-02 08:34:16 | DEBUG    | DES data upserted for DB
+2026-01-02 08:34:16 | INFO     | 💾 Saved DES data for DB to database
+2026-01-02 08:34:16 | INFO     | 
+============================================================
+2026-01-02 08:34:16 | INFO     | 📊 MOST Tickers Collection Summary
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | Total tickers processed: 49
+2026-01-02 08:34:16 | INFO     | ✅ Successful: 49
+2026-01-02 08:34:16 | INFO     | ❌ Failed: 0
+2026-01-02 08:34:16 | INFO     | 📈 Success rate: 100.0%
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | 
+============================================================
+2026-01-02 08:34:16 | INFO     | 📊 Processing Tickers from File
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | 
+============================================================
+2026-01-02 08:34:16 | INFO     | 📊 File Tickers Collection Summary
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | Total tickers processed: 0
+2026-01-02 08:34:16 | INFO     | ✅ Successful: 0
+2026-01-02 08:34:16 | INFO     | ❌ Failed: 0
+2026-01-02 08:34:16 | INFO     | 📈 Success rate: 0.0%
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | 
+============================================================
+2026-01-02 08:34:16 | INFO     | 📊 Overall Collection Summary
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | Total tickers processed: 49
+2026-01-02 08:34:16 | INFO     | ✅ Successful: 49
+2026-01-02 08:34:16 | INFO     | ❌ Failed: 0
+2026-01-02 08:34:16 | INFO     | 📈 Success rate: 100.0%
+2026-01-02 08:34:16 | INFO     | ============================================================
+2026-01-02 08:34:16 | INFO     | 🔌 Disconnecting from database...
+2026-01-02 08:34:16 | DEBUG    | Database connection closed
+2026-01-02 08:34:16 | INFO     | ✅ Database connection closed
+2026-01-02 08:34:16 | INFO     | 
+✅ Cycle #1 completed. Waiting 10 minutes before next check...
