@@ -3747,6 +3747,9 @@ def rebalance_portfolio_beta(accounts_trading: AccountsTrading, beta_threshold: 
         
         logger.info(f"Closing {len(positions_to_close)} position(s) to rebalance beta from {current_beta:.4f} to ~{test_beta:.4f}")
         
+        # Track order IDs for positions being closed so we can update trade objects later
+        close_order_info = []  # List of (ticker, order_id, is_long) tuples
+        
         # Close each position
         for pos_data in positions_to_close:
             ticker = pos_data['ticker']
@@ -3956,6 +3959,8 @@ def rebalance_portfolio_beta(accounts_trading: AccountsTrading, beta_threshold: 
             if result.get('status') == 'FILLED':
                 fill_price = result.get('fillPrice')
                 logger.info(f"✅ Rebalancing order for {ticker} filled immediately at ${fill_price:.4f} (Order ID: {order_id})")
+                # Track this order so we can update the trade object later
+                close_order_info.append((ticker, str(order_id), is_long))
             else:
                 # Verify the order was actually created successfully (not rejected)
                 # Wait a moment for order to be processed, then check status
@@ -3976,11 +3981,14 @@ def rebalance_portfolio_beta(accounts_trading: AccountsTrading, beta_threshold: 
                         accounts_trading.close_order(str(order_id))
                     except:
                         pass
-                    continue  # Skip to next position
+                    continue  # Skip to next position (don't track rejected orders)
                 elif order_status in ['FILLED', 'PARTIALLY_FILLED', 'WORKING', 'ACCEPTED']:
                     logger.info(f"✅ Rebalancing order for {ticker} placed successfully (Order ID: {order_id}, Status: {order_status})")
+                    # Track this order so we can update the trade object later
+                    close_order_info.append((ticker, str(order_id), is_long))
                 else:
                     logger.warning(f"⚠️  Rebalancing order for {ticker} in unexpected status: {order_status}")
+                    # Don't track orders in unexpected status
             
             time.sleep(1)  # Brief pause between orders
         
@@ -4014,6 +4022,44 @@ def rebalance_portfolio_beta(accounts_trading: AccountsTrading, beta_threshold: 
             # If all positions closed, break early
             if closed_count == len(positions_to_close):
                 break
+        
+        # Update trade objects: get fill prices and mark trades as closed
+        if close_order_info:
+            logger.info(f"Updating {len(close_order_info)} trade object(s) for closed positions...")
+            for ticker, order_id, is_long in close_order_info:
+                # Get fill price from order
+                fill_price = accounts_trading.get_fill_price_from_order(order_id, max_retries=5, retry_delay=1.0)
+                if fill_price is None:
+                    # Fallback to quote if we can't get fill price
+                    fill_price = accounts_trading.get_quote(ticker)
+                    if fill_price is None:
+                        logger.warning(f"⚠️  Could not get fill price or quote for {ticker} - skipping trade update")
+                        continue
+                
+                # Find matching trade in active_trades
+                matching_trade = None
+                for trade in accounts_trading.active_trades:
+                    if trade.ticker == ticker and not trade.is_closed:
+                        # Match the action type (LONG position -> LONG trade, SHORT position -> SHORT trade)
+                        if (is_long and trade.action == 'LONG') or (not is_long and trade.action == 'SHORT'):
+                            matching_trade = trade
+                            break
+                
+                if matching_trade:
+                    # Mark trade as closed and save to database
+                    matching_trade.mark_closed(
+                        close_order_id=order_id,
+                        exit_price=fill_price,
+                        exit_order_type='BETA_REBALANCE'
+                    )
+                    save_trade_to_journal(matching_trade)
+                    logger.info(f"✅ Updated trade {ticker} in database (closed at ${fill_price:.4f} for rebalancing)")
+                else:
+                    logger.warning(f"⚠️  Could not find matching active trade for {ticker} - position closed but trade not updated in database")
+            
+            # Remove closed trades from active list
+            accounts_trading.active_trades = [t for t in accounts_trading.active_trades if not t.is_closed]
+            logger.info(f"✅ Rebalancing trade updates complete. Remaining active trades: {len(accounts_trading.active_trades)}")
         
         # Verify new beta
         new_beta = calculate_portfolio_beta(accounts_trading)
