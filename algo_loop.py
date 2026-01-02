@@ -20,8 +20,9 @@ import atexit
 import signal
 import os
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List, Dict, Tuple
 from db_manager import DatabaseManager
+import numpy as np
 
 '''
 #TODO
@@ -33,7 +34,7 @@ make abort button
 '''
 
 # Global constants
-TRADE_HOLD_MINUTES = 15  # How long to hold trades before automatically closing them
+TRADE_HOLD_MINUTES = 10  # How long to hold trades before automatically closing them
 MARKET_OPEN_DELAY_MINUTES = 1  # How many minutes after market opens before starting to trade
 MARKET_CLOSE_BUFFER_MINUTES = 5  # Stop trading this many minutes before market close
 TRADE_JOURNAL_FILE = "trade_journal.json"  # File to store trade results
@@ -1201,6 +1202,7 @@ class AccountsTrading:
                 elif order_status in ['CANCELED', 'REJECTED', 'EXPIRED']:
                     logger.warning(f"Order {current_order_id} ended with status: {order_status}")
                     # Log rejection reason if available
+                    status_desc = order_details.get('statusDescription', '')
                     messages = order_details.get('messages', [])
                     if messages:
                         logger.warning(f"Rejection messages: {messages}")
@@ -1211,13 +1213,37 @@ class AccountsTrading:
                     logger.debug(f"Order details keys: {list(order_details.keys())}")
                     if 'orderLegCollection' in order_details:
                         logger.debug(f"Order leg collection: {order_details['orderLegCollection']}")
+                    
+                    # If rejected with position closure message, return error immediately
+                    if order_status == 'REJECTED':
+                        if status_desc and ('oversold' in status_desc.lower() or 'overbought' in status_desc.lower() or 'open orders' in status_desc.lower()):
+                            # This indicates position might already be closed or there are outstanding orders
+                            # Return error so caller can check position status
+                            return {
+                                'error': f"Order rejected: {status_desc}",
+                                'status': 'REJECTED',
+                                'statusDescription': status_desc,
+                                'orderId': current_order_id
+                            }
                     break
             
-            # Order not filled in time - cancel and adjust price
+            # Order not filled in time - cancel and adjust price (if cancelable)
             if order_status != 'FILLED':
-                logger.info(f"Order not filled in {timeout_seconds}s, canceling and adjusting price...")
-                self.close_order(current_order_id)
-                time.sleep(0.5)  # Brief delay after cancel
+                # Only try to cancel if order is in a cancelable state
+                if order_status in ['REJECTED', 'CANCELED', 'EXPIRED', 'FILLED']:
+                    # Order is already in final state - don't try to cancel
+                    if order_status == 'REJECTED':
+                        status_desc = order_details.get('statusDescription', 'Unknown reason')
+                        logger.warning(f"Order {current_order_id} was REJECTED: {status_desc}")
+                    else:
+                        logger.info(f"Order {current_order_id} already in final state ({order_status}), skipping cancellation")
+                else:
+                    # Order is still active - try to cancel it
+                    logger.info(f"Order not filled in {timeout_seconds}s, canceling and adjusting price...")
+                    cancel_result = self.close_order(current_order_id)
+                    if not cancel_result.get('success'):
+                        logger.debug(f"Cancel attempt returned: {cancel_result.get('error', 'Unknown error')}")
+                    time.sleep(0.5)  # Brief delay after cancel
                 
                 # Adjust price more aggressively
                 if is_buy_order:
@@ -1280,6 +1306,24 @@ class AccountsTrading:
         if 'orderId' in api_response:
             api_response['orderType'] = 'MARKET'
             api_response['fallback'] = True
+            
+            # Check order status immediately - might be rejected
+            order_id = api_response.get('orderId')
+            if order_id:
+                time.sleep(0.5)  # Brief delay for order to process
+                order_details = self.get_order_details(order_id, update_headers=False)
+                if 'error' not in order_details:
+                    order_status = order_details.get('status', '').upper()
+                    if order_status == 'REJECTED':
+                        status_desc = order_details.get('statusDescription', '')
+                        if status_desc and ('oversold' in status_desc.lower() or 'overbought' in status_desc.lower() or 'open orders' in status_desc.lower()):
+                            # Return error so caller can check position status
+                            return {
+                                'error': f"Order rejected: {status_desc}",
+                                'status': 'REJECTED',
+                                'statusDescription': status_desc,
+                                'orderId': order_id
+                            }
         
         return api_response
     
@@ -1533,8 +1577,21 @@ class AccountsTrading:
             order_id: Order ID to cancel
             
         Returns:
-            dict: API response
+            dict: API response with 'success' key
         """
+        # First check the order status to see if it's cancelable
+        try:
+            order_details = self.get_order_details(order_id, update_headers=False)
+            if order_details and 'status' in order_details:
+                order_status = order_details.get('status', '').upper()
+                # Orders in these states cannot be cancelled
+                if order_status in ['REJECTED', 'CANCELED', 'EXPIRED', 'FILLED']:
+                    logger.debug(f"Order {order_id} is in state {order_status} - cannot be cancelled")
+                    return {'success': True, 'order_id': order_id, 'note': f'Order already in final state: {order_status}'}
+        except Exception as e:
+            logger.debug(f"Could not check order status before cancellation: {e}")
+            # Continue with cancellation attempt anyway
+        
         self._update_headers()
         
         url = f"{self.base_url}/accounts/{self.account_hash_value}/orders/{order_id}"
@@ -1546,11 +1603,18 @@ class AccountsTrading:
                 logger.info(f"Order {order_id} cancelled successfully")
                 return {'success': True, 'order_id': order_id}
             else:
-                error_msg = f"Failed to cancel order {order_id}: {response.status_code}"
-                if response.text:
-                    error_msg += f" - {response.text}"
-                logger.error(error_msg)
-                return {'error': error_msg, 'status_code': response.status_code}
+                # Parse error message to check if it's a non-cancelable state
+                error_text = response.text
+                if error_text and ('cannot be canceled' in error_text.lower() or 'state' in error_text.lower()):
+                    # This is expected for orders in non-cancelable states - log as debug, not error
+                    logger.debug(f"Order {order_id} cannot be cancelled (likely in final state): {error_text}")
+                    return {'success': True, 'order_id': order_id, 'note': 'Order in non-cancelable state'}
+                else:
+                    error_msg = f"Failed to cancel order {order_id}: {response.status_code}"
+                    if error_text:
+                        error_msg += f" - {error_text}"
+                    logger.error(error_msg)
+                    return {'error': error_msg, 'status_code': response.status_code}
                 
         except Exception as e:
             logger.error(f"Error cancelling order {order_id}: {e}")
@@ -1763,9 +1827,60 @@ class AccountsTrading:
             if hit_target:
                 logger.info(f"🎯 Profit target hit for {trade.ticker}! Current: ${current_price:.4f}, Target: ${trade.take_profit_price:.4f}")
                 
-                # Cancel stop loss order first (don't wait)
+                # First, check if position is already closed (might have been closed by OCO order)
+                positions = self.get_positions()
+                position_exists = False
+                if positions:
+                    for pos in positions:
+                        instrument = pos.get('instrument', {})
+                        symbol = instrument.get('symbol', '')
+                        if symbol == trade.ticker:
+                            long_qty = pos.get('longQuantity', 0)
+                            short_qty = pos.get('shortQuantity', 0)
+                            if (trade.action == 'LONG' and long_qty > 0) or (trade.action == 'SHORT' and short_qty > 0):
+                                position_exists = True
+                                # Verify quantity matches (might be partial fill)
+                                actual_qty = long_qty if trade.action == 'LONG' else short_qty
+                                if actual_qty != trade.quantity:
+                                    logger.warning(f"Position quantity mismatch for {trade.ticker}: expected {trade.quantity}, actual {actual_qty}")
+                            break
+                
+                if not position_exists:
+                    # Position already closed - likely by OCO order
+                    logger.info(f"Position for {trade.ticker} already closed (likely by OCO order), marking trade as closed")
+                    # Use current price as exit price since we don't have the actual fill price
+                    trade.mark_closed(close_order_id=trade.stop_loss_order_id or 'OCO_AUTO', exit_price=current_price, exit_order_type='OCO_TAKE_PROFIT')
+                    save_trade_to_journal(trade)
+                    pnl_sign = "+" if trade.profit_loss >= 0 else ""
+                    logger.info(f"✅ Profit target closed {trade.ticker}: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
+                    continue
+                
+                # Check for outstanding orders for this ticker
+                open_orders = self.get_all_open_orders()
+                orders_for_ticker = []
+                if open_orders:
+                    for order in open_orders:
+                        order_legs = order.get('orderLegCollection', [])
+                        for leg in order_legs:
+                            instrument = leg.get('instrument', {})
+                            if instrument.get('symbol') == trade.ticker:
+                                orders_for_ticker.append(order)
+                                break
+                
+                # Cancel stop loss order and any other outstanding orders for this ticker
                 if trade.stop_loss_order_id:
                     self.close_order(trade.stop_loss_order_id)
+                
+                # Cancel any other outstanding orders for this ticker
+                for order in orders_for_ticker:
+                    order_id = order.get('orderId')
+                    if order_id and str(order_id) != str(trade.stop_loss_order_id):
+                        logger.debug(f"Cancelling outstanding order {order_id} for {trade.ticker}")
+                        self.close_order(str(order_id))
+                
+                # Wait a moment for cancellations to process
+                if orders_for_ticker:
+                    time.sleep(1)
                 
                 # Close position with dynamic limit order for better pricing
                 close_action = trade.get_close_action()
@@ -1797,7 +1912,39 @@ class AccountsTrading:
                         }
                         response = self.create_order(order_payload)
                     
-                    if 'error' not in response:
+                    # Check if order was rejected and handle intelligently
+                    if 'error' in response:
+                        error_msg = response.get('error', '')
+                        # Check if rejection is due to position already closed or outstanding orders
+                        if 'oversold' in error_msg.lower() or 'overbought' in error_msg.lower() or 'open orders' in error_msg.lower():
+                            # Re-check position status - might have been closed between check and order
+                            time.sleep(0.5)  # Brief delay
+                            positions = self.get_positions()
+                            position_still_exists = False
+                            if positions:
+                                for pos in positions:
+                                    instrument = pos.get('instrument', {})
+                                    if instrument.get('symbol') == trade.ticker:
+                                        long_qty = pos.get('longQuantity', 0)
+                                        short_qty = pos.get('shortQuantity', 0)
+                                        if (trade.action == 'LONG' and long_qty > 0) or (trade.action == 'SHORT' and short_qty > 0):
+                                            position_still_exists = True
+                                            break
+                            
+                            if not position_still_exists:
+                                # Position was closed - mark trade as closed
+                                logger.info(f"Position for {trade.ticker} was closed (order rejected due to position closure)")
+                                trade.mark_closed(close_order_id=trade.stop_loss_order_id or 'OCO_AUTO', exit_price=current_price, exit_order_type='OCO_TAKE_PROFIT')
+                                save_trade_to_journal(trade)
+                                pnl_sign = "+" if trade.profit_loss >= 0 else ""
+                                logger.info(f"✅ Profit target closed {trade.ticker}: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
+                                continue
+                            else:
+                                # Position still exists but order was rejected - log error
+                                logger.error(f"Failed to close {trade.ticker} at profit target: {error_msg}")
+                        else:
+                            logger.error(f"Failed to close {trade.ticker} at profit target: {error_msg}")
+                    elif 'error' not in response:
                         order_id = response.get('orderId', 'unknown')
                         # For dynamic limit orders, fill price is returned directly
                         exit_price = response.get('fillPrice')
@@ -1816,8 +1963,6 @@ class AccountsTrading:
                         
                         pnl_sign = "+" if trade.profit_loss >= 0 else ""
                         logger.info(f"✅ Profit target closed {trade.ticker}: {pnl_sign}${trade.profit_loss:.2f} ({pnl_sign}{trade.profit_loss_percent:.2f}%)")
-                    else:
-                        logger.error(f"Failed to close {trade.ticker} at profit target: {response.get('error')}")
         
         # Remove closed trades from active list
         self.active_trades = [t for t in self.active_trades if not t.is_closed]
@@ -2663,26 +2808,55 @@ class AccountsTrading:
             else:
                 close_action = 'BUY_TO_COVER'
             
-            # Always use market orders for closing positions (safest)
-            order_type = "MARKET"
-            logger.info(f"    Using MARKET order to close position")
-            
-            close_order_payload = {
-                "orderType": order_type,
-                "session": "NORMAL",
-                "duration": "DAY",
-                "orderStrategyType": "SINGLE",
-                "orderLegCollection": [{
-                    "instruction": close_action,
-                    "quantity": int(abs(quantity)),
-                    "instrument": {
-                        "symbol": symbol,
-                        "assetType": "EQUITY"
+            # Use limit orders unless force_market is True (for end-of-day urgency)
+            if force_market:
+                order_type = "MARKET"
+                logger.info(f"    Using MARKET order to close position (force_market=True)")
+                close_order_payload = {
+                    "orderType": order_type,
+                    "session": "NORMAL",
+                    "duration": "DAY",
+                    "orderStrategyType": "SINGLE",
+                    "orderLegCollection": [{
+                        "instruction": close_action,
+                        "quantity": int(abs(quantity)),
+                        "instrument": {
+                            "symbol": symbol,
+                            "assetType": "EQUITY"
+                        }
+                    }]
+                }
+                response = self.create_order(close_order_payload)
+            else:
+                # Try limit order first for better pricing
+                logger.info(f"    Using LIMIT order to close position")
+                response = self.create_dynamic_limit_order(
+                    ticker=symbol,
+                    instruction=close_action,
+                    quantity=int(abs(quantity)),
+                    timeout_seconds=CLOSE_LIMIT_ORDER_TIMEOUT_SECONDS,
+                    max_attempts=CLOSE_LIMIT_ORDER_MAX_ATTEMPTS,
+                    price_offset_percent=CLOSE_LIMIT_ORDER_PRICE_OFFSET_PERCENT,
+                    adjustment_percent=CLOSE_LIMIT_ORDER_ADJUSTMENT_PERCENT
+                )
+                # If limit order failed, fall back to market order
+                if 'error' in response:
+                    logger.warning(f"    Limit order failed, falling back to MARKET order: {response.get('error')}")
+                    close_order_payload = {
+                        "orderType": "MARKET",
+                        "session": "NORMAL",
+                        "duration": "DAY",
+                        "orderStrategyType": "SINGLE",
+                        "orderLegCollection": [{
+                            "instruction": close_action,
+                            "quantity": int(abs(quantity)),
+                            "instrument": {
+                                "symbol": symbol,
+                                "assetType": "EQUITY"
+                            }
+                        }]
                     }
-                }]
-            }
-            
-            response = self.create_order(close_order_payload)
+                    response = self.create_order(close_order_payload)
             
             if 'error' not in response:
                 order_id = response.get('orderId', 'unknown')
@@ -3235,10 +3409,7 @@ def get_des_data_from_db(ticker: str) -> Optional[dict]:
             logger.debug(f"Database manager not available for {ticker}")
             return None
         result = db.get_des_data(ticker)
-        if result:
-            logger.debug(f"Found DES data for {ticker} in database")
-        else:
-            logger.debug(f"No DES data found for {ticker} in database")
+        # Removed verbose debug messages - they're logged in bulk at the end of calculate_portfolio_beta
         return result
     except Exception as e:
         logger.debug(f"Error getting DES data from database for {ticker}: {e}")
@@ -3295,8 +3466,6 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
             current_price = position.get('currentPrice', 0) or 0
             market_value_from_api = position.get('marketValue', 0) or 0
             
-            logger.debug(f"Processing position {ticker}: longQty={long_quantity}, shortQty={short_quantity}, avgPrice={avg_price}, currentPrice={current_price}, marketValue={market_value_from_api}")
-            
             # Calculate quantity: positive for longs, negative for shorts
             quantity = long_quantity - short_quantity
             
@@ -3312,19 +3481,14 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
                 else:
                     market_value = market_value_from_api  # Use as-is if quantity is zero (shouldn't happen)
                 abs_market_value = abs(market_value)
-                logger.debug(f"Using marketValue from API for {ticker}: ${market_value:.2f} (abs: ${abs_market_value:.2f}, quantity: {quantity})")
             else:
                 # Fallback: calculate from price * quantity
                 price = current_price if current_price > 0 else avg_price
                 market_value = quantity * price
                 abs_market_value = abs(market_value)
-                logger.debug(f"Calculated market value for {ticker}: ${market_value:.2f} (qty={quantity}, price={price})")
             
             if abs_market_value == 0:
-                logger.debug(f"Skipping position {ticker}: market value is zero (qty={quantity}, API marketValue={market_value_from_api})")
                 continue
-            
-            logger.debug(f"Position {ticker} has market value: ${market_value:.2f} (abs: ${abs_market_value:.2f})")
             
             # Get beta from database
             des_data = get_des_data_from_db(ticker)
@@ -3339,15 +3503,8 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
                         try:
                             # Remove any non-numeric characters (like "x" suffix)
                             beta = float(beta_str.replace('x', '').strip())
-                            logger.debug(f"Found beta for {ticker}: {beta}")
-                        except (ValueError, AttributeError) as e:
-                            logger.debug(f"Error parsing beta '{beta_str}' for {ticker}: {e}")
-                    else:
-                        logger.debug(f"Beta field exists in snapshot but is empty/None for {ticker}")
-                else:
-                    logger.debug(f"DES data found for {ticker} but snapshot is empty")
-            else:
-                logger.debug(f"No DES data found in database for {ticker}")
+                        except (ValueError, AttributeError):
+                            pass
             
             if beta is None:
                 missing_betas.append(ticker)
@@ -3378,18 +3535,15 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
         # Calculate portfolio beta
         portfolio_beta = weighted_beta_sum / total_abs_market_value
         
-        # Log results
-        logger.info(f"📊 Portfolio Beta Calculation:")
-        logger.info(f"   Portfolio Beta: {portfolio_beta:.3f}")
-        logger.info(f"   Positions analyzed: {len(position_details)}")
+        # Log results (reduced verbosity)
+        logger.info(f"📊 Portfolio Beta: {portfolio_beta:.3f} ({len(position_details)} positions)")
         if missing_betas:
-            logger.info(f"   Missing betas for: {', '.join(missing_betas)}")
+            logger.warning(f"   Missing betas for: {', '.join(missing_betas[:5])}{'...' if len(missing_betas) > 5 else ''}")
         
-        # Log individual position contributions
-        logger.debug("   Position details:")
-        for pos in position_details:
-            weight_pct = (pos['weight'] / total_abs_market_value * 100) if total_abs_market_value > 0 else 0
-            logger.debug(f"     {pos['ticker']}: Beta={pos['beta']:.2f}, Weight={weight_pct:.1f}%, Market Value=${pos['market_value']:,.2f}")
+        # Log tickers with beta data in a single compressed message (only at debug level)
+        tickers_with_beta = [p['ticker'] for p in position_details]
+        if tickers_with_beta:
+            logger.debug(f"Beta data retrieved for {len(tickers_with_beta)} tickers: {', '.join(tickers_with_beta)}")
         
         # Save to trade journal
         save_portfolio_beta_to_journal(portfolio_beta, position_details, missing_betas)
@@ -3409,6 +3563,474 @@ def calculate_portfolio_beta(accounts_trading: AccountsTrading) -> Optional[floa
         import traceback
         logger.debug(traceback.format_exc())
         return None
+
+
+def rebalance_portfolio_beta(accounts_trading: AccountsTrading, beta_threshold: float = 0.05) -> bool:
+    """
+    Rebalance portfolio to maintain beta = 0 by closing positions.
+    If beta deviates beyond threshold, closes positions to bring it back to 0.
+    
+    Args:
+        accounts_trading: AccountsTrading instance
+        beta_threshold: Maximum allowed deviation from 0 before rebalancing
+        
+    Returns:
+        bool: True if rebalancing was performed, False otherwise
+    """
+    try:
+        # Get current positions
+        positions = accounts_trading.get_positions()
+        if not positions:
+            return False
+        
+        # Calculate current beta
+        current_beta = calculate_portfolio_beta(accounts_trading)
+        if current_beta is None:
+            return False
+        
+        beta_abs = abs(current_beta)
+        if beta_abs <= beta_threshold:
+            logger.debug(f"Portfolio beta ({current_beta:.4f}) within threshold ({beta_threshold}) - no rebalancing needed")
+            return False
+        
+        logger.warning(f"🔄 Portfolio beta ({current_beta:.4f}) exceeds threshold ({beta_threshold}) - rebalancing...")
+        
+        # Get position details with beta values
+        position_data = []
+        from db_manager import get_db_manager
+        db = get_db_manager()
+        
+        for pos in positions:
+            ticker = pos.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+            long_qty = pos.get('longQuantity', 0)
+            short_qty = pos.get('shortQuantity', 0)
+            quantity = long_qty - short_qty  # Positive for long, negative for short
+            market_value = pos.get('marketValue', 0)
+            current_price = pos.get('currentPrice', 0) or pos.get('averagePrice', 0)
+            average_price = pos.get('averagePrice', 0)  # Entry price
+            
+            if quantity == 0 or market_value == 0:
+                continue
+            
+            # Calculate P&L for this position
+            # For LONG: P&L = (current_price - average_price) * quantity
+            # For SHORT: P&L = (average_price - current_price) * abs(quantity)
+            pnl = 0.0
+            pnl_percent = 0.0
+            if average_price > 0 and current_price > 0:
+                if quantity > 0:  # LONG position
+                    pnl = (current_price - average_price) * abs(quantity)
+                    pnl_percent = ((current_price - average_price) / average_price) * 100
+                else:  # SHORT position
+                    pnl = (average_price - current_price) * abs(quantity)
+                    pnl_percent = ((average_price - current_price) / average_price) * 100
+            
+            # Get beta from database
+            beta = None
+            if db:
+                des_data = db.get_des_data(ticker)
+                if des_data and des_data.get('snapshot'):
+                    beta_str = des_data['snapshot'].get('Beta')
+                    if beta_str:
+                        try:
+                            beta = float(beta_str.replace('x', '').strip())
+                        except (ValueError, AttributeError):
+                            pass
+            
+            if beta is None:
+                continue
+            
+            # For beta calculation, we need signed market value
+            # Long positions: positive market value, direction = +1
+            # Short positions: negative market value, direction = -1
+            # But we store absolute value for position sizing, and use direction for sign
+            direction = 1.0 if quantity > 0 else -1.0
+            signed_market_value = abs(market_value) if quantity > 0 else -abs(market_value)
+            position_data.append({
+                'ticker': ticker,
+                'quantity': abs(quantity),
+                'market_value': abs(market_value),  # Absolute for position sizing
+                'signed_market_value': signed_market_value,  # Signed for beta calculation
+                'price': current_price,
+                'average_price': average_price,
+                'pnl': pnl,
+                'pnl_percent': pnl_percent,
+                'beta': beta,
+                'direction': direction,
+                'is_long': quantity > 0,
+                'position': pos
+            })
+        
+        if not position_data:
+            logger.warning("No positions with beta data found for rebalancing")
+            return False
+        
+        # Find which position(s) to close to minimize beta
+        # We want to close positions that contribute most to the current beta deviation
+        # BUT prefer closing profitable positions (in the green) over losing positions
+        # Sort by contribution to beta error, with preference for profitable positions
+        for pos_data in position_data:
+            # Contribution to portfolio beta: β * market_value * direction
+            contribution = pos_data['beta'] * pos_data['market_value'] * pos_data['direction']
+            # How much would closing this position change beta?
+            # If beta is positive, we want to close positions with positive contribution
+            # If beta is negative, we want to close positions with negative contribution
+            if current_beta > 0:
+                # Close positions with positive beta contribution
+                base_score = contribution if contribution > 0 else -contribution
+            else:
+                # Close positions with negative beta contribution
+                base_score = -contribution if contribution < 0 else contribution
+            
+            # Prefer closing profitable positions: add bonus to score if P&L is positive
+            # This ensures we close winners before losers when multiple positions have similar beta impact
+            pnl_bonus = 0.0
+            if pos_data['pnl'] > 0:
+                # Add bonus proportional to P&L percentage (capped at 50% of base score)
+                pnl_bonus = min(base_score * 0.5, pos_data['pnl_percent'] * 0.1)
+            elif pos_data['pnl'] < 0:
+                # Penalize closing losing positions (subtract from score)
+                pnl_penalty = min(base_score * 0.3, abs(pos_data['pnl_percent']) * 0.05)
+                pnl_bonus = -pnl_penalty
+            
+            pos_data['rebalance_score'] = base_score + pnl_bonus
+        
+        # Sort by rebalance score (highest first - these will help most)
+        # This prioritizes positions that help beta AND are profitable
+        position_data.sort(key=lambda x: x['rebalance_score'], reverse=True)
+        
+        # Try closing positions one by one until beta is close to 0
+        positions_to_close = []
+        remaining_positions = position_data.copy()
+        
+        # Calculate current weighted sum and total absolute value for proper beta calculation
+        # Portfolio beta = Σ(β_i * signed_market_value_i) / Σ(|market_value_i|)
+        # Use signed_market_value directly (already has correct sign)
+        current_weighted_sum = sum(p['beta'] * p['signed_market_value'] for p in remaining_positions)
+        current_total_abs_value = sum(p['market_value'] for p in remaining_positions)
+        
+        # Simulate closing positions to find the best combination
+        test_beta = current_beta
+        for pos_data in position_data:
+            if pos_data not in remaining_positions:
+                continue
+                
+            # Calculate what beta would be if we close this position
+            # Remove this position's contribution from weighted sum
+            contribution = pos_data['beta'] * pos_data['signed_market_value']
+            new_weighted_sum = current_weighted_sum - contribution
+            
+            # Remove this position's absolute market value
+            new_total_abs_value = current_total_abs_value - pos_data['market_value']
+            
+            if new_total_abs_value == 0:
+                break
+            
+            # Recalculate beta properly
+            new_beta = new_weighted_sum / new_total_abs_value if new_total_abs_value > 0 else 0
+            
+            # If closing this position brings us closer to 0, add it to close list
+            if abs(new_beta) < abs(test_beta):
+                positions_to_close.append(pos_data)
+                remaining_positions.remove(pos_data)
+                # Update for next iteration
+                current_weighted_sum = new_weighted_sum
+                current_total_abs_value = new_total_abs_value
+                test_beta = new_beta
+                
+                if abs(test_beta) <= beta_threshold:
+                    break
+        
+        if not positions_to_close:
+            logger.warning("Could not find positions to close that improve beta")
+            return False
+        
+        logger.info(f"Closing {len(positions_to_close)} position(s) to rebalance beta from {current_beta:.4f} to ~{test_beta:.4f}")
+        
+        # Close each position
+        for pos_data in positions_to_close:
+            ticker = pos_data['ticker']
+            quantity = pos_data['quantity']
+            is_long = pos_data['is_long']
+            
+            # Log P&L info
+            pnl_info = pos_data.get('pnl', 0)
+            pnl_percent = pos_data.get('pnl_percent', 0)
+            pnl_sign = "+" if pnl_info >= 0 else ""
+            logger.info(f"Closing {ticker} ({'LONG' if is_long else 'SHORT'}) {quantity} shares for rebalancing | P&L: {pnl_sign}${pnl_info:.2f} ({pnl_sign}{pnl_percent:.2f}%)")
+            
+            # Find and cancel ALL outstanding orders for this ticker (OCO, limit, stop, etc.)
+            # This MUST happen before placing the closing order, otherwise Schwab will reject it
+            open_orders = accounts_trading.get_all_open_orders()
+            orders_to_cancel = []
+            
+            # First pass: identify all orders to cancel (including OCO parent and child orders)
+            for order in open_orders:
+                order_id = order.get('orderId')
+                order_type = order.get('orderType', 'UNKNOWN')
+                order_strategy = order.get('orderStrategyType', 'UNKNOWN')
+                order_status = order.get('status', 'UNKNOWN')
+                
+                # Check if this is an OCO order with child orders
+                if order_strategy == 'OCO' and 'childOrderStrategies' in order:
+                    # OCO orders have child orders - check each child
+                    child_orders = order.get('childOrderStrategies', [])
+                    for child_order in child_orders:
+                        child_legs = child_order.get('orderLegCollection', [])
+                        for leg in child_legs:
+                            order_ticker = leg.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                            if order_ticker == ticker and order_id:
+                                # Cancel the parent OCO order (this cancels all children)
+                                orders_to_cancel.append({
+                                    'order_id': str(order_id),
+                                    'type': order_type,
+                                    'strategy': order_strategy,
+                                    'status': order_status,
+                                    'is_oco_parent': True
+                                })
+                                break
+                        if any(leg.get('instrument', {}).get('symbol', '').split(':')[0].upper() == ticker for leg in child_legs):
+                            break
+                
+                # Check regular order legs
+                order_legs = order.get('orderLegCollection', [])
+                for leg in order_legs:
+                    order_ticker = leg.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                    if order_ticker == ticker and order_id:
+                        # Only add if not already added (avoid duplicates)
+                        if not any(o['order_id'] == str(order_id) for o in orders_to_cancel):
+                            orders_to_cancel.append({
+                                'order_id': str(order_id),
+                                'type': order_type,
+                                'strategy': order_strategy,
+                                'status': order_status,
+                                'is_oco_parent': False
+                            })
+                        break  # Move to next order after finding match in this order
+            
+            # Second pass: cancel all identified orders
+            cancelled_count = 0
+            failed_cancellations = []
+            for order_info in orders_to_cancel:
+                try:
+                    logger.info(f"Cancelling {order_info['strategy']} {order_info['type']} order {order_info['order_id']} for {ticker} (status: {order_info['status']})")
+                    result = accounts_trading.close_order(order_info['order_id'])
+                    if result.get('success'):
+                        cancelled_count += 1
+                        logger.debug(f"Successfully cancelled order {order_info['order_id']} for {ticker}")
+                    else:
+                        failed_cancellations.append(order_info['order_id'])
+                        logger.warning(f"Failed to cancel order {order_info['order_id']} for {ticker}: {result.get('error', 'Unknown error')}")
+                    time.sleep(0.5)  # Brief pause between cancellations to ensure API processes them
+                except Exception as e:
+                    failed_cancellations.append(order_info['order_id'])
+                    logger.warning(f"Exception cancelling order {order_info['order_id']} for {ticker}: {e}")
+            
+            if cancelled_count > 0:
+                logger.info(f"Cancelled {cancelled_count} outstanding order(s) for {ticker}, waiting 3 seconds for cancellations to process...")
+                time.sleep(3)  # Wait longer for cancellations to fully process
+            
+            # Verify orders are actually cancelled before proceeding - check multiple times
+            max_verification_attempts = 3
+            for attempt in range(max_verification_attempts):
+                remaining_orders = accounts_trading.get_all_open_orders()
+                still_open = []
+                
+                # Check for remaining orders (including OCO parent and child orders)
+                for order in remaining_orders:
+                    order_id = order.get('orderId')
+                    order_strategy = order.get('orderStrategyType', 'UNKNOWN')
+                    order_status = order.get('status', 'UNKNOWN')
+                    
+                    # Skip orders that are already in final states
+                    if order_status in ['FILLED', 'CANCELED', 'REJECTED', 'EXPIRED']:
+                        continue
+                    
+                    # Check OCO child orders
+                    if order_strategy == 'OCO' and 'childOrderStrategies' in order:
+                        child_orders = order.get('childOrderStrategies', [])
+                        for child_order in child_orders:
+                            child_legs = child_order.get('orderLegCollection', [])
+                            for leg in child_legs:
+                                order_ticker = leg.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                                if order_ticker == ticker:
+                                    still_open.append({'id': order_id, 'status': order_status, 'type': 'OCO_PARENT'})
+                                    break
+                            if any(leg.get('instrument', {}).get('symbol', '').split(':')[0].upper() == ticker for leg in child_legs):
+                                break
+                    
+                    # Check regular order legs
+                    order_legs = order.get('orderLegCollection', [])
+                    for leg in order_legs:
+                        order_ticker = leg.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                        if order_ticker == ticker:
+                            still_open.append({'id': order_id, 'status': order_status, 'type': 'REGULAR'})
+                            break
+                
+                if not still_open:
+                    logger.info(f"✅ All orders for {ticker} successfully cancelled")
+                    break
+                elif attempt < max_verification_attempts - 1:
+                    logger.warning(f"⚠️  {len(still_open)} order(s) still open for {ticker} (attempt {attempt + 1}/{max_verification_attempts}): {still_open}")
+                    logger.warning(f"⚠️  Waiting 2 seconds and retrying cancellation...")
+                    time.sleep(2)
+                    # Retry cancellation for any remaining orders
+                    for order_info in still_open:
+                        try:
+                            result = accounts_trading.close_order(str(order_info['id']))
+                            if result.get('success'):
+                                logger.info(f"Retry cancelled order {order_info['id']} for {ticker}")
+                            else:
+                                logger.warning(f"Retry cancellation returned error for {order_info['id']}: {result.get('error')}")
+                            time.sleep(0.5)
+                        except Exception as e:
+                            logger.error(f"Retry cancellation failed for order {order_info['id']}: {e}")
+                else:
+                    logger.error(f"❌ {len(still_open)} order(s) still open for {ticker} after {max_verification_attempts} attempts: {still_open}")
+                    logger.error(f"❌ Cannot proceed with rebalancing for {ticker} - orders not cancelled")
+                    continue  # Skip this position
+            
+            # Verify position quantity before closing
+            # Get current positions to check actual quantity
+            current_positions = accounts_trading.get_positions()
+            actual_quantity = 0
+            for pos in current_positions:
+                pos_ticker = pos.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                if pos_ticker == ticker:
+                    long_qty = pos.get('longQuantity', 0)
+                    short_qty = pos.get('shortQuantity', 0)
+                    actual_quantity = long_qty - short_qty  # Positive for long, negative for short
+                    break
+            
+            # Verify we're not trying to close more than we have
+            if is_long and actual_quantity < quantity:
+                logger.warning(f"⚠️  Trying to close {quantity} LONG shares of {ticker}, but only {actual_quantity} available. Adjusting...")
+                quantity = max(1, int(actual_quantity))
+            elif not is_long and abs(actual_quantity) < quantity:
+                logger.warning(f"⚠️  Trying to close {quantity} SHORT shares of {ticker}, but only {abs(actual_quantity)} available. Adjusting...")
+                quantity = max(1, int(abs(actual_quantity)))
+            
+            if quantity <= 0:
+                logger.warning(f"⚠️  No position to close for {ticker} (quantity: {quantity})")
+                continue
+            
+            # Close the position with limit order for better pricing
+            instruction = "SELL" if is_long else "BUY_TO_COVER"
+            logger.info(f"Placing LIMIT order to close {ticker} for rebalancing")
+            result = accounts_trading.create_dynamic_limit_order(
+                ticker=ticker,
+                instruction=instruction,
+                quantity=int(quantity),
+                timeout_seconds=CLOSE_LIMIT_ORDER_TIMEOUT_SECONDS,
+                max_attempts=CLOSE_LIMIT_ORDER_MAX_ATTEMPTS,
+                price_offset_percent=CLOSE_LIMIT_ORDER_PRICE_OFFSET_PERCENT,
+                adjustment_percent=CLOSE_LIMIT_ORDER_ADJUSTMENT_PERCENT
+            )
+            
+            # If limit order failed, fall back to market order
+            if 'error' in result:
+                logger.warning(f"Limit order failed for {ticker}, falling back to MARKET order: {result.get('error')}")
+                order_payload = {
+                    "orderType": "MARKET",
+                    "session": "NORMAL",
+                    "duration": "DAY",
+                    "orderStrategyType": "SINGLE",
+                    "orderLegCollection": [{
+                        "instruction": instruction,
+                        "quantity": int(quantity),
+                        "positionEffect": "CLOSING",  # Explicitly mark as closing position
+                        "instrument": {
+                            "symbol": ticker,
+                            "assetType": "EQUITY"
+                        }
+                    }]
+                }
+                result = accounts_trading.create_order(order_payload)
+            if 'orderId' not in result:
+                logger.warning(f"⚠️  Failed to place rebalancing order for {ticker}: {result.get('error')}")
+                continue  # Skip to next position
+            
+            order_id = result.get('orderId')
+            
+            # Check if limit order already filled (create_dynamic_limit_order returns status='FILLED' if filled immediately)
+            if result.get('status') == 'FILLED':
+                fill_price = result.get('fillPrice')
+                logger.info(f"✅ Rebalancing order for {ticker} filled immediately at ${fill_price:.4f} (Order ID: {order_id})")
+            else:
+                # Verify the order was actually created successfully (not rejected)
+                # Wait a moment for order to be processed, then check status
+                time.sleep(1)
+                order_details = accounts_trading.get_order_details(str(order_id))
+                if 'error' in order_details:
+                    logger.warning(f"⚠️  Could not get order details for {ticker} order {order_id}: {order_details.get('error')}")
+                    continue
+                
+                order_status = order_details.get('status', 'UNKNOWN')
+                
+                if order_status == 'REJECTED':
+                    error_msg = order_details.get('statusDescription', 'Unknown rejection reason')
+                    logger.error(f"❌ Rebalancing order for {ticker} was REJECTED: {error_msg}")
+                    logger.error(f"❌ Order ID: {order_id}")
+                    # Try to cancel the rejected order (though it may already be cancelled)
+                    try:
+                        accounts_trading.close_order(str(order_id))
+                    except:
+                        pass
+                    continue  # Skip to next position
+                elif order_status in ['FILLED', 'PARTIALLY_FILLED', 'WORKING', 'ACCEPTED']:
+                    logger.info(f"✅ Rebalancing order for {ticker} placed successfully (Order ID: {order_id}, Status: {order_status})")
+                else:
+                    logger.warning(f"⚠️  Rebalancing order for {ticker} in unexpected status: {order_status}")
+            
+            time.sleep(1)  # Brief pause between orders
+        
+        # Wait for orders to fill - check positions multiple times
+        max_wait_time = 10  # Maximum wait time in seconds
+        wait_interval = 1  # Check every second
+        waited = 0
+        
+        while waited < max_wait_time:
+            time.sleep(wait_interval)
+            waited += wait_interval
+            
+            # Check if positions were actually closed
+            current_positions = accounts_trading.get_positions()
+            closed_count = 0
+            for pos_data in positions_to_close:
+                ticker = pos_data['ticker']
+                # Check if this position still exists
+                still_open = False
+                for pos in current_positions:
+                    pos_ticker = pos.get('instrument', {}).get('symbol', '').split(':')[0].upper()
+                    if pos_ticker == ticker:
+                        long_qty = pos.get('longQuantity', 0) or 0
+                        short_qty = pos.get('shortQuantity', 0) or 0
+                        if (pos_data['is_long'] and long_qty > 0) or (not pos_data['is_long'] and short_qty > 0):
+                            still_open = True
+                            break
+                if not still_open:
+                    closed_count += 1
+            
+            # If all positions closed, break early
+            if closed_count == len(positions_to_close):
+                break
+        
+        # Verify new beta
+        new_beta = calculate_portfolio_beta(accounts_trading)
+        if new_beta is not None:
+            improvement = abs(current_beta) - abs(new_beta)
+            if improvement > 0:
+                logger.info(f"✅ Rebalancing complete: Beta {current_beta:.4f} → {new_beta:.4f} (improved by {improvement:.4f})")
+            else:
+                logger.warning(f"⚠️  Rebalancing complete: Beta {current_beta:.4f} → {new_beta:.4f} (worsened by {abs(improvement):.4f})")
+        
+        return True
+        
+    except Exception as e:
+        logger.error(f"Error during portfolio rebalancing: {e}")
+        import traceback
+        logger.debug(traceback.format_exc())
+        return False
 
 
 def save_portfolio_beta_to_journal(portfolio_beta: float, position_details: list, missing_betas: list):
@@ -4258,6 +4880,8 @@ def algo_loop(accounts_trading: AccountsTrading, controller: GodelTerminalContro
                         # Calculate and report portfolio beta periodically
                         try:
                             calculate_portfolio_beta(accounts_trading)
+                            # Check if rebalancing is needed
+                            rebalance_portfolio_beta(accounts_trading, beta_threshold=0.05)
                         except Exception as e:
                             logger.debug(f"Error calculating portfolio beta: {e}")
                         # Send dashboard data update during periodic checks

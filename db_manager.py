@@ -747,10 +747,7 @@ class DatabaseManager:
             result = cursor.fetchone()
             cursor.close()
             
-            if result:
-                logger.debug(f"Database query for {query_ticker}: Found record, beta field = {result.get('beta')}")
-            else:
-                logger.debug(f"Database query for {query_ticker}: No record found")
+            # Removed verbose debug messages - logged in bulk at call site
             
             if result:
                 # Parse JSON fields

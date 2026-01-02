@@ -6,3 +6,4 @@ pytz>=2023.3
 loguru>=0.7.0
 yfinance>=0.2.0
 mysql-connector-python>=8.2.0 
+scipy
