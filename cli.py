@@ -182,8 +182,8 @@ async def cmd_chat(args):
 
 
 async def cmd_multichat(args):
-    """Multi-instance chat monitoring for multiple channels simultaneously."""
-    from multi_chat import MultiChannelChatMonitor
+    """Multi-instance chat monitoring for multiple channels simultaneously using DOM extraction."""
+    from dom_chat_monitor import DOMChatMonitor
     
     try:
         from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
@@ -194,23 +194,75 @@ async def cmd_multichat(args):
     channels = [c.strip() for c in args.channels.split(",")]
     background = not args.visible if args.visible else True
     
-    monitor = MultiChannelChatMonitor(
-        channels=channels,
-        duration=args.duration,
-        url=GODEL_URL,
-        username=GODEL_USERNAME,
-        password=GODEL_PASSWORD
-    )
+    # Create manager for all sessions
+    from godel_core import GodelManager
+    manager = GodelManager(headless=False, background=background, url=GODEL_URL)
+    await manager.start()
+    
+    all_messages = []
     
     try:
-        await monitor.start(background=background)
+        # Setup all sessions
+        sessions = {}
+        for channel in channels:
+            session = await manager.create_session(f"chat_{channel}")
+            await session.init_page()
+            await session.login(GODEL_USERNAME, GODEL_PASSWORD)
+            await session.load_layout("dev")
+            sessions[channel] = session
+            
+            # Open chat and navigate to channel
+            try:
+                chat_btn = session.page.locator("button:has-text('CHAT')").first
+                if await chat_btn.count() > 0:
+                    await chat_btn.click()
+                    await asyncio.sleep(1)
+                
+                # Expand Public Channels
+                public_channels = session.page.locator("text=Public Channels").first
+                if await public_channels.count() > 0:
+                    parent = public_channels.locator("..")
+                    if await parent.count() > 0:
+                        await parent.click()
+                        await asyncio.sleep(1)
+                
+                # Click channel
+                channel_elem = session.page.locator(f"text=#{channel}").first
+                if await channel_elem.count() > 0:
+                    await channel_elem.click()
+                    await asyncio.sleep(2)
+                    
+            except Exception as e:
+                logger.warning(f"Could not open channel {channel}: {e}")
+        
+        # Start monitoring all channels concurrently
+        async def monitor_channel(channel, session):
+            monitor = DOMChatMonitor(session, channel)
+            try:
+                await monitor.start(duration=args.duration, poll_interval=3.0)
+                return {"channel": channel, "messages": monitor.message_count}
+            except Exception as e:
+                return {"channel": channel, "messages": 0, "error": str(e)}
+        
+        tasks = [monitor_channel(ch, sessions[ch]) for ch in channels if ch in sessions]
+        results = await asyncio.gather(*tasks)
+        
+        total_messages = sum(r.get("messages", 0) for r in results)
+        
+        _json_out({
+            "success": True,
+            "channels": channels,
+            "duration": args.duration,
+            "total_messages": total_messages,
+            "channel_results": results
+        })
+        
     except KeyboardInterrupt:
         logger.info("Interrupted by user")
     finally:
-        await monitor.shutdown()
-    
-    summary = monitor.get_summary()
-    _json_out({"success": True, **summary})
+        await manager.shutdown()
+        from db import close_db
+        await close_db()
 
 
 async def cmd_g(args):
