@@ -430,8 +430,14 @@ class BaseCommand(ABC):
     async def extract_data(self) -> Dict:
         pass
 
-    async def execute(self, ticker: str = None, asset_class: str = "EQ") -> Dict:
-        """Send command, wait for window, wait for loading, extract data."""
+    async def execute(self, ticker: str = None, asset_class: str = "EQ", auto_close: bool = True) -> Dict:
+        """Send command, wait for window, wait for loading, extract data.
+        
+        Args:
+            ticker: Stock ticker symbol
+            asset_class: Asset class (default EQ)
+            auto_close: Whether to close the window after extraction (default True)
+        """
         command_str = self.get_command_string(ticker, asset_class)
 
         previous_count = len(await self.session.get_current_windows())
@@ -458,6 +464,13 @@ class BaseCommand(ABC):
         logger.info("Extracting data...")
         try:
             self.data = await self.extract_data()
+            
+            # Auto-close window after extraction if enabled
+            if auto_close and self.window:
+                logger.info("Closing window...")
+                await self.session.close_window(self.window)
+                logger.info("Window closed")
+            
             return {"success": True, "command": command_str, "data": self.data}
         except Exception as e:
             logger.error(f"Extraction failed: {e}", exc_info=True)
