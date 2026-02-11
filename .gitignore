@@ -7,3 +7,4 @@ output/*.csv
 output/pdfs/
 __pycache__/
 *.pyc
+venv/
