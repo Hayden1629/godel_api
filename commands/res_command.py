@@ -43,16 +43,9 @@ class RESCommand(BaseCommand):
         # Extract text and parse
         text = await self.window.text_content()
         
-        # Debug: save text
-        try:
-            with open('output/res_debug.txt', 'w') as f:
-                f.write(text)
-            logger.info(f"Saved window text ({len(text)} chars)")
-        except:
-            pass
-        
+        # Parse research items from text
         items = self._parse_research_text(text)
-
+        
         return {
             "success": True,
             "timestamp": datetime.now(timezone.utc).isoformat(),
@@ -74,18 +67,10 @@ class RESCommand(BaseCommand):
         date_pattern = r'\d{4}-\d{2}-\d{2}'
         dates = list(re.finditer(date_pattern, text))
         
-        # Debug
-        print(f"DEBUG: Text length after split: {len(text)}")
-        print(f"DEBUG: Found {len(dates)} dates")
-        
-        print(f"DEBUG: About to process {len(dates)} dates")
         for i, date_match in enumerate(dates):
             try:
                 date = date_match.group(0)
                 start_pos = date_match.end()  # Start after the date
-                
-                if i == 0:
-                    print(f"DEBUG: Processing first date {date}")
                 
                 # End at next date or end of text
                 if i + 1 < len(dates):
@@ -132,13 +117,9 @@ class RESCommand(BaseCommand):
                         "provider": provider,
                         "title": title[:150],
                     })
-                    if len(items) <= 3:
-                        print(f"DEBUG: Added item {len(items)}: {date} | {ticker}")
                 
             except Exception as e:
-                logger.error(f"Error parsing entry {i}: {e}")
-                import traceback
-                logger.error(traceback.format_exc())
+                logger.debug(f"Error parsing entry {i}: {e}")
                 continue
         
         return items

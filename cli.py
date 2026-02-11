@@ -348,7 +348,7 @@ Examples:
 
     # -- RES ----------------------------------------------------------------
     p = sub.add_parser("res", help="Research / PDF downloads")
-    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("ticker", nargs="?", default=None, help="Ticker symbol (optional - shows general research feed if not specified)")
     p.add_argument("--asset-class", default="EQ")
     p.add_argument("--download-pdfs", action="store_true", default=True)
     p.add_argument("--no-download", dest="download_pdfs", action="store_false")
