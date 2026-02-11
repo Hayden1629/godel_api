@@ -181,6 +181,38 @@ async def cmd_chat(args):
         await manager.shutdown()
 
 
+async def cmd_multichat(args):
+    """Multi-instance chat monitoring for multiple channels simultaneously."""
+    from multi_chat import MultiChannelChatMonitor
+    
+    try:
+        from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
+    except ImportError:
+        _json_out({"success": False, "error": "config.py not found. Copy config-example.py to config.py."})
+        return
+    
+    channels = [c.strip() for c in args.channels.split(",")]
+    background = not args.visible if args.visible else True
+    
+    monitor = MultiChannelChatMonitor(
+        channels=channels,
+        duration=args.duration,
+        url=GODEL_URL,
+        username=GODEL_USERNAME,
+        password=GODEL_PASSWORD
+    )
+    
+    try:
+        await monitor.start(background=background)
+    except KeyboardInterrupt:
+        logger.info("Interrupted by user")
+    finally:
+        await monitor.shutdown()
+    
+    summary = monitor.get_summary()
+    _json_out({"success": True, **summary})
+
+
 async def cmd_g(args):
     manager, session = await _get_session(args)
     try:
@@ -229,6 +261,7 @@ Examples:
   python cli.py prt AAPL MSFT GOOGL -o results.csv
   python cli.py probe --duration 30 --filter websocket
   python cli.py chat --channels general,trading --duration 60
+  python cli.py multichat --channels general,biotech,paid --duration 120
   python cli.py res AAPL --download-pdfs
         """,
     )
@@ -282,6 +315,12 @@ Examples:
     p.add_argument("--channels", default=None, help="Comma-separated channel names")
     p.add_argument("--duration", type=int, default=60, help="Seconds to monitor (default 60)")
 
+    # -- MULTICHAT ----------------------------------------------------------
+    p = sub.add_parser("multichat", help="Monitor multiple chat channels simultaneously (multi-instance)")
+    p.add_argument("--channels", "-c", default="general,biotech,paid", help="Comma-separated channel names (default: general,biotech,paid)")
+    p.add_argument("--duration", "-d", type=int, default=60, help="Seconds to monitor (default 60)")
+    p.add_argument("--visible", action="store_true", help="Run browser visibly (for debugging)")
+
     # -- G ------------------------------------------------------------------
     p = sub.add_parser("g", help="Price chart")
     p.add_argument("ticker", help="Ticker symbol")
@@ -314,6 +353,7 @@ DISPATCH = {
     "res": cmd_res,
     "probe": cmd_probe,
     "chat": cmd_chat,
+    "multichat": cmd_multichat,
     "g": cmd_g,
     "gip": cmd_gip,
     "qm": cmd_qm,

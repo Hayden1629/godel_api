@@ -11,10 +11,11 @@ from .prt_command import PRTCommand
 from .most_command import MOSTCommand
 from .probe_command import ProbeCommand
 from .chat_monitor import ChatMonitor
+from .chat_monitor_v2 import ChatMonitorV2
 from .res_command import RESCommand
 
 __all__ = [
     "DESCommand", "GCommand", "GIPCommand", "QMCommand",
     "PRTCommand", "MOSTCommand",
-    "ProbeCommand", "ChatMonitor", "RESCommand",
+    "ProbeCommand", "ChatMonitor", "ChatMonitorV2", "RESCommand",
 ]
