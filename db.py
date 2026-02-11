@@ -47,6 +47,11 @@ class DatabaseBackend(ABC):
                              limit: int = 100) -> List[Dict]:
         ...
 
+    @abstractmethod
+    async def get_recent_messages(self, minutes: int = 5) -> List[Dict]:
+        """Get messages from the last N minutes."""
+        ...
+
     # -- pdf downloads ------------------------------------------------------
 
     @abstractmethod
@@ -139,6 +144,12 @@ class SQLiteBackend(DatabaseBackend):
         cursor = await self._db.execute(sql, params)
         rows = await cursor.fetchall()
         return [dict(row) for row in rows]
+
+    async def get_recent_messages(self, minutes: int = 5) -> List[Dict]:
+        """Get messages from the last N minutes."""
+        from datetime import timedelta
+        since = datetime.now(timezone.utc) - timedelta(minutes=minutes)
+        return await self.query_messages(since=since, limit=1000)
 
     # -- pdfs ---------------------------------------------------------------
 
