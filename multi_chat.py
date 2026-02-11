@@ -95,60 +95,69 @@ class MultiChannelChatMonitor:
             self.results[channel] = {"error": str(e)}
     
     async def _open_chat_window(self, session: GodelSession, channel: str):
-        """Open the chat window for a specific channel."""
+        """Open the chat window for a specific channel by clicking the channel in the sidebar."""
         try:
-            # Try different possible chat commands
-            # Godel Terminal likely uses something like CHAT #channel or just opens chat
+            logger.info(f"Opening chat channel: {channel}")
             
-            # First, try to find if there's a chat UI element
-            # Look for chat-related buttons or menu items
+            # Ensure chat is open by clicking CHAT button
+            try:
+                chat_btn = session.page.locator("button:has-text('CHAT')").first
+                if await chat_btn.count() > 0:
+                    await chat_btn.click()
+                    logger.info("Clicked CHAT button to ensure chat is open")
+                    await session.page.wait_for_timeout(2000)
+            except:
+                pass
             
-            # Try clicking on a chat menu/button if it exists
-            chat_selectors = [
-                "button:has-text('Chat')",
-                "a:has-text('Chat')",
-                "[data-testid='chat']",
-                "text=Chat",
-            ]
-            
-            for selector in chat_selectors:
-                try:
-                    chat_btn = session.page.locator(selector).first
-                    if await chat_btn.count() > 0:
-                        await chat_btn.click()
-                        logger.info(f"Opened chat UI for {channel}")
+            # Try to expand Public Channels section by clicking parent element
+            try:
+                public_channels = session.page.locator("text=Public Channels").first
+                if await public_channels.count() > 0:
+                    # Get parent element which should be clickable
+                    parent = public_channels.locator("..")
+                    if await parent.count() > 0:
+                        await parent.click()
+                        logger.info("Expanded Public Channels section (clicked parent)")
                         await session.page.wait_for_timeout(2000)
-                        break
-                except:
-                    continue
+                    else:
+                        # Fallback: click the element itself
+                        await public_channels.click()
+                        logger.info("Expanded Public Channels section (clicked self)")
+                        await session.page.wait_for_timeout(2000)
+            except Exception as e:
+                logger.debug(f"Could not expand Public Channels: {e}")
             
-            # Try sending a chat command to the terminal
-            # Common patterns: CHAT, CHAT #channel, /join #channel, etc.
-            chat_commands = [
-                f"CHAT #{channel}",
-                f"CHAT {channel}",
-                "CHAT",
-                f"/join #{channel}",
-                f"/chat {channel}",
-            ]
+            # Now try to find and click the specific channel
+            channel_selector = f"text=#{channel}"
             
-            for cmd in chat_commands:
-                try:
-                    await session.send_command(cmd)
-                    await session.page.wait_for_timeout(3000)
+            try:
+                channel_elem = session.page.locator(channel_selector).first
+                if await channel_elem.count() > 0:
+                    await channel_elem.click()
+                    logger.info(f"Clicked on channel #{channel}")
+                    await session.page.wait_for_timeout(2000)
                     
-                    # Check if a chat window opened
-                    windows = await session.get_current_windows()
-                    if windows:
-                        logger.info(f"Chat window opened for {channel} with command: {cmd}")
-                        return
-                except:
-                    continue
+                    # Verify we're in the right channel by checking the title
+                    try:
+                        title_elem = session.page.locator(".chat-header >> text").first
+                        if await title_elem.count() > 0:
+                            title = await title_elem.text_content()
+                            logger.info(f"Channel title: {title}")
+                    except:
+                        pass
+                    
+                    return True
+                else:
+                    logger.warning(f"Channel #{channel} not found in sidebar")
+            except Exception as e:
+                logger.debug(f"Could not click channel {channel}: {e}")
             
             logger.warning(f"Could not open chat window for {channel}, will monitor WebSocket anyway")
+            return False
             
         except Exception as e:
             logger.error(f"Error opening chat for {channel}: {e}")
+            return False
     
     async def _monitor_channel(self, channel: str):
         """Monitor a single channel."""
