@@ -1,126 +1,144 @@
 """
-RES (Research) Command — async Playwright
-Opens the RES window and downloads PDFs
+RES (Research) Command — Smart text parser
 """
 
 import logging
+import re
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Dict, List, Optional
 
 from godel_core import BaseCommand, GodelSession
-from db import get_db
 
 logger = logging.getLogger("godel.res")
 
+# Known providers to help with parsing
+KNOWN_PROVIDERS = [
+    'Truist Securities', 'JPMorgan', 'J.P. Morgan', 'KeyBanc Capital Markets',
+    'RBC Capital Markets', 'Jefferies', 'Goldman Sachs', 'Morgan Stanley',
+    'Bank of America', 'UBS', 'Deutsche Bank', 'Wells Fargo Securities',
+    'William Blair', 'KB Securities', 'Fubon Research', 'CLSA',
+    'Asia Pacific Equity Research', 'Morning Notes'
+]
+
 
 class RESCommand(BaseCommand):
-    """Research (RES) command — lists and downloads research PDFs."""
+    """Research (RES) command — extracts research from concatenated text."""
 
-    def __init__(self, session: GodelSession, download_pdfs: bool = True,
+    def __init__(self, session: GodelSession, download_pdfs: bool = False,
                  output_dir: str = "output/pdfs", db_path: Optional[str] = None):
         super().__init__(session)
         self.download_pdfs = download_pdfs
         self.output_dir = output_dir
         self.db_path = db_path
-        self.downloaded_files: List[Dict] = []
 
     def get_command_string(self, ticker: str = None, asset_class: str = None) -> str:
-        return f"{ticker} {asset_class or 'EQ'} RES"
+        return "RES"
 
     async def extract_data(self) -> Dict:
         if not self.window:
             raise ValueError("No window available")
 
-        await self.page.wait_for_timeout(2000)
+        await self.page.wait_for_timeout(3000)
 
-        pdf_links = await self._find_pdf_links()
-        downloaded = []
-
-        if self.download_pdfs and pdf_links:
-            downloaded = await self._download_pdfs(pdf_links)
+        # Extract text and parse
+        text = await self.window.text_content()
+        
+        # Debug: save text
+        try:
+            with open('output/res_debug.txt', 'w') as f:
+                f.write(text)
+            logger.info(f"Saved window text ({len(text)} chars)")
+        except:
+            pass
+        
+        items = self._parse_research_text(text)
 
         return {
+            "success": True,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "window_id": self.window_id,
-            "pdf_links_found": len(pdf_links),
-            "pdfs_downloaded": len(downloaded),
-            "files": downloaded,
+            "research_items_found": len(items),
+            "items": items[:50],
         }
 
-    async def _find_pdf_links(self) -> List[Dict]:
-        """Find all PDF links in the RES window."""
-        links = []
-        try:
-            # Look for anchor tags with pdf-like hrefs or text
-            anchors = await self.window.locator("a[href]").all()
-            for a in anchors:
-                href = await a.get_attribute("href") or ""
-                text = (await a.inner_text()).strip()
-                if ".pdf" in href.lower() or "pdf" in text.lower() or "research" in text.lower():
-                    links.append({"href": href, "text": text})
-
-            # Also look for clickable elements that might trigger downloads
-            buttons = await self.window.locator("button:has-text('PDF'), button:has-text('Download'), [class*='download']").all()
-            for btn in buttons:
-                text = (await btn.inner_text()).strip()
-                links.append({"href": None, "text": text, "element": btn})
-
-            logger.info(f"Found {len(links)} potential PDF links")
-        except Exception as e:
-            logger.error(f"Error finding PDF links: {e}")
-
-        return links
-
-    async def _download_pdfs(self, links: List[Dict]) -> List[Dict]:
-        """Download PDFs using Playwright's download handling."""
-        Path(self.output_dir).mkdir(parents=True, exist_ok=True)
-        downloaded = []
-        db = await get_db(self.db_path)
-
-        for link_info in links:
+    def _parse_research_text(self, text: str) -> List[Dict]:
+        """Parse research items from concatenated text."""
+        items = []
+        
+        # Find where actual data starts (after "Title")
+        if "Title" in text:
+            text = text.split("Title", 1)[1]
+        
+        # Find all date positions
+        import re
+        date_pattern = r'\d{4}-\d{2}-\d{2}'
+        dates = list(re.finditer(date_pattern, text))
+        
+        # Debug
+        print(f"DEBUG: Text length after split: {len(text)}")
+        print(f"DEBUG: Found {len(dates)} dates")
+        
+        print(f"DEBUG: About to process {len(dates)} dates")
+        for i, date_match in enumerate(dates):
             try:
-                href = link_info.get("href")
-                if href and href.startswith("http"):
-                    # Direct link — trigger download via navigation
-                    async with self.page.expect_download(timeout=30000) as download_info:
-                        # Open in new tab to avoid navigating away
-                        await self.page.evaluate(f"window.open('{href}', '_blank')")
-                    download = await download_info.value
-                elif "element" in link_info:
-                    # Click-triggered download
-                    async with self.page.expect_download(timeout=30000) as download_info:
-                        await link_info["element"].click()
-                    download = await download_info.value
+                date = date_match.group(0)
+                start_pos = date_match.end()  # Start after the date
+                
+                if i == 0:
+                    print(f"DEBUG: Processing first date {date}")
+                
+                # End at next date or end of text
+                if i + 1 < len(dates):
+                    end_pos = dates[i + 1].start()
                 else:
-                    continue
-
-                # Save to output dir
-                filename = download.suggested_filename or f"research_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
-                save_path = str(Path(self.output_dir) / filename)
-                await download.save_as(save_path)
-
-                file_record = {
-                    "filename": filename,
-                    "filepath": save_path,
-                    "source_text": link_info.get("text", ""),
-                    "source_url": href or "",
-                }
-                downloaded.append(file_record)
-
-                # Record in DB
-                await db.save_pdf_record(
-                    ticker=self.window_id or "unknown",
-                    command="RES",
-                    filename=filename,
-                    filepath=save_path,
-                )
-
-                logger.info(f"Downloaded: {filename}")
-
+                    end_pos = len(text)
+                
+                entry = text[start_pos:end_pos]
+                
+                # Skip if entry starts with another date (overlap issue)
+                if re.match(r'^\d{4}-\d{2}-\d{2}', entry):
+                    entry = entry[10:]  # Skip the duplicate date
+                
+                # Try to find ticker at start of entry
+                # Tickers usually have format: SYMBOL.XX (like RCUS.US, AAPL.US)
+                ticker_match = re.match(r'^([A-Z][A-Z]+\.[A-Z]{2})', entry)
+                
+                if ticker_match:
+                    ticker = ticker_match.group(1)
+                    remaining = entry[len(ticker):]
+                else:
+                    # No ticker found - use placeholder
+                    ticker = "N/A"
+                    remaining = entry
+                
+                # Find provider
+                provider = "Unknown"
+                title = remaining
+                
+                for prov in KNOWN_PROVIDERS:
+                    if prov in remaining:
+                        provider = prov
+                        title = remaining.split(prov, 1)[1].strip()
+                        break
+                
+                # Clean up title
+                title = title.replace('INVITE:', '').replace('First Take:', '').strip()
+                
+                # Only add if we have meaningful content
+                if title and len(title) > 5:
+                    items.append({
+                        "date": date,
+                        "ticker": ticker,
+                        "provider": provider,
+                        "title": title[:150],
+                    })
+                    if len(items) <= 3:
+                        print(f"DEBUG: Added item {len(items)}: {date} | {ticker}")
+                
             except Exception as e:
-                logger.warning(f"Download failed for {link_info.get('text', '?')}: {e}")
+                logger.error(f"Error parsing entry {i}: {e}")
+                import traceback
+                logger.error(traceback.format_exc())
                 continue
-
-        self.downloaded_files = downloaded
-        return downloaded
+        
+        return items
