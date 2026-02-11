@@ -1,575 +1,471 @@
 """
-Godel Terminal Core Framework
-Base classes for terminal control and command execution
+Godel Terminal Core Framework (Playwright)
+Multi-instance terminal control with network interception
 """
 
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException, NoSuchElementException, StaleElementReferenceException
-from typing import Dict, Optional, List, Any
-from abc import ABC, abstractmethod
+import asyncio
+import json
+import logging
 import time
+from abc import ABC, abstractmethod
+from datetime import datetime, timezone
+from pathlib import Path
+from typing import Any, Dict, List, Optional
+
+from playwright.async_api import (
+    Browser,
+    BrowserContext,
+    Page,
+    Playwright,
+    async_playwright,
+)
+
+logger = logging.getLogger("godel")
+
+# ---------------------------------------------------------------------------
+# Network Interceptor
+# ---------------------------------------------------------------------------
+
+class NetworkInterceptor:
+    """Captures HTTP requests/responses and WebSocket frames on a page."""
+
+    def __init__(self, page: Page):
+        self.page = page
+        self.requests: List[Dict] = []
+        self.responses: List[Dict] = []
+        self.ws_frames: List[Dict] = []
+        self._ws_objects: List[Any] = []
+        self._listening = False
+
+    def start(self, url_filter: Optional[str] = None, capture_ws: bool = True):
+        """Begin capturing network traffic."""
+        self._url_filter = url_filter
+        self._listening = True
+
+        self.page.on("request", self._on_request)
+        self.page.on("response", self._on_response)
+        if capture_ws:
+            self.page.on("websocket", self._on_websocket)
+
+    def stop(self):
+        """Stop capturing (removes listeners)."""
+        self._listening = False
+        try:
+            self.page.remove_listener("request", self._on_request)
+            self.page.remove_listener("response", self._on_response)
+            self.page.remove_listener("websocket", self._on_websocket)
+        except Exception:
+            pass
+
+    # -- internal handlers --------------------------------------------------
+
+    def _on_request(self, request):
+        if not self._listening:
+            return
+        url = request.url
+        if self._url_filter and self._url_filter not in url:
+            return
+        self.requests.append({
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "method": request.method,
+            "url": url,
+            "resource_type": request.resource_type,
+            "headers": dict(request.headers) if request.headers else {},
+            "post_data": request.post_data,
+        })
+
+    async def _on_response(self, response):
+        if not self._listening:
+            return
+        url = response.url
+        if self._url_filter and self._url_filter not in url:
+            return
+        body_text = None
+        try:
+            body_text = await response.text()
+            # Truncate large bodies
+            if len(body_text) > 10000:
+                body_text = body_text[:10000] + "...[truncated]"
+        except Exception:
+            pass
+        self.responses.append({
+            "ts": datetime.now(timezone.utc).isoformat(),
+            "status": response.status,
+            "url": url,
+            "headers": dict(response.headers) if response.headers else {},
+            "body_preview": body_text,
+        })
+
+    def _on_websocket(self, ws):
+        logger.info(f"WebSocket opened: {ws.url}")
+        self._ws_objects.append(ws)
+
+        def on_frame_sent(payload):
+            self.ws_frames.append({
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "direction": "sent",
+                "url": ws.url,
+                "payload": payload[:5000] if isinstance(payload, str) and len(payload) > 5000 else payload,
+            })
+
+        def on_frame_received(payload):
+            self.ws_frames.append({
+                "ts": datetime.now(timezone.utc).isoformat(),
+                "direction": "received",
+                "url": ws.url,
+                "payload": payload[:5000] if isinstance(payload, str) and len(payload) > 5000 else payload,
+            })
+
+        ws.on("framesent", on_frame_sent)
+        ws.on("framereceived", on_frame_received)
+        ws.on("close", lambda _: logger.info(f"WebSocket closed: {ws.url}"))
+
+    # -- data access --------------------------------------------------------
+
+    def dump(self, filter_type: Optional[str] = None) -> Dict:
+        """Return captured traffic as a dict.  filter_type: 'http', 'websocket', or None for all."""
+        data: Dict[str, Any] = {}
+        if filter_type in (None, "http"):
+            data["requests"] = self.requests
+            data["responses"] = self.responses
+        if filter_type in (None, "websocket"):
+            data["websocket_frames"] = self.ws_frames
+        return data
+
+    def clear(self):
+        self.requests.clear()
+        self.responses.clear()
+        self.ws_frames.clear()
 
 
-class DOMMonitor:
-    """Monitor DOM changes for new window creation"""
-    
-    def __init__(self, driver):
-        self.driver = driver
-        self.tracked_windows = set()
-        
-    def get_current_windows(self) -> List[Any]:
-        """Get all window elements currently in DOM"""
+# ---------------------------------------------------------------------------
+# GodelSession  (one browser context == one logged-in session)
+# ---------------------------------------------------------------------------
+
+class GodelSession:
+    """Single Godel Terminal session backed by a Playwright BrowserContext."""
+
+    def __init__(self, context: BrowserContext, url: str = "https://app.godelterminal.com"):
+        self.context = context
+        self.url = url
+        self.page: Optional[Page] = None
+        self.interceptor: Optional[NetworkInterceptor] = None
+        self.active_commands: List[Any] = []
+        self._tracked_windows: set = set()
+
+    async def init_page(self):
+        """Create the page, attach interceptor, navigate to terminal."""
+        self.page = await self.context.new_page()
+        self.interceptor = NetworkInterceptor(self.page)
+        await self.page.goto(self.url, wait_until="domcontentloaded")
+        await self.page.wait_for_timeout(2000)
+        logger.info(f"Connected to {self.url}")
+
+    async def login(self, username: str, password: str):
+        """Log in to Godel Terminal."""
+        logger.info("Logging in...")
+
+        # Wait for the page to settle
+        await self.page.wait_for_timeout(2000)
+
+        # Check if sign-in modal or login button is present
+        header_login = self.page.locator("button:has-text('Login')").first
+        await header_login.wait_for(state="visible", timeout=15000)
+        await header_login.click()
+        await self.page.wait_for_timeout(1000)
+
+        # Wait for sign-in modal to appear
+        logger.info("Entering credentials...")
+        email_field = self.page.locator("input[type='email'], input[autocomplete='username'], input[placeholder*='mail' i]").first
+        await email_field.wait_for(state="visible", timeout=10000)
+
+        # Use triple-click to select all, then type to simulate real keystrokes
+        # This works with React controlled inputs where fill() may not trigger state
+        await email_field.click(click_count=3)
+        await self.page.wait_for_timeout(100)
+        await email_field.type(username, delay=30)
+        logger.info(f"Email typed: {username}")
+
+        password_field = self.page.locator("input[type='password'], input[autocomplete='current-password']").first
+        await password_field.click(click_count=3)
+        await self.page.wait_for_timeout(100)
+        await password_field.type(password, delay=30)
+        logger.info("Password typed")
+        await self.page.wait_for_timeout(500)
+
+        # Submit by pressing Enter on the password field (most reliable for React forms)
+        await password_field.press("Enter")
+        logger.info("Login submitted via Enter key")
+
+        logger.info("Waiting for login to complete...")
+        await self.page.wait_for_timeout(3000)
+
+        # Check if login succeeded: the sign-in modal should be gone
+        # and the header should no longer show "Register"
+        sign_in_modal = self.page.locator("text=Sign In").first
         try:
-            windows = self.driver.find_elements(
-                By.CSS_SELECTOR, 
-                "div.resize.inline-block.absolute[id$='-window']"
+            await sign_in_modal.wait_for(state="hidden", timeout=10000)
+            logger.info("Sign-in modal closed — login successful")
+        except Exception:
+            await self.screenshot("output/login_failed.png")
+            raise RuntimeError(
+                "Login failed — sign-in modal still visible. "
+                "Check credentials in config.py. Screenshot: output/login_failed.png"
             )
-            return windows
-        except Exception as e:
-            print(f"Error getting windows: {e}")
-            return []
-    
-    def get_new_window(self, previous_count: int, timeout: int = 10) -> Optional[Any]:
-        """Wait for and return a newly created window"""
-        start_time = time.time()
-        
-        while time.time() - start_time < timeout:
-            current_windows = self.get_current_windows()
-            
-            if len(current_windows) > previous_count:
-                # Get the newest window (last in list)
-                new_window = current_windows[-1]
-                window_id = new_window.get_attribute('id')
-                
-                if window_id not in self.tracked_windows:
-                    self.tracked_windows.add(window_id)
-                    return new_window
-            
-            time.sleep(0.1)
-        
-        return None
-    
-    def wait_for_loading(self, timeout: int = 30) -> bool:
-        """Wait for loading spinner to disappear"""
+
+        await self.page.wait_for_timeout(1000)
+        logger.info("Login complete")
+
+    async def load_layout(self, layout_name: str = "dev") -> bool:
+        """Switch to a named layout. Returns False (not fatal) if not found."""
+        logger.info(f"Loading layout: {layout_name}")
         try:
-            time.sleep(0.5)  # Brief wait for spinner to appear
-            WebDriverWait(self.driver, timeout).until(
-                EC.invisibility_of_element_located(
-                    (By.CSS_SELECTOR, ".anticon-loading.anticon-spin")
-                )
-            )
+            layout = self.page.locator(f"span.whitespace-nowrap:text-is('{layout_name}')")
+            await layout.wait_for(state="visible", timeout=10000)
+            await layout.click()
+            await self.page.wait_for_timeout(1000)
+            logger.info(f"Layout '{layout_name}' loaded")
             return True
-        except TimeoutException:
-            return False
-
-
-class BaseCommand(ABC):
-    """Base class for all terminal commands"""
-    
-    def __init__(self, controller):
-        self.controller = controller
-        self.driver = controller.driver
-        self.dom_monitor = controller.dom_monitor
-        self.window = None
-        self.window_id = None
-        self.data = None
-    
-    @abstractmethod
-    def get_command_string(self, ticker: str, asset_class: str) -> str:
-        """Return the command string to send to terminal"""
-        pass
-    
-    @abstractmethod
-    def extract_data(self) -> Dict:
-        """Extract data from the command window"""
-        pass
-    
-    def execute(self, ticker: str, asset_class: str = "EQ") -> Dict:
-        """Execute the command and return results"""
-        command_str = self.get_command_string(ticker, asset_class)
-        
-        # Get current window count
-        previous_count = len(self.dom_monitor.get_current_windows())
-        
-        print(f"\nExecuting: {command_str}")
-        print(f"Current windows: {previous_count}")
-        
-        # Send command
-        if not self.controller.send_command(command_str):
-            return {
-                'success': False,
-                'error': 'Failed to send command',
-                'command': command_str
-            }
-        
-        # Wait for new window
-        print("Waiting for new window...")
-        self.window = self.dom_monitor.get_new_window(previous_count, timeout=10)
-        
-        if not self.window:
-            return {
-                'success': False,
-                'error': 'No new window created',
-                'command': command_str
-            }
-        
-        self.window_id = self.window.get_attribute('id')
-        print(f"New window detected: {self.window_id}")
-        
-        # Wait for loading to complete
-        print("Waiting for content to load...")
-        if not self.dom_monitor.wait_for_loading(timeout=30):
-            return {
-                'success': False,
-                'error': 'Loading timeout',
-                'command': command_str,
-                'window_id': self.window_id
-            }
-        
-        # Extract data
-        print("Extracting data...")
-        try:
-            self.data = self.extract_data()
-            return {
-                'success': True,
-                'command': command_str,
-                'data': self.data
-            }
         except Exception as e:
-            return {
-                'success': False,
-                'error': f'Data extraction failed: {str(e)}',
-                'command': command_str,
-                'window_id': self.window_id
-            }
-    
-    def close(self, retry_count=0):
-        """Close the command window with multiple fallback strategies"""
-        if retry_count > 2:  # Prevent infinite recursion
-            print(f"Max retries reached for closing window {self.window_id}")
+            logger.warning(f"Layout '{layout_name}' not found, continuing with default: {e}")
             return False
-            
-        if not self.window:
-            print("No window to close")
-            return False
-        
-        # If we have a window_id, try to refresh the window reference if it's stale
-        if self.window_id:
-            try:
-                # Test if window reference is still valid
-                _ = self.window.get_attribute('id')
-            except Exception:
-                # Window reference is stale, try to find it again
-                try:
-                    windows = self.dom_monitor.get_current_windows()
-                    for win in windows:
-                        if win.get_attribute('id') == self.window_id:
-                            self.window = win
-                            print(f"Refreshed stale window reference for {self.window_id}")
-                            break
-                except Exception as e:
-                    print(f"Could not refresh window reference: {e}")
-        
+
+    async def send_command(self, command_str: str) -> bool:
+        """Type a command into the terminal input and press Enter."""
         try:
-            # Strategy 1: Try span with close icon (most common)
+            terminal = self.page.locator("#terminal-input")
+            await terminal.fill("")
+            await terminal.type(command_str, delay=20)
+            await self.page.wait_for_timeout(200)
+            await terminal.press("Enter")
+            logger.info(f"Command sent: {command_str}")
+            return True
+        except Exception as e:
+            logger.error(f"Error sending command: {e}")
+            return False
+
+    # -- window helpers -----------------------------------------------------
+
+    async def get_current_windows(self) -> list:
+        """Return all window element handles in the DOM."""
+        return await self.page.locator("div.resize.inline-block.absolute[id$='-window']").all()
+
+    async def wait_for_new_window(self, previous_count: int, timeout: int = 10000) -> Optional[Any]:
+        """Poll until a new window appears or timeout (ms)."""
+        deadline = time.monotonic() + timeout / 1000
+        while time.monotonic() < deadline:
+            windows = await self.get_current_windows()
+            if len(windows) > previous_count:
+                new_win = windows[-1]
+                win_id = await new_win.get_attribute("id")
+                if win_id and win_id not in self._tracked_windows:
+                    self._tracked_windows.add(win_id)
+                    return new_win
+            await self.page.wait_for_timeout(100)
+        return None
+
+    async def wait_for_loading(self, timeout: int = 30000) -> bool:
+        """Wait for the loading spinner to disappear."""
+        try:
+            await self.page.wait_for_timeout(500)
+            spinner = self.page.locator(".anticon-loading.anticon-spin")
+            await spinner.wait_for(state="hidden", timeout=timeout)
+            return True
+        except Exception:
+            return False
+
+    async def close_window(self, window) -> bool:
+        """Close a command window using multiple fallback strategies."""
+        strategies = [
+            "span.anticon.anticon-close",
+            "svg[data-icon='close']",
+            "button[aria-label*='close' i]",
+        ]
+        for selector in strategies:
             try:
-                close_button = self.window.find_element(
-                    By.CSS_SELECTOR,
-                    "span.anticon.anticon-close"
-                )
-                close_button.click()
-                time.sleep(0.5)
-                print(f"Window {self.window_id} closed")
-                return True
-            except NoSuchElementException:
-                pass
-            
-            # Strategy 2: Try SVG with data-icon='close'
-            try:
-                close_svg = self.window.find_element(
-                    By.CSS_SELECTOR,
-                    "svg[data-icon='close']"
-                )
-                close_svg.click()
-                time.sleep(0.5)
-                print(f"Window {self.window_id} closed (via SVG)")
-                return True
-            except NoSuchElementException:
-                pass
-            
-            # Strategy 3: Try button with close icon class
-            try:
-                close_btn = self.window.find_element(
-                    By.CSS_SELECTOR,
-                    "button[aria-label*='close' i], button[aria-label*='Close' i]"
-                )
-                close_btn.click()
-                time.sleep(0.5)
-                print(f"Window {self.window_id} closed (via button)")
-                return True
-            except NoSuchElementException:
-                pass
-            
-            # Strategy 4: Try to find any element with close-related classes/attributes in header
-            try:
-                # Look for header element first
-                header = self.window.find_element(By.CSS_SELECTOR, ".ant-modal-header, .window-header, [class*='header']")
-                close_elements = header.find_elements(
-                    By.CSS_SELECTOR,
-                    "span[class*='close'], button[class*='close'], svg[data-icon='close'], .anticon-close"
-                )
-                if close_elements:
-                    close_elements[0].click()
-                    time.sleep(0.5)
-                    print(f"Window {self.window_id} closed (via header element)")
+                close_btn = window.locator(selector).first
+                if await close_btn.count() > 0:
+                    await close_btn.click()
+                    await self.page.wait_for_timeout(500)
                     return True
             except Exception:
-                pass
-            
-            # Strategy 5: Try to find close button anywhere in window using XPath
-            try:
-                close_xpath = ".//span[contains(@class, 'close')] | .//button[contains(@class, 'close')] | .//*[contains(@aria-label, 'close')]"
-                close_el = self.window.find_element(By.XPATH, close_xpath)
-                close_el.click()
-                time.sleep(0.5)
-                print(f"Window {self.window_id} closed (via XPath)")
-                return True
-            except NoSuchElementException:
-                pass
-            
-            print(f"Warning: Could not find close button for window {self.window_id}")
-            return False
-            
-        except StaleElementReferenceException:
-            # Window element became stale, try to refresh and close again
-            print(f"Window element became stale, attempting to refresh and close...")
-            if self.window_id:
-                try:
-                    windows = self.dom_monitor.get_current_windows()
-                    for win in windows:
-                        if win.get_attribute('id') == self.window_id:
-                            self.window = win
-                            # Retry closing with fresh reference
-                            return self.close(retry_count=retry_count + 1)
-                except Exception as e:
-                    print(f"Could not refresh stale window reference: {e}")
-            return False
+                continue
+        logger.warning("Could not close window")
+        return False
+
+    async def close_all_windows(self):
+        """Close every tracked command window."""
+        windows = await self.get_current_windows()
+        for win in windows:
+            await self.close_window(win)
+        self.active_commands.clear()
+        self._tracked_windows.clear()
+        logger.info("All windows closed")
+
+    async def screenshot(self, path: str = "output/screenshot.png"):
+        """Save a screenshot (useful for debugging)."""
+        Path(path).parent.mkdir(parents=True, exist_ok=True)
+        await self.page.screenshot(path=path, full_page=True)
+        logger.info(f"Screenshot saved: {path}")
+
+    async def close(self):
+        """Tear down this session's page and context."""
+        try:
+            if self.interceptor:
+                self.interceptor.stop()
+            if self.page:
+                await self.page.close()
+            await self.context.close()
+            logger.info("Session closed")
         except Exception as e:
-            print(f"Error closing window {self.window_id}: {e}")
-            import traceback
-            traceback.print_exc()
-            return False
+            logger.error(f"Error closing session: {e}")
 
 
-class GodelTerminalController:
-    """Controller for Godel Terminal command execution"""
-    
-    def __init__(self, url: str ="https://app.godelterminal.com", headless: bool = False):
-        self.url = url
-        self.driver = None
-        self.dom_monitor = None
+# ---------------------------------------------------------------------------
+# GodelManager  (one browser, many contexts/sessions)
+# ---------------------------------------------------------------------------
+
+class GodelManager:
+    """Owns the Playwright browser and spawns GodelSession instances."""
+
+    def __init__(self, headless: bool = False, background: bool = False,
+                 url: str = "https://app.godelterminal.com"):
         self.headless = headless
-        self.active_commands = []
-        self.command_registry = {}
-        
-    def register_command(self, command_type: str, command_class):
-        """Register a command class"""
-        self.command_registry[command_type] = command_class
-        
-    def connect(self):
-        """Initialize browser and navigate to terminal"""
-        options = webdriver.ChromeOptions()
-        
-        if self.headless:
-            options.add_argument('--headless')
-        
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--window-size=1920,1080')
-        # Suppress SSL errors and other Chrome logging
-        options.add_argument('--log-level=3')
-        options.add_argument('--disable-logging')
-        options.add_argument('--disable-gpu')
-        options.add_argument('--silent')
-        options.add_argument('--disable-extensions')
-        # Suppress SSL certificate errors
-        options.add_argument('--ignore-certificate-errors')
-        options.add_argument('--ignore-ssl-errors')
-        options.add_argument('--ignore-certificate-errors-spki-list')
-        # Suppress console errors
-        options.add_experimental_option('excludeSwitches', ['enable-logging', 'enable-automation'])
-        options.add_experimental_option('useAutomationExtension', False)
-        # Suppress all logging including SSL errors
-        prefs = {
-            'logging': {
-                'level': 'OFF'
-            },"credentials_enable_service": False,
-         "profile.password_manager_enabled": False
-        }
-        options.add_experimental_option('prefs', prefs)
-        
-        # Suppress SSL handshake errors by filtering stderr
-        import sys
-        import os
-        
-        # Save original stderr
-        if not hasattr(self, '_original_stderr'):
-            self._original_stderr = sys.stderr
-            
-            # Create a filter for stderr that ignores SSL errors
-            class SSLErrorFilter:
-                def __init__(self, original):
-                    self.original = original
-                    self.ssl_error_patterns = [
-                        'handshake failed',
-                        'SSL error code',
-                        'net/socket/ssl_client_socket_impl.cc',
-                        'net_error -100'
-                    ]
-                
-                def write(self, message):
-                    # Filter out SSL-related errors
-                    if any(pattern in message for pattern in self.ssl_error_patterns):
-                        return  # Don't write SSL errors
-                    self.original.write(message)
-                
-                def flush(self):
-                    self.original.flush()
-                
-                def __getattr__(self, name):
-                    return getattr(self.original, name)
-            
-            # Install the filter
-            sys.stderr = SSLErrorFilter(self._original_stderr)
-        
-        self.driver = webdriver.Chrome(options=options)
-        self.driver.get(self.url)
-        
-        # Maximize window immediately on initialization
-        try:
-            self.driver.maximize_window()
-        except Exception as e:
-            # If maximize fails (e.g., in headless mode), that's okay
-            pass
-        
-        # Initialize DOM monitor
-        self.dom_monitor = DOMMonitor(self.driver)
-        
-        time.sleep(3)
-        print(f"Connected to {self.url}")
-    
-    def disconnect(self):
-        """Close browser with robust cleanup"""
-        if not self.driver:
-            return
-        
-        driver_ref = self.driver
-        self.driver = None  # Clear reference early to prevent reuse
-        
-        try:
-            # First, try to close all windows gracefully (but don't fail if connection is already broken)
-            try:
-                # Check if driver connection is still alive
-                _ = driver_ref.current_url  # This will fail if connection is broken
-                
-                # If we get here, connection is alive, try to close windows
-                windows = driver_ref.window_handles
-                for window in windows:
-                    try:
-                        driver_ref.switch_to.window(window)
-                        driver_ref.close()
-                    except Exception:
-                        # If we can't close a specific window, continue with others
-                        pass
-            except Exception:
-                # Connection is already broken or windows can't be closed - that's okay
-                pass
-            
-            # Then quit the driver (may fail silently if already disconnected)
-            try:
-                driver_ref.quit()
-            except Exception:
-                # Driver already quit or connection broken - that's fine
-                pass
-            
-            print("Browser disconnected successfully")
-            
-            # Small delay to ensure cleanup completes
-            time.sleep(0.5)
-                
-        except Exception as e:
-            print(f"Error during disconnect: {e}")
-            
-            # Force cleanup - try to kill the process if quit() failed (optional, requires psutil)
-            try:
-                import psutil
-                import os
-                # Find and kill Chrome/Chromium processes for this driver
-                current_pid = os.getpid()
-                for proc in psutil.process_iter(['pid', 'name', 'ppid']):
-                    try:
-                        if proc.info['ppid'] == current_pid and 'chrome' in proc.info['name'].lower():
-                            proc.kill()
-                    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
-                        pass
-            except ImportError:
-                # psutil not available, that's okay - graceful quit is preferred anyway
-                pass
-            except Exception as e2:
-                # Silently ignore force cleanup errors
-                pass
-    
-    def login(self, username: str, password: str):
-        """Log in to the website"""
-        try:
-            print('Logging in...')
-            
-            # Wait for and click initial login button
-            WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.XPATH, "//button[text()='Login']"))
-            )
-            login_button = self.driver.find_element(By.XPATH, "//button[text()='Login']")
-            login_button.click()
+        self.background = background
+        self.url = url
+        self._playwright: Optional[Playwright] = None
+        self._browser: Optional[Browser] = None
+        self.sessions: Dict[str, GodelSession] = {}
 
-            # Wait for login form and fill credentials
-            print('Entering credentials...')
-            username_field = WebDriverWait(self.driver, 10).until(
-                EC.presence_of_element_located((By.CSS_SELECTOR, "input[autocomplete='username']"))
-            )
-            username_field.send_keys(username)
-            
-            password_field = self.driver.find_element(By.CSS_SELECTOR, "input[autocomplete='current-password']")
-            password_field.send_keys(password)
-            time.sleep(.5)
+    async def start(self):
+        """Launch the browser.
 
-            # Click login button to submit
-            login_button = self.driver.find_element(By.XPATH, '//*[@id="root"]/div[2]/div[3]/div/div[2]/div/form/div[2]/button')
-            login_button.click()
-            
-            print('Waiting for login to complete...')
-            
-            # Wait for login modal/button to disappear
-            WebDriverWait(self.driver, 15).until(
-                EC.invisibility_of_element_located((By.XPATH, "//button[text()='Login']"))
-            )
-            print('Login modal closed')
-            
-            # Wait for main page to load
-            WebDriverWait(self.driver, 15).until(
-                EC.presence_of_element_located((By.ID, "terminal-input"))
-            )
-            print('Main page loaded')
-            
-            time.sleep(1)
-            print("✓ Login successful and page ready")
-            return True
-            
-        except TimeoutException as e:
-            print(f'✗ Login timeout: {str(e)}')
-            print('  Possible issues: wrong credentials, slow network, or page structure changed')
-            raise
-        except Exception as e:
-            print(f'✗ Login failed: {str(e)}')
-            raise
-    
-    def load_layout(self, layout_name: str = "dev"):
-        """Navigate to a specific layout"""
-        try:
-            print(f'Loading layout: {layout_name}...')
-            
-            # Find and click the layout by name
-            layout_span = WebDriverWait(self.driver, 10).until(
-                EC.element_to_be_clickable((By.XPATH, f"//span[@class='whitespace-nowrap' and text()='{layout_name}']"))
-            )
-            layout_span.click()
-            
-            time.sleep(1)
-            print(f"✓ Layout '{layout_name}' loaded")
-            return True
-            
-        except TimeoutException:
-            print(f'✗ Layout "{layout_name}" not found')
-            return False
-        except Exception as e:
-            print(f'✗ Error loading layout: {str(e)}')
-            return False
-    
-    def open_terminal(self):
-        """Open terminal using backtick key"""
-        try:
-            body = self.driver.find_element(By.TAG_NAME, 'body')
-            body.send_keys('`')
-            time.sleep(0.5)
-            
-            # Verify terminal input is visible/active
-            terminal_input = self.driver.find_element(By.ID, "terminal-input")
-            print("Terminal opened")
-            return True
-            
-        except Exception as e:
-            print(f"Error opening terminal: {e}")
-            return False
-    
-    def send_command(self, command_str: str) -> bool:
-        """Send command string to terminal"""
-        try:
-            terminal_input = self.driver.find_element(By.ID, "terminal-input")
-            terminal_input.clear()
-            terminal_input.send_keys(command_str)
-            time.sleep(0.3)
-            terminal_input.send_keys(Keys.RETURN)
-            
-            print(f"Command sent: {command_str}")
-            return True
-            
-        except Exception as e:
-            print(f"Error sending command: {e}")
-            return False
-    
-    def execute_command(self, command_type: str, ticker = None, asset_class: str = "EQ", **kwargs) -> tuple[Dict, Optional[Any]]:
-        """Execute a command by type and return (result_dict, command_instance)
-        
-        Args:
-            command_type: Type of command to execute (DES, PRT, etc.)
-            ticker: Single ticker string OR list of tickers (for PRT)
-            asset_class: Asset class (for single-ticker commands)
-            **kwargs: Additional arguments passed to command constructor
+        Modes:
+          headless=False, background=False  — normal visible browser
+          headless=False, background=True   — real browser positioned off-screen (invisible but undetectable)
+          headless=True                     — headless Chromium (may be blocked by some sites)
         """
-        if command_type not in self.command_registry:
-            return {
-                'success': False,
-                'error': f'Unknown command type: {command_type}',
-                'available_commands': list(self.command_registry.keys())
-            }, None
-        
-        # Create command instance
-        command_class = self.command_registry[command_type]
-        
-        # Special handling for PRT command (takes list of tickers in constructor)
-        if command_type == 'PRT':
-            # ticker should be a list for PRT
-            tickers = ticker if isinstance(ticker, list) else [ticker] if ticker else []
-            command = command_class(self, tickers=tickers, **kwargs)
-            result = command.execute()
-        else:
-            # Standard commands (DES, GIP, etc.) - single ticker + asset_class
-            command = command_class(self, **kwargs)
-            result = command.execute(ticker, asset_class)
-        
-        # Track successful commands
-        if result['success']:
-            self.active_commands.append(command)
-            return result, command
-        else:
-            return result, None
-    
-    def close_all_windows(self):
-        """Close all active command windows"""
-        for command in self.active_commands:
-            command.close()
-        self.active_commands = []
-        print("All windows closed")
+        self._playwright = await async_playwright().start()
+
+        args = [
+            "--no-sandbox",
+            "--disable-dev-shm-usage",
+            "--disable-gpu",
+            "--ignore-certificate-errors",
+            "--disable-save-password-bubble",
+            "--disable-autofill-keyboard-accessory-view",
+        ]
+
+        if self.background and not self.headless:
+            # Position the window far off-screen so it's invisible
+            # but still a real headed browser (bypasses bot detection)
+            args.append("--window-position=-10000,-10000")
+
+        self._browser = await self._playwright.chromium.launch(
+            headless=self.headless,
+            args=args,
+        )
+
+        mode = "background" if self.background else ("headless" if self.headless else "visible")
+        logger.info(f"Browser launched (mode={mode})")
+
+    async def create_session(self, session_id: str = "default") -> GodelSession:
+        """Create a new browser context and session."""
+        if not self._browser:
+            raise RuntimeError("Browser not started. Call start() first.")
+        context = await self._browser.new_context(
+            viewport={"width": 1920, "height": 1080},
+            ignore_https_errors=True,
+        )
+        session = GodelSession(context, self.url)
+        self.sessions[session_id] = session
+        logger.info(f"Session '{session_id}' created")
+        return session
+
+    async def get_session(self, session_id: str = "default") -> Optional[GodelSession]:
+        return self.sessions.get(session_id)
+
+    async def close_session(self, session_id: str = "default"):
+        session = self.sessions.pop(session_id, None)
+        if session:
+            await session.close()
+
+    async def shutdown(self):
+        """Close all sessions and the browser."""
+        for sid in list(self.sessions):
+            await self.close_session(sid)
+        if self._browser:
+            await self._browser.close()
+        if self._playwright:
+            await self._playwright.stop()
+        logger.info("Manager shut down")
+
+    async def __aenter__(self):
+        await self.start()
+        return self
+
+    async def __aexit__(self, *exc):
+        await self.shutdown()
+
+
+# ---------------------------------------------------------------------------
+# BaseCommand  (async, Playwright-based)
+# ---------------------------------------------------------------------------
+
+class BaseCommand(ABC):
+    """Abstract base for all terminal commands."""
+
+    def __init__(self, session: GodelSession):
+        self.session = session
+        self.page = session.page
+        self.window = None
+        self.window_id: Optional[str] = None
+        self.data: Optional[Dict] = None
+
+    @abstractmethod
+    def get_command_string(self, ticker: str = None, asset_class: str = None) -> str:
+        pass
+
+    @abstractmethod
+    async def extract_data(self) -> Dict:
+        pass
+
+    async def execute(self, ticker: str = None, asset_class: str = "EQ") -> Dict:
+        """Send command, wait for window, wait for loading, extract data."""
+        command_str = self.get_command_string(ticker, asset_class)
+
+        previous_count = len(await self.session.get_current_windows())
+        logger.info(f"Executing: {command_str}  (windows before: {previous_count})")
+
+        if not await self.session.send_command(command_str):
+            return {"success": False, "error": "Failed to send command", "command": command_str}
+
+        logger.info("Waiting for new window...")
+        self.window = await self.session.wait_for_new_window(previous_count, timeout=15000)
+        if not self.window:
+            await self.session.screenshot(f"output/no_window_{command_str.replace(' ', '_')}.png")
+            return {"success": False, "error": "No new window created", "command": command_str}
+
+        self.window_id = await self.window.get_attribute("id")
+        logger.info(f"New window: {self.window_id}")
+
+        logger.info("Waiting for content to load...")
+        if not await self.session.wait_for_loading(timeout=30000):
+            # Take a screenshot on failure
+            await self.session.screenshot(f"output/timeout_{self.window_id}.png")
+            return {"success": False, "error": "Loading timeout", "command": command_str, "window_id": self.window_id}
+
+        logger.info("Extracting data...")
+        try:
+            self.data = await self.extract_data()
+            return {"success": True, "command": command_str, "data": self.data}
+        except Exception as e:
+            logger.error(f"Extraction failed: {e}", exc_info=True)
+            await self.session.screenshot(f"output/error_{self.window_id}.png")
+            return {"success": False, "error": f"Data extraction failed: {e}", "command": command_str, "window_id": self.window_id}
+
+    async def close(self):
+        """Close this command's window."""
+        if self.window:
+            return await self.session.close_window(self.window)
+        return False

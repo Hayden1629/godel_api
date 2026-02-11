@@ -1,19 +1,15 @@
 """
-Godel Terminal API
-Python module interface for programmatic use
+Godel Terminal API — async Python interface with multi-session support
 """
 
-from typing import List, Optional, Dict, Any
-from pathlib import Path
-import sys
+import asyncio
+from typing import Any, Dict, List, Optional
 
-# Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent))
-
-from godel_core import GodelTerminalController
+from godel_core import GodelManager, GodelSession
 from commands import (
     DESCommand, PRTCommand, MOSTCommand,
-    GCommand, GIPCommand, QMCommand
+    GCommand, GIPCommand, QMCommand,
+    ProbeCommand, ChatMonitor, RESCommand,
 )
 
 try:
@@ -25,246 +21,172 @@ except ImportError:
 
 
 class GodelAPI:
-    """
-    High-level API wrapper for Godel Terminal commands.
-    Manages controller lifecycle and provides convenient methods for each command.
-    """
-    
-    def __init__(self, url: str = None, username: str = None, password: str = None, headless: bool = False):
-        """
-        Initialize Godel API
-        
-        Args:
-            url: Godel Terminal URL (defaults to config.py or default URL)
-            username: Godel Terminal username (defaults to config.py)
-            password: Godel Terminal password (defaults to config.py)
-            headless: Run browser in headless mode
-        """
+    """Async API wrapper for Godel Terminal with multi-session support."""
+
+    def __init__(self, url: str = None, username: str = None, password: str = None,
+                 headless: bool = False):
         self.url = url or GODEL_URL
         self.username = username or GODEL_USERNAME
         self.password = password or GODEL_PASSWORD
         self.headless = headless
-        self.controller: Optional[GodelTerminalController] = None
-        self._connected = False
-        
+        self.manager: Optional[GodelManager] = None
+        self._default_session: Optional[GodelSession] = None
+
         if not self.username or not self.password:
-            raise ValueError("Username and password must be provided either via config.py or as arguments")
-    
-    def connect(self, layout: str = "dev") -> bool:
-        """
-        Connect to Godel Terminal and log in
-        
-        Args:
-            layout: Layout name to load (default: "dev")
-            
-        Returns:
-            bool: True if connection successful
-        """
-        try:
-            self.controller = GodelTerminalController(self.url, headless=self.headless)
-            self.controller.connect()
-            self.controller.login(self.username, self.password)
-            
-            if layout:
-                self.controller.load_layout(layout)
-            
-            self._connected = True
-            return True
-        except Exception as e:
-            print(f"Connection failed: {e}")
-            return False
-    
-    def disconnect(self):
-        """Disconnect from Godel Terminal"""
-        if self.controller:
-            self.controller.close_all_windows()
-            self.controller.disconnect()
-            self.controller = None
-            self._connected = False
-    
-    def _ensure_connected(self):
-        """Ensure controller is connected"""
-        if not self._connected or not self.controller:
-            raise RuntimeError("Not connected. Call connect() first.")
-    
-    def des(self, ticker: str, asset_class: str = "EQ") -> Dict[str, Any]:
-        """
-        Execute DES (Description) command
-        
-        Args:
-            ticker: Ticker symbol
-            asset_class: Asset class (default: "EQ")
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', etc.
-        """
-        self._ensure_connected()
-        des = DESCommand(self.controller)
-        return des.execute(ticker, asset_class)
-    
-    def prt(self, tickers: List[str], output_path: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Execute PRT (Pattern Real-Time) command
-        
-        Args:
-            tickers: List of ticker symbols to analyze
-            output_path: Optional path to save CSV/JSON (default: None, uses Downloads folder)
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', 'csv_file', etc.
-        """
-        self._ensure_connected()
-        prt = PRTCommand(self.controller, tickers=tickers)
-        result = prt.execute()
-        
-        if result['success'] and output_path:
-            if output_path.endswith('.csv'):
-                prt.save_to_csv(output_path)
-            elif output_path.endswith('.json'):
-                prt.save_to_json(output_path)
+            raise ValueError("Username and password required (via config.py or arguments)")
+
+    async def connect(self, layout: str = "dev", session_id: str = "default") -> GodelSession:
+        """Start browser, create session, login, load layout."""
+        self.manager = GodelManager(headless=self.headless, url=self.url)
+        await self.manager.start()
+        session = await self.manager.create_session(session_id)
+        await session.init_page()
+        await session.login(self.username, self.password)
+        await session.load_layout(layout)
+        self._default_session = session
+        return session
+
+    async def add_session(self, session_id: str, layout: str = "dev") -> GodelSession:
+        """Add an additional concurrent session (new browser context)."""
+        if not self.manager:
+            raise RuntimeError("Call connect() first")
+        session = await self.manager.create_session(session_id)
+        await session.init_page()
+        await session.login(self.username, self.password)
+        await session.load_layout(layout)
+        return session
+
+    def _session(self, session_id: str = None) -> GodelSession:
+        if session_id and self.manager:
+            s = self.manager.sessions.get(session_id)
+            if s:
+                return s
+        if self._default_session:
+            return self._default_session
+        raise RuntimeError("Not connected")
+
+    async def disconnect(self):
+        if self.manager:
+            await self.manager.shutdown()
+            self.manager = None
+            self._default_session = None
+
+    # -- commands -----------------------------------------------------------
+
+    async def des(self, ticker: str, asset_class: str = "EQ",
+                  session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = DESCommand(s)
+        return await cmd.execute(ticker, asset_class)
+
+    async def prt(self, tickers: List[str], output_path: Optional[str] = None,
+                  session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = PRTCommand(s, tickers=tickers)
+        result = await cmd.execute()
+        if result["success"] and output_path and cmd.df is not None:
+            if output_path.endswith(".csv"):
+                cmd.save_to_csv(output_path)
+            elif output_path.endswith(".json"):
+                cmd.save_to_json(output_path)
             else:
-                prt.save_to_csv(output_path + '.csv')
-        
+                cmd.save_to_csv(output_path + ".csv")
         return result
-    
-    def most(self, tab: str = "ACTIVE", limit: int = 75, output_path: Optional[str] = None) -> Dict[str, Any]:
-        """
-        Execute MOST (Most Active Stocks) command
-        
-        Args:
-            tab: Tab to select - "ACTIVE", "GAINERS", "LOSERS", or "VALUE" (default: "ACTIVE")
-            limit: Number of results - 10, 25, 50, 75, or 100 (default: 75)
-            output_path: Optional path to save CSV/JSON
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', etc.
-        """
-        self._ensure_connected()
-        most = MOSTCommand(self.controller, tab=tab, limit=limit)
-        result = most.execute()
-        
-        if result['success'] and output_path:
-            if output_path.endswith('.csv'):
-                most.save_to_csv(output_path)
-            elif output_path.endswith('.json'):
-                most.save_to_json(output_path)
+
+    async def most(self, tab: str = "ACTIVE", limit: int = 75,
+                   output_path: Optional[str] = None,
+                   session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = MOSTCommand(s, tab=tab, limit=limit)
+        result = await cmd.execute()
+        if result["success"] and output_path and cmd.df is not None:
+            if output_path.endswith(".csv"):
+                cmd.save_to_csv(output_path)
+            elif output_path.endswith(".json"):
+                cmd.save_to_json(output_path)
             else:
-                most.save_to_csv(output_path + '.csv')
-        
+                cmd.save_to_csv(output_path + ".csv")
         return result
-    
-    def g(self, ticker: str, asset_class: str = "EQ") -> Dict[str, Any]:
-        """
-        Execute G (Chart) command
-        
-        Args:
-            ticker: Ticker symbol
-            asset_class: Asset class (default: "EQ")
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', etc.
-        """
-        self._ensure_connected()
-        g = GCommand(self.controller)
-        return g.execute(ticker, asset_class)
-    
-    def gip(self, ticker: str, asset_class: str = "EQ") -> Dict[str, Any]:
-        """
-        Execute GIP (Intraday Chart) command
-        
-        Args:
-            ticker: Ticker symbol
-            asset_class: Asset class (default: "EQ")
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', etc.
-        """
-        self._ensure_connected()
-        gip = GIPCommand(self.controller)
-        return gip.execute(ticker, asset_class)
-    
-    def qm(self, ticker: str, asset_class: str = "EQ") -> Dict[str, Any]:
-        """
-        Execute QM (Quote Monitor) command
-        
-        Args:
-            ticker: Ticker symbol
-            asset_class: Asset class (default: "EQ")
-            
-        Returns:
-            dict: Result dictionary with 'success', 'data', etc.
-        """
-        self._ensure_connected()
-        qm = QMCommand(self.controller)
-        return qm.execute(ticker, asset_class)
-    
-    def close_all_windows(self):
-        """Close all active command windows"""
-        if self.controller:
-            self.controller.close_all_windows()
-    
-    def __enter__(self):
-        """Context manager entry"""
-        self.connect()
+
+    async def res(self, ticker: str, asset_class: str = "EQ",
+                  download_pdfs: bool = True, output_dir: str = "output/pdfs",
+                  session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = RESCommand(s, download_pdfs=download_pdfs, output_dir=output_dir)
+        return await cmd.execute(ticker, asset_class)
+
+    async def probe(self, duration: int = 30, filter_type: Optional[str] = None,
+                    url_filter: Optional[str] = None, output_path: Optional[str] = None,
+                    session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = ProbeCommand(s, duration=duration, filter_type=filter_type,
+                           url_filter=url_filter)
+        return await cmd.execute_and_save(output_path)
+
+    async def chat(self, channels: Optional[List[str]] = None, duration: int = 60,
+                   session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        monitor = ChatMonitor(s, channels=channels)
+        await monitor.start(duration=duration)
+        return {
+            "success": True,
+            "messages_captured": monitor.message_count,
+            "duration": duration,
+            "channels": channels,
+        }
+
+    async def g(self, ticker: str, asset_class: str = "EQ",
+                session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = GCommand(s)
+        return await cmd.execute(ticker, asset_class)
+
+    async def gip(self, ticker: str, asset_class: str = "EQ",
+                  session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = GIPCommand(s)
+        return await cmd.execute(ticker, asset_class)
+
+    async def qm(self, ticker: str, asset_class: str = "EQ",
+                 session_id: str = None) -> Dict[str, Any]:
+        s = self._session(session_id)
+        cmd = QMCommand(s)
+        return await cmd.execute(ticker, asset_class)
+
+    async def close_all_windows(self, session_id: str = None):
+        self._session(session_id)
+        s = self._session(session_id)
+        await s.close_all_windows()
+
+    # -- context manager ----------------------------------------------------
+
+    async def __aenter__(self):
+        await self.connect()
         return self
-    
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Context manager exit"""
-        self.disconnect()
+
+    async def __aexit__(self, *exc):
+        await self.disconnect()
 
 
-# Convenience functions for quick usage
-def quick_des(ticker: str, asset_class: str = "EQ", url: str = None, 
-              username: str = None, password: str = None) -> Dict[str, Any]:
-    """
-    Quick DES command execution (connects, executes, disconnects)
-    
-    Args:
-        ticker: Ticker symbol
-        asset_class: Asset class (default: "EQ")
-        url: Godel Terminal URL (optional, uses config.py if not provided)
-        username: Username (optional, uses config.py if not provided)
-        password: Password (optional, uses config.py if not provided)
-        
-    Returns:
-        dict: Result dictionary
-    """
-    with GodelAPI(url=url, username=username, password=password) as api:
-        return api.des(ticker, asset_class)
+# ---------------------------------------------------------------------------
+# Quick functions (connect, execute, disconnect in one call)
+# ---------------------------------------------------------------------------
+
+async def quick_des(ticker: str, asset_class: str = "EQ", **kw) -> Dict[str, Any]:
+    async with GodelAPI(**kw) as api:
+        return await api.des(ticker, asset_class)
 
 
-def quick_prt(tickers: List[str], url: str = None, 
-              username: str = None, password: str = None) -> Dict[str, Any]:
-    """
-    Quick PRT command execution (connects, executes, disconnects)
-    
-    Args:
-        tickers: List of ticker symbols
-        url: Godel Terminal URL (optional, uses config.py if not provided)
-        username: Username (optional, uses config.py if not provided)
-        password: Password (optional, uses config.py if not provided)
-        
-    Returns:
-        dict: Result dictionary
-    """
-    with GodelAPI(url=url, username=username, password=password) as api:
-        return api.prt(tickers)
+async def quick_prt(tickers: List[str], **kw) -> Dict[str, Any]:
+    async with GodelAPI(**kw) as api:
+        return await api.prt(tickers)
 
 
-def quick_most(tab: str = "ACTIVE", limit: int = 75, url: str = None,
-               username: str = None, password: str = None) -> Dict[str, Any]:
-    """
-    Quick MOST command execution (connects, executes, disconnects)
-    
-    Args:
-        tab: Tab to select (default: "ACTIVE")
-        limit: Number of results (default: 75)
-        url: Godel Terminal URL (optional, uses config.py if not provided)
-        username: Username (optional, uses config.py if not provided)
-        password: Password (optional, uses config.py if not provided)
-        
-    Returns:
-        dict: Result dictionary
-    """
-    with GodelAPI(url=url, username=username, password=password) as api:
-        return api.most(tab=tab, limit=limit)
+async def quick_most(tab: str = "ACTIVE", limit: int = 75, **kw) -> Dict[str, Any]:
+    async with GodelAPI(**kw) as api:
+        return await api.most(tab=tab, limit=limit)
+
+
+async def quick_probe(duration: int = 30, **kw) -> Dict[str, Any]:
+    async with GodelAPI(**kw) as api:
+        return await api.probe(duration=duration)

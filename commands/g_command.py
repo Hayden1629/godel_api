@@ -1,40 +1,32 @@
 """
-G (Chart) Command
-Displays price chart (data extraction not yet implemented)
+G (Chart) Command — async Playwright
+Opens price chart window (data extraction placeholder)
 """
 
-from selenium.webdriver.common.by import By
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Optional
-
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from godel_core import BaseCommand
 
 
 class GCommand(BaseCommand):
-    """Chart (G) command - displays price chart"""
-    
-    def get_command_string(self, ticker: str, asset_class: str) -> str:
-        return f"{ticker} {asset_class} G"
-    
-    def extract_data(self) -> Dict:
-        """Extract chart data - placeholder for future implementation"""
-        data = {
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'window_id': self.window_id,
-            'ticker': self._extract_ticker(),
-            'type': 'chart',
-            'note': 'Chart data extraction not yet implemented'
+    """Chart (G) command."""
+
+    def get_command_string(self, ticker: str = None, asset_class: str = None) -> str:
+        return f"{ticker} {asset_class or 'EQ'} G"
+
+    async def extract_data(self) -> Dict:
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "window_id": self.window_id,
+            "ticker": await self._get_ticker(),
+            "type": "chart",
+            "note": "Chart data extraction not yet implemented",
         }
-        return data
-    
-    def _extract_ticker(self) -> Optional[str]:
-        """Extract ticker from input field"""
+
+    async def _get_ticker(self) -> Optional[str]:
         try:
-            ticker_input = self.window.find_element(By.CSS_SELECTOR, "input[value]")
-            return ticker_input.get_attribute('value')
-        except:
+            inp = self.window.locator("input[value]").first
+            return await inp.input_value()
+        except Exception:
             return None

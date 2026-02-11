@@ -1,6 +1,6 @@
 """
 Godel Terminal Commands
-Command implementations for different terminal functions
+Async Playwright-based command implementations
 """
 
 from .des_command import DESCommand
@@ -9,5 +9,12 @@ from .gip_command import GIPCommand
 from .qm_command import QMCommand
 from .prt_command import PRTCommand
 from .most_command import MOSTCommand
+from .probe_command import ProbeCommand
+from .chat_monitor import ChatMonitor
+from .res_command import RESCommand
 
-__all__ = ['DESCommand', 'GCommand', 'GIPCommand', 'QMCommand', 'PRTCommand', 'MOSTCommand']
+__all__ = [
+    "DESCommand", "GCommand", "GIPCommand", "QMCommand",
+    "PRTCommand", "MOSTCommand",
+    "ProbeCommand", "ChatMonitor", "RESCommand",
+]

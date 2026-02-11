@@ -1,1 +1,9 @@
 config.py
+godel.db
+godel_cli.log
+output/*.png
+output/*.json
+output/*.csv
+output/pdfs/
+__pycache__/
+*.pyc

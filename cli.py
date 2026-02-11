@@ -1,276 +1,350 @@
 #!/usr/bin/env python3
 """
 Godel Terminal CLI
-Command-line interface for executing Godel Terminal commands
+All output is structured JSON to stdout (parseable by agents).
+Logging goes to godel_cli.log.
 """
 
 import argparse
-import sys
+import asyncio
 import json
+import logging
+import sys
+from datetime import datetime
 from pathlib import Path
-from typing import List, Optional
 
-# Add current directory to path
-sys.path.insert(0, str(Path(__file__).parent))
+# ---------------------------------------------------------------------------
+# Logging setup — all human-readable logs go to file, NOT stdout
+# ---------------------------------------------------------------------------
 
-from godel_core import GodelTerminalController
-from commands import (
-    DESCommand, PRTCommand, MOSTCommand,
-    GCommand, GIPCommand, QMCommand
-)
+logger = logging.getLogger("godel")
+LOG_FILE = Path(__file__).parent / "godel_cli.log"
 
-try:
-    from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
-except ImportError:
-    print("Error: config.py not found. Please copy config-example.py to config.py and fill in your credentials.")
-    sys.exit(1)
+def _setup_logging(verbose: bool = False):
+    root = logging.getLogger("godel")
+    root.setLevel(logging.DEBUG if verbose else logging.INFO)
+    # File handler (always)
+    fh = logging.FileHandler(LOG_FILE, mode="a")
+    fh.setFormatter(logging.Formatter("%(asctime)s %(name)s %(levelname)s  %(message)s"))
+    root.addHandler(fh)
+    # Stderr handler only in verbose mode (never stdout)
+    if verbose:
+        sh = logging.StreamHandler(sys.stderr)
+        sh.setFormatter(logging.Formatter("%(levelname)s  %(message)s"))
+        root.addHandler(sh)
 
 
-def execute_des(controller: GodelTerminalController, ticker: str, asset_class: str = "EQ", output: Optional[str] = None):
-    """Execute DES command"""
-    print(f"Executing DES command for {ticker} {asset_class}...")
-    des = DESCommand(controller)
-    result = des.execute(ticker, asset_class)
-    
-    if result['success']:
-        print("✓ DES command executed successfully")
-        if output:
-            with open(output, 'w') as f:
-                json.dump(result['data'], f, indent=2)
-            print(f"Data saved to {output}")
-        else:
-            print(json.dumps(result['data'], indent=2))
-        return True
+# ---------------------------------------------------------------------------
+# Helpers
+# ---------------------------------------------------------------------------
+
+def _json_out(data: dict, output_file: str = None):
+    """Write result dict as JSON to stdout (or file)."""
+    text = json.dumps(data, indent=2, default=str)
+    if output_file:
+        Path(output_file).parent.mkdir(parents=True, exist_ok=True)
+        Path(output_file).write_text(text)
     else:
-        print(f"✗ DES command failed: {result.get('error', 'Unknown error')}")
-        return False
+        print(text)
 
 
-def execute_prt(controller: GodelTerminalController, tickers: List[str], output: Optional[str] = None):
-    """Execute PRT command"""
-    print(f"Executing PRT command for {len(tickers)} tickers...")
-    prt = PRTCommand(controller, tickers=tickers)
-    result = prt.execute()
-    
-    if result['success']:
-        print("✓ PRT command executed successfully")
-        print(f"CSV file: {result.get('csv_file', 'N/A')}")
-        
-        # Save DataFrame if output specified
-        if output:
-            if output.endswith('.csv'):
-                prt.save_to_csv(output)
-            elif output.endswith('.json'):
-                prt.save_to_json(output)
+async def _get_session(args):
+    """Create manager + session, login, load layout, return (manager, session)."""
+    from godel_core import GodelManager
+
+    try:
+        from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
+    except ImportError:
+        _json_out({"success": False, "error": "config.py not found. Copy config-example.py to config.py."})
+        sys.exit(1)
+
+    url = args.url if hasattr(args, "url") and args.url else GODEL_URL
+    headless = getattr(args, "headless", False)
+    background = getattr(args, "background", False)
+
+    manager = GodelManager(headless=headless, background=background, url=url)
+    await manager.start()
+
+    session_id = getattr(args, "session_id", "default") or "default"
+    session = await manager.create_session(session_id)
+    await session.init_page()
+    await session.login(GODEL_USERNAME, GODEL_PASSWORD)
+
+    layout = getattr(args, "layout", "dev") or "dev"
+    await session.load_layout(layout)
+
+    # Snapshot existing windows so commands can detect new ones
+    existing = await session.get_current_windows()
+    for w in existing:
+        wid = await w.get_attribute("id")
+        if wid:
+            session._tracked_windows.add(wid)
+    logger.info(f"Pre-existing windows: {len(existing)}")
+
+    return manager, session
+
+
+# ---------------------------------------------------------------------------
+# Command handlers
+# ---------------------------------------------------------------------------
+
+async def cmd_des(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import DESCommand
+        cmd = DESCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_prt(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import PRTCommand
+        cmd = PRTCommand(session, tickers=args.tickers)
+        result = await cmd.execute()
+        # Save CSV/JSON if requested
+        if args.output and cmd.df is not None:
+            if args.output.endswith(".csv"):
+                cmd.save_to_csv(args.output)
+            elif args.output.endswith(".json"):
+                cmd.save_to_json(args.output)
             else:
-                prt.save_to_csv(output + '.csv')
-            print(f"Results saved to {output}")
-        
-        # Print summary
-        df = prt.get_dataframe()
-        if df is not None:
-            print(f"Rows: {len(df)}, Columns: {len(df.columns)}")
-        
-        return True
-    else:
-        print(f"✗ PRT command failed: {result.get('error', 'Unknown error')}")
-        return False
+                cmd.save_to_csv(args.output + ".csv")
+            result["saved_to"] = args.output
+        _json_out(result, None)  # always print result to stdout
+    finally:
+        await manager.shutdown()
 
 
-def execute_most(controller: GodelTerminalController, tab: str = "ACTIVE", limit: int = 75, output: Optional[str] = None):
-    """Execute MOST command"""
-    print(f"Executing MOST command (tab: {tab}, limit: {limit})...")
-    most = MOSTCommand(controller, tab=tab, limit=limit)
-    result = most.execute()
-    
-    if result['success']:
-        print("✓ MOST command executed successfully")
-        data = result['data']
-        print(f"Rows extracted: {data.get('row_count', 0)}")
-        
-        # Save DataFrame if output specified
-        if output:
-            if output.endswith('.csv'):
-                most.save_to_csv(output)
-            elif output.endswith('.json'):
-                most.save_to_json(output)
+async def cmd_most(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import MOSTCommand
+        cmd = MOSTCommand(session, tab=args.tab, limit=args.limit)
+        result = await cmd.execute()
+        if args.output and cmd.df is not None:
+            if args.output.endswith(".csv"):
+                cmd.save_to_csv(args.output)
+            elif args.output.endswith(".json"):
+                cmd.save_to_json(args.output)
             else:
-                most.save_to_csv(output + '.csv')
-            print(f"Results saved to {output}")
-        
-        # Print tickers
-        tickers = data.get('tickers', [])
-        if tickers:
-            print(f"Tickers: {', '.join(tickers[:10])}{'...' if len(tickers) > 10 else ''}")
-        
-        return True
-    else:
-        print(f"✗ MOST command failed: {result.get('error', 'Unknown error')}")
-        return False
+                cmd.save_to_csv(args.output + ".csv")
+            result["saved_to"] = args.output
+        _json_out(result, None)
+    finally:
+        await manager.shutdown()
 
 
-def execute_g(controller: GodelTerminalController, ticker: str, asset_class: str = "EQ"):
-    """Execute G command"""
-    print(f"Executing G command for {ticker} {asset_class}...")
-    g = GCommand(controller)
-    result = g.execute(ticker, asset_class)
-    
-    if result['success']:
-        print("✓ G command executed successfully")
-        print(json.dumps(result['data'], indent=2))
-        return True
-    else:
-        print(f"✗ G command failed: {result.get('error', 'Unknown error')}")
-        return False
+async def cmd_res(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import RESCommand
+        cmd = RESCommand(session, download_pdfs=args.download_pdfs,
+                         output_dir=args.pdf_dir)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
 
 
-def execute_gip(controller: GodelTerminalController, ticker: str, asset_class: str = "EQ"):
-    """Execute GIP command"""
-    print(f"Executing GIP command for {ticker} {asset_class}...")
-    gip = GIPCommand(controller)
-    result = gip.execute(ticker, asset_class)
-    
-    if result['success']:
-        print("✓ GIP command executed successfully")
-        print(json.dumps(result['data'], indent=2))
-        return True
-    else:
-        print(f"✗ GIP command failed: {result.get('error', 'Unknown error')}")
-        return False
+async def cmd_probe(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import ProbeCommand
+        cmd = ProbeCommand(session, duration=args.duration,
+                           filter_type=args.filter, url_filter=args.url_filter)
+        result = await cmd.execute_and_save(args.output)
+        _json_out(result)
+    finally:
+        await manager.shutdown()
 
 
-def execute_qm(controller: GodelTerminalController, ticker: str, asset_class: str = "EQ"):
-    """Execute QM command"""
-    print(f"Executing QM command for {ticker} {asset_class}...")
-    qm = QMCommand(controller)
-    result = qm.execute(ticker, asset_class)
-    
-    if result['success']:
-        print("✓ QM command executed successfully")
-        print(json.dumps(result['data'], indent=2))
-        return True
-    else:
-        print(f"✗ QM command failed: {result.get('error', 'Unknown error')}")
-        return False
+async def cmd_chat(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import ChatMonitor
+        channels = args.channels.split(",") if args.channels else None
+        monitor = ChatMonitor(session, channels=channels)
+        await monitor.start(duration=args.duration)
+        _json_out({
+            "success": True,
+            "messages_captured": monitor.message_count,
+            "duration": args.duration,
+            "channels": channels,
+        })
+    finally:
+        from db import close_db
+        await close_db()
+        await manager.shutdown()
 
 
-def main():
+async def cmd_g(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import GCommand
+        cmd = GCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_gip(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import GIPCommand
+        cmd = GIPCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_qm(args):
+    manager, session = await _get_session(args)
+    try:
+        from commands import QMCommand
+        cmd = QMCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+# ---------------------------------------------------------------------------
+# Argument parser
+# ---------------------------------------------------------------------------
+
+def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description='Godel Terminal CLI - Execute terminal commands programmatically',
+        description="Godel Terminal CLI — structured JSON output for AI agents",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  # Execute DES command
   python cli.py des AAPL
-  
-  # Execute DES with custom asset class and save output
-  python cli.py des AAPL --asset-class OPT --output aapl_des.json
-  
-  # Execute PRT command with multiple tickers
-  python cli.py prt AAPL MSFT GOOGL --output results.csv
-  
-  # Execute MOST command
-  python cli.py most --tab GAINERS --limit 50 --output gainers.csv
-  
-  # Execute G command
-  python cli.py g AAPL
-  
-  # Headless mode (no browser window)
-  python cli.py des AAPL --headless
-        """
+  python cli.py most --tab GAINERS --limit 50 -o gainers.json
+  python cli.py prt AAPL MSFT GOOGL -o results.csv
+  python cli.py probe --duration 30 --filter websocket
+  python cli.py chat --channels general,trading --duration 60
+  python cli.py res AAPL --download-pdfs
+        """,
     )
-    
-    parser.add_argument('--headless', action='store_true', help='Run browser in headless mode')
-    parser.add_argument('--url', default=GODEL_URL, help=f'Godel Terminal URL (default: {GODEL_URL})')
-    parser.add_argument('--layout', default='dev', help='Layout name to load (default: dev)')
-    
-    subparsers = parser.add_subparsers(dest='command', help='Command to execute')
-    
-    # DES command
-    des_parser = subparsers.add_parser('des', help='Execute DES (Description) command')
-    des_parser.add_argument('ticker', help='Ticker symbol')
-    des_parser.add_argument('--asset-class', default='EQ', help='Asset class (default: EQ)')
-    des_parser.add_argument('--output', '-o', help='Output file path (JSON)')
-    
-    # PRT command
-    prt_parser = subparsers.add_parser('prt', help='Execute PRT (Pattern Real-Time) command')
-    prt_parser.add_argument('tickers', nargs='+', help='Ticker symbols (space-separated)')
-    prt_parser.add_argument('--output', '-o', help='Output file path (CSV or JSON)')
-    
-    # MOST command
-    most_parser = subparsers.add_parser('most', help='Execute MOST (Most Active Stocks) command')
-    most_parser.add_argument('--tab', choices=['ACTIVE', 'GAINERS', 'LOSERS', 'VALUE'], 
-                           default='ACTIVE', help='Tab to select (default: ACTIVE)')
-    most_parser.add_argument('--limit', type=int, choices=[10, 25, 50, 75, 100], 
-                           default=75, help='Number of results (default: 75)')
-    most_parser.add_argument('--output', '-o', help='Output file path (CSV or JSON)')
-    
-    # G command
-    g_parser = subparsers.add_parser('g', help='Execute G (Chart) command')
-    g_parser.add_argument('ticker', help='Ticker symbol')
-    g_parser.add_argument('--asset-class', default='EQ', help='Asset class (default: EQ)')
-    
-    # GIP command
-    gip_parser = subparsers.add_parser('gip', help='Execute GIP (Intraday Chart) command')
-    gip_parser.add_argument('ticker', help='Ticker symbol')
-    gip_parser.add_argument('--asset-class', default='EQ', help='Asset class (default: EQ)')
-    
-    # QM command
-    qm_parser = subparsers.add_parser('qm', help='Execute QM (Quote Monitor) command')
-    qm_parser.add_argument('ticker', help='Ticker symbol')
-    qm_parser.add_argument('--asset-class', default='EQ', help='Asset class (default: EQ)')
-    
+
+    # Global flags
+    parser.add_argument("--headless", action="store_true", help="Run browser headless (may be blocked by site)")
+    parser.add_argument("--background", "-bg", action="store_true",
+                        help="Run browser off-screen (invisible but bypasses bot detection — recommended for agents)")
+    parser.add_argument("--url", default=None, help="Godel Terminal URL override")
+    parser.add_argument("--layout", default="dev", help="Layout name (default: dev)")
+    parser.add_argument("--session-id", default="default", help="Session identifier (for multi-instance)")
+    parser.add_argument("--verbose", "-v", action="store_true", help="Verbose logging to stderr")
+
+    sub = parser.add_subparsers(dest="command", help="Command to execute")
+
+    # -- DES ----------------------------------------------------------------
+    p = sub.add_parser("des", help="Company description")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- PRT ----------------------------------------------------------------
+    p = sub.add_parser("prt", help="Pattern Real-Time batch analysis")
+    p.add_argument("tickers", nargs="+", help="Ticker symbols")
+    p.add_argument("-o", "--output", help="Output CSV/JSON file")
+
+    # -- MOST ---------------------------------------------------------------
+    p = sub.add_parser("most", help="Most active stocks")
+    p.add_argument("--tab", choices=["ACTIVE", "GAINERS", "LOSERS", "VALUE"], default="ACTIVE")
+    p.add_argument("--limit", type=int, choices=[10, 25, 50, 75, 100], default=75)
+    p.add_argument("-o", "--output", help="Output CSV/JSON file")
+
+    # -- RES ----------------------------------------------------------------
+    p = sub.add_parser("res", help="Research / PDF downloads")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("--download-pdfs", action="store_true", default=True)
+    p.add_argument("--no-download", dest="download_pdfs", action="store_false")
+    p.add_argument("--pdf-dir", default="output/pdfs", help="PDF download directory")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- PROBE --------------------------------------------------------------
+    p = sub.add_parser("probe", help="Capture network traffic for reverse-engineering")
+    p.add_argument("--duration", type=int, default=30, help="Seconds to capture (default 30)")
+    p.add_argument("--filter", choices=["http", "websocket"], default=None, help="Traffic type filter")
+    p.add_argument("--url-filter", default=None, help="Only capture URLs containing this string")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- CHAT ---------------------------------------------------------------
+    p = sub.add_parser("chat", help="Monitor chat channels")
+    p.add_argument("--channels", default=None, help="Comma-separated channel names")
+    p.add_argument("--duration", type=int, default=60, help="Seconds to monitor (default 60)")
+
+    # -- G ------------------------------------------------------------------
+    p = sub.add_parser("g", help="Price chart")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- GIP ----------------------------------------------------------------
+    p = sub.add_parser("gip", help="Intraday chart")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- QM -----------------------------------------------------------------
+    p = sub.add_parser("qm", help="Quote monitor")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    return parser
+
+
+# ---------------------------------------------------------------------------
+# Main
+# ---------------------------------------------------------------------------
+
+DISPATCH = {
+    "des": cmd_des,
+    "prt": cmd_prt,
+    "most": cmd_most,
+    "res": cmd_res,
+    "probe": cmd_probe,
+    "chat": cmd_chat,
+    "g": cmd_g,
+    "gip": cmd_gip,
+    "qm": cmd_qm,
+}
+
+
+def main():
+    parser = build_parser()
     args = parser.parse_args()
-    
+
     if not args.command:
         parser.print_help()
         sys.exit(1)
-    
-    # Initialize controller
-    print("Initializing Godel Terminal controller...")
-    controller = GodelTerminalController(args.url, headless=args.headless)
-    
+
+    _setup_logging(verbose=getattr(args, "verbose", False))
+
+    handler = DISPATCH.get(args.command)
+    if not handler:
+        _json_out({"success": False, "error": f"Unknown command: {args.command}"})
+        sys.exit(1)
+
     try:
-        controller.connect()
-        controller.login(GODEL_USERNAME, GODEL_PASSWORD)
-        
-        if args.layout:
-            controller.load_layout(args.layout)
-        
-        # Execute command
-        success = False
-        if args.command == 'des':
-            success = execute_des(controller, args.ticker, args.asset_class, args.output)
-        elif args.command == 'prt':
-            success = execute_prt(controller, args.tickers, args.output)
-        elif args.command == 'most':
-            success = execute_most(controller, args.tab, args.limit, args.output)
-        elif args.command == 'g':
-            success = execute_g(controller, args.ticker, args.asset_class)
-        elif args.command == 'gip':
-            success = execute_gip(controller, args.ticker, args.asset_class)
-        elif args.command == 'qm':
-            success = execute_qm(controller, args.ticker, args.asset_class)
-        
-        # Cleanup
-        controller.close_all_windows()
-        controller.disconnect()
-        
-        sys.exit(0 if success else 1)
-        
+        asyncio.run(handler(args))
     except KeyboardInterrupt:
-        print("\nInterrupted by user")
-        controller.close_all_windows()
-        controller.disconnect()
-        sys.exit(1)
+        _json_out({"success": False, "error": "Interrupted"})
+        sys.exit(130)
     except Exception as e:
-        print(f"Error: {e}")
-        import traceback
-        traceback.print_exc()
-        controller.close_all_windows()
-        controller.disconnect()
+        logging.getLogger("godel").error(f"Fatal: {e}", exc_info=True)
+        _json_out({"success": False, "error": str(e)})
         sys.exit(1)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

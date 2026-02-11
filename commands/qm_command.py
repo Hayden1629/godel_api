@@ -1,40 +1,23 @@
 """
-QM (Quote Monitor) Command
-Monitors real-time quotes (data extraction not yet implemented)
+QM (Quote Monitor) Command — async Playwright
 """
 
-from selenium.webdriver.common.by import By
-from datetime import datetime
-from typing import Dict, Optional
-
-import sys
-from pathlib import Path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+from datetime import datetime, timezone
+from typing import Dict
 
 from godel_core import BaseCommand
 
 
 class QMCommand(BaseCommand):
-    """Quote Monitor (QM) command - monitors real-time quotes"""
-    
-    def get_command_string(self, ticker: str, asset_class: str) -> str:
-        return f"{ticker} {asset_class} QM"
-    
-    def extract_data(self) -> Dict:
-        """Extract quote monitor data - placeholder for future implementation"""
-        data = {
-            'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'window_id': self.window_id,
-            'ticker': self._extract_ticker(),
-            'type': 'quote_monitor',
-            'note': 'Quote monitor data extraction not yet implemented'
+    """Quote Monitor (QM) command."""
+
+    def get_command_string(self, ticker: str = None, asset_class: str = None) -> str:
+        return f"{ticker} {asset_class or 'EQ'} QM"
+
+    async def extract_data(self) -> Dict:
+        return {
+            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "window_id": self.window_id,
+            "type": "quote_monitor",
+            "note": "Quote monitor data extraction not yet implemented",
         }
-        return data
-    
-    def _extract_ticker(self) -> Optional[str]:
-        """Extract ticker from input field"""
-        try:
-            ticker_input = self.window.find_element(By.CSS_SELECTOR, "input[value]")
-            return ticker_input.get_attribute('value')
-        except:
-            return None
