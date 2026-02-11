@@ -1,8 +1,30 @@
 # Godel Terminal CLI — Agent Handoff Document
 
-## What This Project Is
+## Project Goal
 
-A Playwright-based CLI and Python API for automating the [Godel Terminal](https://app.godelterminal.com/) — a browser-based financial terminal. The goal is to let AI agents execute terminal commands from a real terminal, extract structured data from the HTML, and pipe it back as JSON.
+Build a command-line interface for [Godel Terminal](https://app.godelterminal.com/) so that AI agents can interface with financial data. The user inputs commands from their terminal (or an agent does it), information is extracted from the HTML components, and structured JSON is relayed back to the terminal.
+
+The Godel Terminal is a browser-based financial terminal with a keyboard-first CLI design. You open the command bar with the backtick key, type a command like `DES AAPL`, and a window opens with data. This project automates that entire flow with Playwright and extracts the data from the DOM.
+
+## Specific Goals (from the user)
+
+1. **Multi-instance support** — Run multiple Godel sessions simultaneously. Done via Playwright BrowserContexts (each context is an isolated session sharing one browser process).
+
+2. **Agent-testable infrastructure** — The agent (you) must be able to run commands and read results to iterate on features. The CLI outputs JSON to stdout, logs go to `godel_cli.log`, and screenshots are saved on failure. Use `--background` mode to run invisibly.
+
+3. **CLI-compatible everything** — Every feature must be accessible from the command line. No feature should only be available via the Python API.
+
+4. **Chat logging to SQL** — Monitor chat messages from multiple channels and store them in a SQL database. Currently SQLite (`godel.db`), will migrate to a remote SQL database later. The `ChatMonitor` uses WebSocket interception to capture messages. The parsing heuristics need refinement once actual chat frame payloads are captured.
+
+5. **PDF downloads from RES** — Automate downloading research PDFs from the RES component. The `RESCommand` opens the RES window, finds PDF links/buttons, and uses Playwright's download API. Records are stored in the `pdf_downloads` table.
+
+6. **Technical figures from DES** — Extract company description, EPS estimates, analyst ratings, and financial snapshot from the DES component. This is fully working and tested.
+
+7. **Network interception for chat** — Instead of polling the DOM for chat updates, intercept WebSocket frames directly. The `NetworkInterceptor` class captures all HTTP and WebSocket traffic. The `probe` command lets you record and analyze traffic to understand how the site communicates.
+
+8. **Reverse-engineer the site** — Use the probe tool to capture all network traffic and understand how the site works under the hood. Two WebSocket endpoints and one HTTP API have been discovered so far.
+
+9. **Database will move to remote SQL** — The `DatabaseBackend` abstract class in `db.py` is designed so that swapping SQLite for PostgreSQL (or any other SQL) means implementing one new class. Keep this in mind when adding new tables or queries.
 
 ## Architecture
 
@@ -26,6 +48,7 @@ commands/
   gip_command.py        GIP — intraday chart (placeholder)
   qm_command.py         QM — quote monitor (placeholder)
 config.py               Credentials (gitignored) — copy from config-example.py
+AGENTS.md               This file
 ```
 
 ## How It Works
@@ -36,44 +59,45 @@ config.py               Credentials (gitignored) — copy from config-example.py
 4. Commands use `session.send_command()` to type into `#terminal-input` and press Enter. They then poll for a new window element (`div[id$='-window']`) to appear, wait for the loading spinner to clear, and extract data from the DOM.
 5. All CLI commands output structured JSON to stdout. Logs go to `godel_cli.log`.
 
-## CLI Usage
+## How to Run Commands
 
 ```bash
-python cli.py des AAPL                                  # company description
-python cli.py most --tab GAINERS --limit 50             # most active stocks
-python cli.py prt AAPL MSFT GOOGL -o results.csv        # pattern analysis
-python cli.py probe --duration 30 --filter websocket    # capture network traffic
-python cli.py chat --channels general --duration 60     # monitor chat → SQLite
-python cli.py res AAPL --download-pdfs                  # download research PDFs
+python cli.py -bg des AAPL                                  # company description
+python cli.py -bg most --tab GAINERS --limit 50             # most active stocks
+python cli.py -bg prt AAPL MSFT GOOGL -o results.csv        # pattern analysis
+python cli.py -bg probe --duration 30 --filter websocket    # capture network traffic
+python cli.py -bg chat --channels general --duration 60     # monitor chat → SQLite
+python cli.py -bg res AAPL --download-pdfs                  # download research PDFs
 ```
 
-Global flags: `--headless`, `--layout <name>`, `--session-id <id>`, `--verbose`, `--url <url>`
+Global flags: `--background` / `-bg` (recommended), `--layout <name>`, `--session-id <id>`, `--verbose`, `-o <file>`
 
 ## Critical Gotchas
 
 ### Headless mode is blocked — use --background instead
+
 Godel Terminal detects headless Chrome and refuses to log in. The sign-in modal stays open and the auth silently fails. **Do not use `--headless`.**
 
-Instead, use `--background` (or `-bg`). This launches a real headed browser but positions the window at coordinates (-10000, -10000) — far off-screen and completely invisible. The site can't distinguish it from a normal user, but you won't see any browser windows. **This is the recommended mode for agents.**
-
-```bash
-python cli.py --background des AAPL
-python cli.py -bg most --tab ACTIVE --limit 25
-```
+Use `--background` (or `-bg`) instead. This launches a real headed browser positioned off-screen at (-10000, -10000) — completely invisible but undetectable by the site. **This is the recommended mode for agents.**
 
 ### Login uses type(), not fill()
+
 The React app uses controlled inputs. Playwright's `fill()` sets the DOM value but doesn't trigger React's synthetic events, so the internal state stays empty. Using `type(delay=30)` simulates real keystrokes and works. The form is submitted by pressing Enter on the password field (clicking the Login button was unreliable).
 
 ### Login success detection
+
 The `#terminal-input` element exists on the page even when NOT logged in. Login success is detected by waiting for the "Sign In" modal (`h1.text-lg` with text "Sign In") to become hidden.
 
 ### Pre-existing windows
+
 The default layout may have windows already open. Before running a command, `_get_session()` in `cli.py` snapshots all existing window IDs into `session._tracked_windows` so the window detection logic only finds genuinely new windows.
 
 ### Layout loading is non-fatal
+
 `load_layout()` returns False (doesn't raise) if the layout name isn't found. The terminal continues with whatever layout is active.
 
 ### Window selectors
+
 Windows are identified by: `div.resize.inline-block.absolute[id$='-window']`. Close buttons use fallback strategies: `span.anticon.anticon-close`, `svg[data-icon='close']`, `button[aria-label*='close']`.
 
 ## Database
@@ -83,28 +107,40 @@ SQLite via aiosqlite at `./godel.db`. Two tables:
 - `chat_messages(id, channel, sender, content, timestamp, raw_data, created_at)`
 - `pdf_downloads(id, ticker, command, filename, filepath, timestamp)`
 
-The `DatabaseBackend` abstract class in `db.py` is designed so swapping to PostgreSQL means implementing one new class.
+The `DatabaseBackend` abstract class in `db.py` is designed so swapping to PostgreSQL means implementing one new class. Add new tables by adding methods to the abstract class and implementing them in `SQLiteBackend`.
 
 ## WebSocket Endpoints Discovered
 
 From probe command output:
+
 - `wss://events.godelterminal.com/socket.io/?EIO=4&transport=websocket` — Socket.IO event stream
 - `wss://api.godelterminal.com/events` — API event stream
 
-These are the targets for chat monitoring. The `ChatMonitor` attaches to the `NetworkInterceptor` and processes incoming WebSocket frames, looking for JSON payloads with message-like structures. The exact chat message schema hasn't been fully mapped yet — run `python cli.py probe --duration 60 --filter websocket` while chat is active to capture frame payloads and refine the parsing heuristics in `ChatMonitor._extract_chat_message()`.
+These are the targets for chat monitoring. The `ChatMonitor` attaches to the `NetworkInterceptor` and processes incoming WebSocket frames, looking for JSON payloads with message-like structures. The exact chat message schema hasn't been fully mapped yet — run `python cli.py -bg probe --duration 60 --filter websocket` while chat is active to capture frame payloads and refine the parsing heuristics in `ChatMonitor._extract_chat_message()`.
 
 ## HTTP API Discovered
 
 - `GET https://app.godelterminal.com/api/fetchBreaking` — returns breaking news as JSON array with fields: `id`, `type`, `time`, `important`, `data.content`, `impact[].symbol`, `classification[].name`
 
-## What's Left To Do
+## What's Working
 
-- **Chat monitoring**: The `ChatMonitor` frame parsing heuristics need tuning once we see actual chat WebSocket payloads. Run probe with chat open to capture them.
-- **RES command**: The PDF link detection in `res_command.py` uses generic selectors. Needs testing against actual RES windows to refine the anchor/button selectors.
-- **PRT command**: Ported but not yet tested with the new Playwright code. The original Selenium version worked.
-- **Headless workaround**: Investigate Playwright stealth or using `channel: "chrome"` to bypass bot detection.
-- **Trillion parsing**: Fixed in MOST — the `_parse_number` helper now handles T/B/M/K suffixes.
-- **config-example.py**: Should be updated to match the current config.py structure.
+- **DES command** — Fully working and tested. Extracts company info, description, EPS estimates, analyst ratings, snapshot.
+- **MOST command** — Fully working and tested. Extracts most active stocks with tab/limit/market cap filters. Handles T/B/M/K suffixes.
+- **Probe command** — Working. Captures HTTP and WebSocket traffic, saves to JSON.
+- **Login flow** — Working in non-headless and background modes. Uses type() + Enter.
+
+- **Multi-instance architecture** — GodelManager + BrowserContexts are wired up and tested.
+
+## What Needs Work
+
+- **Chat monitoring** — The `ChatMonitor` frame parsing heuristics in `_extract_chat_message()` need tuning. Run probe with chat open to capture real WebSocket payloads and refine the parsing. The chat window on Godel Terminal shows as "Chat" with an "Anonymous" user label — explore this component to understand the message structure. Need to monitor #General, #biotech, #paid
+- **RES command** — The PDF link detection uses generic selectors (`a[href]` with "pdf" in text/href). Needs testing against actual RES windows to find the right selectors for PDF download buttons.
+- **PRT command** — Ported from Selenium to Playwright but not yet tested end-to-end. The original Selenium version worked. Test with: `python cli.py -bg prt AAPL MSFT -o test_prt.csv`
+- **More Godel commands** — The site supports many more commands (FA, ANR, HMS, SI, TOP, WEI, TAS, FOCUS, HDS, etc.). Each needs a command class in `commands/` following the `BaseCommand` pattern.
+- **WebSocket frame capture** — The interceptor detects WS connections opening/closing but captured 0 frames in initial testing. The connections may be short-lived or the frames may fire before handlers attach. Investigate by starting the interceptor earlier (before login) or by using CDP directly.
+- **config-example.py** — Should be updated to match current structure.
+- **Background mode** — Working. Off-screen browser, invisible to user, undetectable by site.
+- **Find more API backends** — similar to breaking news, find more like that.
 
 ## Dependencies
 
@@ -125,3 +161,5 @@ Packages are installed to the conda environment at `/opt/anaconda3/bin/python`. 
 - Output files: `./output/`
 - Screenshots on error: `./output/*.png`
 - Config: `./config.py` (gitignored)
+- Docs site (may timeout): https://docs.godelterminal.com/
+- Beginner guide: https://godelguide.com/godel-terminal-complete-beginners-guide/

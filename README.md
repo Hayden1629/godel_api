@@ -1,311 +1,183 @@
-# Godel Terminal API
+# Godel Terminal CLI
 
-Selenium-based API for automating the Godel Terminal. Execute commands programmatically and get structured data back.
+Playwright-based CLI and Python API for automating the [Godel Terminal](https://app.godelterminal.com/). Execute terminal commands from your shell, extract structured data from the HTML, and get JSON back. Built for AI agents.
 
 ## Installation
 
-1. Install dependencies:
 ```bash
 pip install -r requirements.txt
+playwright install chromium
 ```
 
-2. Copy `config-example.py` to `config.py` and fill in your credentials:
+Copy `config-example.py` to `config.py` and add your Godel Terminal credentials:
+
 ```bash
 cp config-example.py config.py
-# Edit config.py with your Godel Terminal credentials
 ```
 
-## Quick Start
+## CLI Usage
 
-```python
-from godel_core import GodelTerminalController
-from commands import DESCommand, PRTCommand, MOSTCommand
-from config import GODEL_URL, GODEL_USERNAME, GODEL_PASSWORD
+All commands output structured JSON to stdout. Use `--background` (or `-bg`) to run the browser invisibly.
 
-# Initialize controller
-controller = GodelTerminalController(GODEL_URL, headless=False)
-controller.connect()
-controller.login(GODEL_USERNAME, GODEL_PASSWORD)
+```bash
+# Company description
+python cli.py -bg des AAPL
 
-# Execute a command
-des = DESCommand(controller)
-result = des.execute("AAPL", "EQ")
-print(result['data'])
+# Most active stocks
+python cli.py -bg most --tab GAINERS --limit 50
 
-# Cleanup
-controller.disconnect()
+# Batch pattern analysis
+python cli.py -bg prt AAPL MSFT GOOGL -o results.csv
+
+# Network traffic capture (reverse-engineering)
+python cli.py -bg probe --duration 30 --filter websocket
+
+# Monitor chat channels → SQLite
+python cli.py -bg chat --channels general,trading --duration 60
+
+# Download research PDFs
+python cli.py -bg res AAPL --download-pdfs
+
+# Save output to file
+python cli.py -bg des AAPL -o output/aapl.json
 ```
 
-## Core Components
+Run `python cli.py --help` for full options.
 
-### `GodelTerminalController`
+### Global Flags
 
-Main controller class that manages the Selenium browser session and terminal interaction.
-
-**Methods:**
-- `connect()` - Initialize browser and navigate to terminal
-- `login(username, password)` - Log in to Godel Terminal
-- `load_layout(layout_name)` - Load a specific layout (default: "dev")
-- `open_terminal()` - Open terminal using backtick key
-- `send_command(command_str)` - Send a command string to terminal
-- `execute_command(command_type, ticker, asset_class, **kwargs)` - Execute a registered command
-- `close_all_windows()` - Close all active command windows
-- `disconnect()` - Close browser and cleanup
-
-### `BaseCommand`
-
-Abstract base class for all terminal commands. Provides common functionality for:
-- Window detection and management
-- Data extraction workflow
-- Window closing with multiple fallback strategies
+| Flag | Description |
+|------|-------------|
+| `--background`, `-bg` | Run browser off-screen (recommended for agents) |
+| `--headless` | Headless mode (blocked by Godel — use `-bg` instead) |
+| `--layout NAME` | Load a named layout (default: dev) |
+| `--session-id ID` | Session identifier for multi-instance |
+| `--verbose`, `-v` | Verbose logging to stderr |
+| `-o FILE` | Save output to file |
 
 ## Available Commands
 
-### DES (Description) Command
+### DES — Company Description
 
-Extracts comprehensive company information including description, financials, and analyst ratings.
+Extracts company info, description, EPS estimates, analyst ratings, and financial snapshot.
 
-**Usage:**
-```python
-from commands import DESCommand
-
-des = DESCommand(controller)
-result = des.execute("AAPL", "EQ")
-
-# Access extracted data
-data = result['data']
-print(data['company_info']['company_name'])
-print(data['description'])
-print(data['analyst_ratings'])
-print(data['eps_estimates'])
-print(data['snapshot'])
+```bash
+python cli.py -bg des AAPL
+python cli.py -bg des MSFT --asset-class EQ -o msft.json
 ```
 
-**Returns:**
-- `company_info`: Company name, logo, website, address, CEO, asset class
-- `description`: Full company description
-- `eps_estimates`: EPS estimates by quarter/fiscal year
-- `analyst_ratings`: List of analyst ratings with firm, analyst, rating, targets, date
-- `snapshot`: Key financial metrics (market cap, P/E, etc.)
+Returns: `company_info`, `description`, `eps_estimates`, `analyst_ratings`, `snapshot`
 
-### PRT (Pattern Real-Time) Command
+### MOST — Most Active Stocks
 
-Runs batch pattern analysis on multiple tickers and exports results to CSV.
+Extracts the most active stocks table into structured records.
 
-**Usage:**
-```python
-from commands import PRTCommand
-
-# Initialize with list of tickers
-prt = PRTCommand(controller, tickers=["AAPL", "MSFT", "GOOGL"])
-result = prt.execute()
-
-# Access CSV file path and DataFrame
-csv_path = result['csv_file']
-df = prt.get_dataframe()
-
-# Or save to custom location
-prt.save_to_csv("custom_path.csv")
-prt.save_to_json("custom_path.json")
+```bash
+python cli.py -bg most --tab ACTIVE --limit 75
+python cli.py -bg most --tab LOSERS --limit 25 -o losers.json
 ```
 
-**Parameters:**
-- `tickers`: List of ticker symbols to analyze
+Tabs: `ACTIVE`, `GAINERS`, `LOSERS`, `VALUE`. Limits: 10, 25, 50, 75, 100.
 
-**Returns:**
-- `csv_file_path`: Path to downloaded CSV file
-- `dataframe`: pandas DataFrame with results
-- `performance_summary`: Performance metrics by bucket
-- `progress`: Completion status
-- `failures`: Number of failed analyses
+### PRT — Pattern Real-Time
 
-### MOST (Most Active Stocks) Command
+Batch pattern analysis on multiple tickers with CSV export.
 
-Extracts most active stocks table data into a pandas DataFrame.
-
-**Usage:**
-```python
-from commands import MOSTCommand
-
-# Initialize with tab and limit
-most = MOSTCommand(controller, tab="ACTIVE", limit=75)
-result = most.execute()
-
-# Access DataFrame
-df = most.get_dataframe()
-tickers = result['data']['tickers']
-
-# Save results
-most.save_to_csv("most_active.csv")
-most.save_to_json("most_active.json")
+```bash
+python cli.py -bg prt AAPL MSFT GOOGL NVDA -o results.csv
 ```
 
-**Parameters:**
-- `tab`: Tab to select - "ACTIVE", "GAINERS", "LOSERS", or "VALUE" (default: "ACTIVE")
-- `limit`: Number of results - 10, 25, 50, 75, or 100 (default: 75)
+### PROBE — Network Traffic Capture
 
-**Returns:**
-- `dataframe`: pandas DataFrame with stock data
-- `tickers`: List of ticker symbols
-- `records`: List of dictionaries with row data
-- `row_count`: Number of rows extracted
+Captures HTTP requests/responses and WebSocket frames. Use this to reverse-engineer how the site communicates.
 
-### G (Chart) Command
-
-Opens price chart window (data extraction not yet implemented).
-
-**Usage:**
-```python
-from commands import GCommand
-
-g = GCommand(controller)
-result = g.execute("AAPL", "EQ")
+```bash
+python cli.py -bg probe --duration 30                    # capture everything
+python cli.py -bg probe --duration 60 --filter websocket # WebSocket only
+python cli.py -bg probe --duration 30 --url-filter chat  # filter by URL
 ```
 
-### GIP (Intraday Chart) Command
+### CHAT — Chat Monitor
 
-Opens intraday price chart window (data extraction not yet implemented).
+Monitors chat channels via WebSocket interception and stores messages in SQLite.
 
-**Usage:**
-```python
-from commands import GIPCommand
-
-gip = GIPCommand(controller)
-result = gip.execute("AAPL", "EQ")
+```bash
+python cli.py -bg chat --channels general,trading --duration 120
 ```
 
-### QM (Quote Monitor) Command
+### RES — Research PDF Downloads
 
-Opens quote monitor window (data extraction not yet implemented).
+Opens the RES window for a ticker and downloads available PDFs.
 
-**Usage:**
-```python
-from commands import QMCommand
-
-qm = QMCommand(controller)
-result = qm.execute("AAPL", "EQ")
+```bash
+python cli.py -bg res AAPL --download-pdfs --pdf-dir output/pdfs
 ```
 
-## Command Execution Pattern
+### G, GIP, QM — Chart, Intraday Chart, Quote Monitor
 
-All commands follow the same execution pattern:
+Open windows (data extraction placeholders).
 
-1. **Initialize**: Create command instance with controller
-2. **Execute**: Call `execute(ticker, asset_class)` or `execute()` for commands that don't need tickers
-3. **Check Result**: Verify `result['success']` is `True`
-4. **Access Data**: Use `result['data']` to access extracted information
-5. **Close**: Command windows are automatically tracked; use `controller.close_all_windows()` to close all
+```bash
+python cli.py -bg g AAPL
+python cli.py -bg gip AAPL
+python cli.py -bg qm AAPL
+```
 
-## Error Handling
+## Python API
 
-All commands return a result dictionary with:
-- `success`: Boolean indicating if command succeeded
-- `error`: Error message if `success` is `False`
-- `command`: Command string that was executed
-- `data`: Extracted data (if successful)
+```python
+import asyncio
+from godel_api import GodelAPI
 
-Always check `result['success']` before accessing `result['data']`.
+async def main():
+    async with GodelAPI() as api:
+        result = await api.des("AAPL")
+        print(result["data"]["company_info"]["company_name"])
 
-## Best Practices
+        result = await api.most(tab="GAINERS", limit=25)
+        print(result["data"]["tickers"])
 
-1. **Reuse Controller**: Initialize controller once and reuse for multiple commands
-2. **Close Windows**: Periodically call `controller.close_all_windows()` to prevent window buildup
-3. **Error Handling**: Always check `result['success']` before accessing data
-4. **Headless Mode**: Use `headless=True` for automated scripts (but may have limitations)
-5. **Cleanup**: Always call `controller.disconnect()` when done
+asyncio.run(main())
+```
+
+Multi-session (concurrent instances):
+
+```python
+async with GodelAPI() as api:
+    session2 = await api.add_session("second", layout="dev")
+    result1 = await api.des("AAPL")                        # default session
+    result2 = await api.des("MSFT", session_id="second")   # second session
+```
 
 ## Architecture
 
 ```
-godel_api/
-├── godel_core.py          # Core framework (Controller, BaseCommand, DOMMonitor)
-├── commands/
-│   ├── __init__.py       # Command exports
-│   ├── des_command.py    # DES command implementation
-│   ├── prt_command.py    # PRT command implementation
-│   ├── most_command.py   # MOST command implementation
-│   ├── g_command.py      # G command implementation
-│   ├── gip_command.py    # GIP command implementation
-│   └── qm_command.py     # QM command implementation
-├── config-example.py     # Configuration template
-├── requirements.txt      # Python dependencies
-└── README.md            # This file
+cli.py                  CLI entry point (JSON to stdout, logs to godel_cli.log)
+godel_api.py            Async Python API (context manager, multi-session)
+godel_core.py           GodelManager, GodelSession, NetworkInterceptor, BaseCommand
+db.py                   SQLite storage with abstract DatabaseBackend interface
+commands/
+  des_command.py        DES — company description extraction
+  most_command.py       MOST — active stocks table → DataFrame
+  prt_command.py        PRT — batch analysis, CSV export
+  probe_command.py      Network traffic capture
+  chat_monitor.py       WebSocket chat → SQLite
+  res_command.py        RES — PDF downloads
+  g_command.py          G — chart (placeholder)
+  gip_command.py        GIP — intraday chart (placeholder)
+  qm_command.py         QM — quote monitor (placeholder)
+config.py               Credentials (gitignored)
 ```
 
-## Python Module Interface
+## Error Handling
 
-For programmatic use in other Python scripts, use the `godel_api` module:
+All commands return a dict with `success` (bool), `error` (str if failed), `command`, and `data`. Always check `result["success"]` before accessing `result["data"]`.
 
-```python
-from godel_api import GodelAPI
-
-# Using context manager (recommended)
-with GodelAPI() as api:
-    # Execute DES command
-    result = api.des("AAPL", "EQ")
-    if result['success']:
-        print(result['data']['company_info']['company_name'])
-    
-    # Execute PRT command
-    result = api.prt(["AAPL", "MSFT", "GOOGL"], output_path="results.csv")
-    
-    # Execute MOST command
-    result = api.most(tab="GAINERS", limit=50, output_path="gainers.csv")
-    if result['success']:
-        df = result['data']['dataframe']
-        print(df.head())
-
-# Or manual connection management
-api = GodelAPI()
-api.connect()
-result = api.des("AAPL")
-api.disconnect()
-```
-
-### Quick Functions
-
-For one-off commands, use the quick functions:
-
-```python
-from godel_api import quick_des, quick_prt, quick_most
-
-# Quick DES
-result = quick_des("AAPL")
-
-# Quick PRT
-result = quick_prt(["AAPL", "MSFT"])
-
-# Quick MOST
-result = quick_most(tab="ACTIVE", limit=75)
-```
-
-## Command Line Interface
-
-Use the CLI for command-line execution:
-
-```bash
-# DES command
-python cli.py des AAPL --output aapl_des.json
-
-# PRT command
-python cli.py prt AAPL MSFT GOOGL --output results.csv
-
-# MOST command
-python cli.py most --tab GAINERS --limit 50 --output gainers.csv
-
-# With custom layout
-python cli.py des AAPL --layout my_layout
-
-# Headless mode
-python cli.py des AAPL --headless
-```
-
-Run `python cli.py --help` for full usage information.
+On extraction failure, a screenshot is saved to `output/` for debugging.
 
 ## Notes
 
-- Commands automatically detect new windows created by the terminal
-- Window closing uses multiple fallback strategies for reliability
-- Data extraction waits for loading spinners to complete
-- CSV exports from PRT go to your Downloads folder by default
-- Use context managers (`with` statement) for automatic cleanup
+- The `--background` flag positions the browser off-screen — invisible but undetectable by the site
+- `--headless` is blocked by Godel's bot detection — do not use it
+- All logging goes to `godel_cli.log`, never to stdout (stdout is reserved for JSON output)
+- The database is at `./godel.db` (SQLite, will migrate to remote SQL later)
