@@ -298,6 +298,74 @@ async def cmd_qm(args):
         await manager.shutdown()
 
 
+async def cmd_fa(args):
+    """Financial Analysis - get financial data for DCF modeling."""
+    manager, session = await _get_session(args)
+    try:
+        from commands import FACommand
+        cmd = FACommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_top(args):
+    """Top movers/gainers."""
+    manager, session = await _get_session(args)
+    try:
+        from commands import TOPCommand
+        cmd = TOPCommand(session, tab=args.tab, limit=args.limit)
+        result = await cmd.execute()
+        if args.output and cmd.df is not None:
+            if args.output.endswith(".csv"):
+                cmd.save_to_csv(args.output)
+            elif args.output.endswith(".json"):
+                cmd.save_to_json(args.output)
+            else:
+                cmd.save_to_csv(args.output + ".csv")
+            result["saved_to"] = args.output
+        _json_out(result, None)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_em(args):
+    """Earnings Matrix - get EPS and valuation data."""
+    manager, session = await _get_session(args)
+    try:
+        from commands import EMCommand
+        cmd = EMCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_n(args):
+    """News - get news feed for a ticker."""
+    manager, session = await _get_session(args)
+    try:
+        from commands import NCommand
+        cmd = NCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
+async def cmd_tran(args):
+    """Transcripts - get earnings call transcripts."""
+    manager, session = await _get_session(args)
+    try:
+        from commands import TRANCommand
+        cmd = TRANCommand(session)
+        result = await cmd.execute(args.ticker, args.asset_class)
+        _json_out(result, args.output)
+    finally:
+        await manager.shutdown()
+
+
 # ---------------------------------------------------------------------------
 # Argument parser
 # ---------------------------------------------------------------------------
@@ -391,6 +459,36 @@ Examples:
     p.add_argument("--asset-class", default="EQ")
     p.add_argument("-o", "--output", help="Output JSON file")
 
+    # -- FA -----------------------------------------------------------------
+    p = sub.add_parser("fa", help="Financial Analysis (Balance Sheet, Income, Cash Flow)")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- TOP ----------------------------------------------------------------
+    p = sub.add_parser("top", help="Top movers/gainers/losers")
+    p.add_argument("--tab", choices=["GAINERS", "LOSERS", "MOST_ACTIVE", "UNUSUAL_VOLUME"], default="GAINERS")
+    p.add_argument("--limit", type=int, default=50, help="Number of results")
+    p.add_argument("-o", "--output", help="Output CSV/JSON file")
+
+    # -- EM -----------------------------------------------------------------
+    p = sub.add_parser("em", help="Earnings Matrix (EPS estimates, valuation)")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- N ------------------------------------------------------------------
+    p = sub.add_parser("n", help="News feed")
+    p.add_argument("ticker", nargs="?", default=None, help="Ticker symbol (optional)")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
+    # -- TRAN ---------------------------------------------------------------
+    p = sub.add_parser("tran", help="Earnings call transcripts")
+    p.add_argument("ticker", help="Ticker symbol")
+    p.add_argument("--asset-class", default="EQ")
+    p.add_argument("-o", "--output", help="Output JSON file")
+
     return parser
 
 
@@ -409,6 +507,11 @@ DISPATCH = {
     "g": cmd_g,
     "gip": cmd_gip,
     "qm": cmd_qm,
+    "fa": cmd_fa,
+    "top": cmd_top,
+    "em": cmd_em,
+    "n": cmd_n,
+    "tran": cmd_tran,
 }
 
 
