@@ -38,7 +38,9 @@ class DatabaseBackend(ABC):
     @abstractmethod
     async def save_message(self, channel: str, sender: str, content: str,
                            timestamp: Optional[datetime] = None,
-                           raw_data: Optional[str] = None) -> int:
+                           raw_data: Optional[str] = None,
+                           message_id: Optional[str] = None,
+                           username: Optional[str] = None) -> int:
         ...
 
     @abstractmethod
@@ -77,7 +79,12 @@ CREATE TABLE IF NOT EXISTS chat_messages (
     content TEXT,
     timestamp DATETIME,
     raw_data TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    is_reply INTEGER DEFAULT 0,
+    reply_to TEXT,
+    message_id TEXT,
+    username TEXT,
+    UNIQUE(channel, message_id)
 );
 
 CREATE TABLE IF NOT EXISTS pdf_downloads (
@@ -118,11 +125,15 @@ class SQLiteBackend(DatabaseBackend):
 
     async def save_message(self, channel: str, sender: str, content: str,
                            timestamp: Optional[datetime] = None,
-                           raw_data: Optional[str] = None) -> int:
+                           raw_data: Optional[str] = None,
+                           message_id: Optional[str] = None,
+                           username: Optional[str] = None) -> int:
         ts = timestamp or datetime.now(timezone.utc)
         cursor = await self._db.execute(
-            "INSERT INTO chat_messages (channel, sender, content, timestamp, raw_data) VALUES (?, ?, ?, ?, ?)",
-            (channel, sender, content, ts.isoformat(), raw_data),
+            """INSERT OR IGNORE INTO chat_messages 
+                (channel, sender, content, timestamp, raw_data, message_id, username) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)""",
+            (channel, sender, content, ts.isoformat(), raw_data, message_id, username),
         )
         await self._db.commit()
         return cursor.lastrowid

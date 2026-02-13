@@ -6,6 +6,7 @@ Extracts messages directly from the DOM instead of WebSocket interception.
 import asyncio
 import json
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Set
 
@@ -13,6 +14,20 @@ from godel_core import GodelSession
 from db import get_db
 
 logger = logging.getLogger("godel.dom_chat")
+
+
+def clean_for_hash(text: str) -> str:
+    """Remove dynamic price data from message text for consistent hashing.
+    
+    Godel updates stock prices in real-time (e.g., "+0.00%", "US -0.46-2.51%"),
+    which causes the same message to hash differently every few seconds.
+    """
+    # Remove patterns like "+0.00%", "-0.46-2.51%", "US -0.46-2.56%"
+    cleaned = re.sub(r'\s+[-+]?\d+\.?\d*%', ' ', text)
+    cleaned = re.sub(r'\s+US\s+[-+]?\d+\.?\d*-[-+]?\d+\.?\d*%', ' ', cleaned)
+    # Remove extra whitespace
+    cleaned = ' '.join(cleaned.split())
+    return cleaned.strip()
 
 
 class DOMChatMonitor:
@@ -145,13 +160,15 @@ class DOMChatMonitor:
                     sender = parts[0].replace("@", "").strip()
                     text = parts[1].strip()
             
-            # Create unique ID for deduplication
-            msg_id = f"{sender}:{text[:100]}"
+            # Create unique ID for deduplication (strip dynamic price data)
+            clean_text = clean_for_hash(text)
+            msg_id = f"{sender}:{clean_text[:100]}"
             
             return {
                 "id": msg_id,
                 "channel": self.channel,
                 "sender": sender,
+                "username": sender,  # Store username separately
                 "content": text,
                 "timestamp": datetime.now(timezone.utc),
                 "raw": None,
@@ -179,6 +196,8 @@ class DOMChatMonitor:
                 content=msg.get("content", ""),
                 timestamp=msg.get("timestamp"),
                 raw_data=json.dumps({"source": "dom", "id": msg_id}),
+                message_id=msg_id,
+                username=msg.get("username"),
             )
             self._message_count += 1
             logger.info(f"[{self.channel}] {msg.get('sender')}: {msg.get('content', '')[:60]}...")
